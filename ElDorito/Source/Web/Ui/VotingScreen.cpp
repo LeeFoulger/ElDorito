@@ -5,11 +5,14 @@
 #include "../../ThirdParty/rapidjson/writer.h"
 #include "../../ThirdParty/rapidjson/stringbuffer.h"
 #include <unordered_map>
+#include "../../Patches/Input.hpp"
 
 using namespace Server::Voting;
 
 namespace
 {
+	void OnUiInputUpdate();
+
 	std::unordered_map<int, std::string> MapNames =
 	{
 		{ 320, "guardian" },
@@ -26,6 +29,10 @@ namespace
 		{ 30, "zanzibar" },
 	};
 
+	bool currentlyVoting = false;
+	bool temporarilyHidden = false;
+
+	void OnVotingEnded();
 }
 
 class VotingOutputHandler : public VotingMessageHandler
@@ -72,6 +79,7 @@ public:
 			jsonWriter.EndObject();
 			Web::Ui::Voting::Show();
 			Web::Ui::ScreenLayer::Notify("VotingOptionsUpdated", jsonBuffer.GetString(), true);
+			currentlyVoting = true;
 		}
 		else if (message.Type == VotingMessageType::VetoOption) {
 
@@ -106,6 +114,7 @@ public:
 			jsonWriter.EndObject();
 			Web::Ui::Voting::Show();
 			Web::Ui::ScreenLayer::Notify("VetoOptionsUpdated", jsonBuffer.GetString(), true);
+			currentlyVoting = true;
 		}
 		else if (message.Type == VotingMessageType::Winner)
 		{
@@ -146,7 +155,6 @@ public:
 
 		}
 	}
-
 };
 
 namespace
@@ -156,13 +164,9 @@ namespace
 		switch (newState)
 		{
 		case Blam::Network::eLifeCycleStateStartGame:
-			Web::Ui::Voting::Hide();
-			break;
 		case Blam::Network::eLifeCycleStateNone:
-			Web::Ui::Voting::Hide();
-			break;
 		case Blam::Network::eLifeCycleStateLeaving:
-			Web::Ui::Voting::Hide();
+			OnVotingEnded();
 			break;
 		}
 	}
@@ -174,6 +178,7 @@ namespace Web::Ui::Voting
 	{
 		Server::Voting::AddMessageHandler(std::make_shared<VotingOutputHandler>());
 		Patches::Network::OnLifeCycleStateChanged(LifeCycleStateChanged);
+		Patches::Input::RegisterMenuUIInputHandler(OnUiInputUpdate);
 	}
 
 	void Show()
@@ -184,5 +189,52 @@ namespace Web::Ui::Voting
 	void Hide()
 	{
 		ScreenLayer::Hide("voting");
+	}
+}
+
+namespace
+{
+	void OnUiInputUpdate()
+	{
+		using namespace Blam::Input;
+
+		const auto c_gui_screen_manager__get_first = (uint8_t*(__thiscall *)(void *thisptr, uint32_t, int))(0x00AAB320);
+
+		if (currentlyVoting)
+		{
+			auto action = GetActionState(Blam::Input::eGameActionUiY);
+			if (!(action->Flags & eActionStateFlagsHandled) && action->Ticks == 1)
+			{
+				action->Ticks |= eActionStateFlagsHandled;
+				Web::Ui::ScreenLayer::Show("voting", "{ userInvoked: true }");
+			}
+
+			auto screenManager = (uint8_t*)0x05260F34;
+			auto widget = c_gui_screen_manager__get_first(screenManager, 0, 0);
+			if (widget)
+			{
+				auto name = *(uint32_t*)(widget + 0x40);
+				if (name == 0x100b3) // pregame_lobby_multiplayer
+				{
+					if (temporarilyHidden)
+					{
+						temporarilyHidden = false;
+						Web::Ui::ScreenLayer::Show("voting", "{ compact: true }");
+					}
+				}
+				else
+				{
+					Web::Ui::Voting::Hide();
+					temporarilyHidden = true;
+				}
+			}
+		}
+	}
+
+	void OnVotingEnded()
+	{
+		currentlyVoting = false;
+		Web::Ui::ScreenLayer::Notify("VoteEnded", "{}", true);
+		Web::Ui::Voting::Hide();
 	}
 }

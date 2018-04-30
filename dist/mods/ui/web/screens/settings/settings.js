@@ -2,7 +2,6 @@ var activePage;
 var selectedItem;
 var itemNumber = 0;
 var tabIndex = 0;
-var previousBind;
 var colorIndex = 0;
 var changeArray = [];
 var commandValues = [];
@@ -161,7 +160,13 @@ $(document).ready(function(){
     $(document).keyup(function (e) {
         if (e.keyCode === 27) {
             if(window.location.hash != '#page5'){
-                cancelButton();
+                if(!activePage.endsWith('alertBox')){
+                    cancelButton();
+                }else{
+                    if($('#dismissButton:visible').length){
+                        hideAlert(true);
+                    }
+                }
             }
         }
         if (e.keyCode == 44) {
@@ -229,6 +234,7 @@ $(document).ready(function(){
         var newID = $(this).attr('id') + 'Text';
         $('#'+newID).val($(this).val());
     });
+    var lastSoundPlayedTime = Date.now();
     $('#settingsWindow input:not(#lookSensitivity,#lookSensitivityText), #settingsWindow select,#settingsWindow textarea').on('change', function(e){
         var elementID = e.target.id;
         if($('#'+elementID).hasClass('tinySetting') && e.target.id.endsWith('Text')){
@@ -248,7 +254,11 @@ $(document).ready(function(){
             };
         });
         if(playSound){
-            dew.command('Game.PlaySound 0x0B00');
+            var currentTime = Date.now();
+            if((currentTime - lastSoundPlayedTime) > 100) {
+                lastSoundPlayedTime = currentTime;
+                dew.command('Game.PlaySound 0x0B00');
+            }
         }
     });
     $('#lookSensitivity, #lookSensitivityText').on('change', function(e){
@@ -351,7 +361,11 @@ $(document).ready(function(){
         if(hasGP){    
             if(e.data.A == 1){
                 if(activePage.endsWith('alertBox')){
-                    hideAlert(true);
+                    if($('#dismissButton:visible').length){
+                        dismissButton();
+                    }else{
+                        hideAlert(true);
+                    }
                 }else if($('#'+selectedItem).prev()[0].computedRole == 'button'){
                     $('#'+selectedItem).prev().click();
                 }else{    
@@ -359,10 +373,10 @@ $(document).ready(function(){
                 }
             }
             if(e.data.B == 1){
-                if(activePage.endsWith('alertBox')){
-                    dismissButton();
-                }else{
+                if(!activePage.endsWith('alertBox')){
                     cancelButton();
+                }else{
+                    hideAlert(true);
                 }
             }
             if(e.data.X == 1){
@@ -453,13 +467,18 @@ $(document).ready(function(){
         if(!$('#gCefMedals').is(":checked")){
             alertBox('This setting only effects Custom medal packs. Turning them on now.', false);
             $('#gCefMedals').prop('checked', true);
+            $('#gCefMedals').trigger('change');
         }
     });
     $('#okButton').off('click').on('click', function(){
-        hideAlert(true);
+        if($('#dismissButton:visible').length){
+            dismissButton();
+        }else{
+            hideAlert(true);
+        }
     });
     $('#dismissButton').off('click').on('click', function(){
-        dismissButton();
+        hideAlert(true);
     });
 });
 
@@ -857,8 +876,9 @@ function applyBindString(bindString){
 function initializeBindings(){
     dew.command("Input.DumpBindingsJson", {}).then(function(response){
         $('#bindBox tbody').empty();
-        $('#bindBox tbody').each(function(){
-            $(this).append('<tr><th colspan="3">'+$(this).attr('class')+'</th></tr>');
+        $('#bindBox tbody').each(function(i, e){
+            if(i > 0)
+                $(this).append('<tr style="height: 2.5vh"><th colspan="3"></th></tr>');
         });
         var bindDump = JSON.parse(response);
         for (i = 0; i < bindDump.length; i++){
@@ -877,34 +897,41 @@ function initializeBindings(){
                     if(bindDump[i].secondaryMouseButton != 'none'){
                         secondaryBind = bindDump[i].secondaryMouseButton;
                     }
-                    $('#bindBox .'+result[2]).append($('<tr data-action="'+result[0]+'"><td>'+result[1]+'</td><td><input class="keybind" value='+primaryBind+'></td><td><input class="keybind" value='+secondaryBind+'></td></tr>'));
+                    $('#bindBox .'+result[2]).append($('<tr data-action="'+result[0]+'"><td>'+result[1]+'</td><td><input class="keybind" value='+primaryBind+' data-initialvalue='+primaryBind+'></td><td><input class="keybind" value='+secondaryBind+' data-initialvalue='+secondaryBind+'></td></tr>'))
                 }
                 }
             })
         }
+        
         updateBindLabels();
         getCurrentBindString();
+
+        dew.on('mouse-xbutton-event', function(m){
+            if(!document.activeElement.classList.contains('keybind'))
+                return;
+
+            if(m.data.xbutton == 1){
+                document.activeElement.value = 'Mouse4';
+            }else{
+                document.activeElement.value = 'Mouse5';
+            }; 
+            document.activeElement.blur();
+        });
+
         $('.keybind').on('focus blur', function(e){
             var this_ = $(this);
-            dew.on('mouse-xbutton-event', function(m){
-                if(m.data.xbutton == 1){
-                    document.activeElement.value = 'Mouse4';
-                }else{
-                    document.activeElement.value = 'Mouse5';
-                }; 
-                document.activeElement.blur();
-            });
+
             function keyHandler(e){
                 e.preventDefault();
                 e.stopPropagation();
 
                 // not escape
                 if(e.keyCode == 27){
-                    if(previousBind){
-                        if(previousBind == this_.val()){
+                    if(this_.data('initialvalue') ){
+                        if(this_.data('initialvalue')  == this_.val()){
                             this_.val('none');
                         }else{
-                            this_.val(previousBind);
+                            this_.val(this_.data('initialvalue') );
                         }
                     }
                     this_.blur();
@@ -1029,11 +1056,12 @@ function initializeBindings(){
                 e.preventDefault();
                 e.stopPropagation();
                 if(e.type == 'mousewheel'){
+                    
                     if(e.originalEvent.wheelDelta > 0){
                         this_.val('MouseWheelUp');
                     }else{
                         this_.val('MouseWheelDown');
-                    }   
+                    }
                 }
                 else if(e.type == 'mousedown'){
                     switch(e.which){
@@ -1051,6 +1079,8 @@ function initializeBindings(){
                     }
                 }
                 this_.blur();
+
+                return false;
             };
 
             var $doc = $(document);
@@ -1059,7 +1089,6 @@ function initializeBindings(){
                 $doc.on('mousewheel.rebind', mouseHandler);
                 $doc.on('keydown.rebind', keyHandler);
             }else{
-                previousBind = e.target.defaultValue;
                 $doc.off('keydown.rebind');
                 $doc.off('mousedown.rebind');
                 $doc.off('mousewheel.rebind');
@@ -1238,7 +1267,7 @@ function toggleSetting(){
 }
 
 function queueChange(changeBlock){
-    $('#cancelButton').html('<img class="button">Cancel');
+    $('#cancelButton').html('<img class="button" src="dew://assets/buttons/360_B.png">Cancel');
     $('#applyButton').show();
     if(hasGP){
         setButtons();

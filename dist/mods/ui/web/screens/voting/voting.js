@@ -1,6 +1,5 @@
 var votingType = "voting";
 var interval = 0;
-var seconds_left;
 var isHost;
 var axisThreshold = .5;
 var stickTicks = { left: 0, right: 0, up: 0, down: 0 };
@@ -9,6 +8,7 @@ var lastHeldUpdated = 0;
 var itemNumber = 1;
 
 var settingsArray = { 'Settings.Gamepad': '0' , 'Game.IconSet': '360'};
+var compactMode = false;
 
 dew.on("variable_update", function(e){
     for(i = 0; i < e.data.length; i++){
@@ -53,7 +53,7 @@ $(document).ready(function(){
             dew.show("chat", {'captureInput': true, 'teamChat': teamChat});
         }
         if(e.keyCode == 88 && votingType == "veto"){ //X to veto
-            vote(1);
+            veto();
         }
         if(e.keyCode == 36){ //Home
             dew.show('settings');
@@ -72,60 +72,88 @@ $(document).ready(function(){
         hideScreen();
     });
     $('#vetoButton').off('click').on('click', function(){
-        vote(1);
+        veto();
+    });
+
+    $('#showButton').off('click').on('click', function() {
+        dew.command('Game.PlaySound 0xb02');
+        compactMode = false;
+        onShow();
+        
     });
     loadSettings(0);
 });
 
+var isThrottled = false;
+var throttleDuration = 1000;
+function veto(){
+    if (isThrottled) { return; }
+    isThrottled = true;
+    setTimeout(function () { isThrottled = false; }, throttleDuration);
+    vote(1);
+}
+
 function hideScreen(){
-    if(isHost){
-        dew.command("server.CancelVote");
-    }else{
-        dew.gameaction(11);	
+    if(!compactMode) {
+        dew.command('Game.PlaySound 0xb01');
     }
-    dew.hide(); 
+    compactMode = true;
+    onShow();
+}
+
+function setTimer(amount, voting){
+    clearInterval(interval);
+    interval = setInterval(function() {
+        var timerElement =   document.getElementById(compactMode ? 'timerCompact' : 'timer');
+        if(voting){
+            timerElement.innerHTML = " Voting ends in..." + --amount ;
+        }else{
+            timerElement.innerHTML = " Game starts in..." + --amount ;    
+        }
+        if (amount <= 0) {
+            timerElement.innerHTML = "";
+            clearInterval(interval);
+        }
+    }, 1000);
 }
 
 function vote(number) {
     dew.command("server.SubmitVote " + number);
+	var WinnerChosen = document.getElementsByClassName('winner');
     if(votingType != "veto"){
-        var WinnerChosen = document.getElementsByClassName('winner');
         if (WinnerChosen.length <= 0) {
             $('.myVote').removeClass('myVote');
             $('.votingOption').eq(number-1).addClass("myVote");
         }
     }else{
         if($('.vetoBox:contains("Map")').length){
-            $('.vetoBox').html('<img class="button">Voted to veto');
+            $('.vetoBox').html('<a onclick="veto();"><img class="button">Voted to veto</a>');
         }else{
-            $('.vetoBox').html('<img class="button">Veto Map and Game'); 
+            $('.vetoBox').html('<a onclick="veto();"><img class="button">Veto Map and Game</a>'); 
         }
-        if(settingsArray['Settings.Gamepad'] == 1){
-            $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
-            $('.button').show();
-        }
+        $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
+    }
+    if (WinnerChosen.length <= 0) {
+        dew.command('Game.PlaySound 0x0B00');
     }
 }
 
 dew.on("show", function(event) {
     dew.getSessionInfo().then(function(i){
         isHost = i.isHost;
-        if(isHost){
-            $('#closeButton').html('<img class="button">Close');
-        }else{
-            $('#closeButton').html('<img class="button">Leave');
-        }
-        if(settingsArray['Settings.Gamepad'] == 1){
-            $("#closeButton img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_B.png');
-            $('.button').show();
-        }
     });
     itemNumber = 1;
     initGamepad();
+
+
+    if(event.data.userInvoked && compactMode && !event.data.compact) {
+        dew.command('Game.PlaySound 0xb02');
+    }
+    compactMode = event.data.compact;
+    onShow();
 });
 
 dew.on("hide", function(event) {
-    clearInterval(interval);
     if(repGP){
         window.clearInterval(repGP);
         repGP = null;
@@ -133,66 +161,43 @@ dew.on("hide", function(event) {
 });
 
 dew.on("Winner", function(event) {
-    $('#votingDesc').html('Game starts in: <span id="timer"></span>');
-    clearInterval(interval);
-    seconds_left = event.data.timeUntilGameStart + 1;
-    interval = setInterval(function() {
-        document.getElementById('timer').innerHTML = --seconds_left + " seconds";
-        if (seconds_left <= 0) {
-            document.getElementById('timer').innerHTML = "";
-            clearInterval(interval);
-        }
-    }, 1000);
+    $('#votingDesc').html('Your game will be starting shortly. <span id="timer"></span>');
     $("#" + event.data.Winner).addClass('winner');
 	$(".votingOption").removeClass("selected");
+    setTimer(event.data.timeUntilGameStart, false);  
 });
 
 dew.on("VetoOptionsUpdated", function(event) {
     $("#votingOptions").empty();
+    var voting;
     if(event.data.vetoOption.canveto){
         votingType = "veto";
+        voting = true;
         $('#vetoButton, #vetoCount').show();
-        $('#votingDesc').html('Voting round ends in: <span id="timer"></span>');
-        $('#description').text('A new game and map will be chosen with a majority veto.');
-        $("<div class='vetoBox'><img class='button'>Veto Map and Game</div>").appendTo($("#votingOptions"));
-        if(settingsArray['Settings.Gamepad'] == 1){
-            $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
-            $('.button').show();
-        }
+        $('#votingDesc').html('Vote to veto game and map... <span id="timer"></span>');
+        $("<div class='vetoBox'><a onclick='veto()'><img class='button'>Veto Map and Game</a></div>").appendTo($("#votingOptions"));
+        $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
     }else{
         votingType = "ended";
+        voting = false;
         $('#vetoButton, #vetoCount').hide();
-        $('#votingDesc').html('Game starts in: <span id="timer"></span>');
-        $('#description').text('Your game will be starting shortly.');
+        $('#votingDesc').html('Your game will be starting shortly. <span id="timer"></span>');
     }
-    clearInterval(interval);
 
     $('.top').css('height', '294px');
-     
-    seconds_left = event.data.timeRemaining -1;
-    interval = setInterval(function() {
-        document.getElementById('timer').innerHTML = --seconds_left + " seconds";
-        if (seconds_left <= 0) {
-            document.getElementById('timer').innerHTML = "";
-            clearInterval(interval);
-        }
-    }, 1000);
-    
-    
     
     dew.command('Server.ListPlayersJSON').then(function(res){
-        $('#voteCount').html('<span id="1"><span class="selector">0</span> of '+JSON.parse(res).length+'</span> ('+event.data.votesNeededToPass + ' needed)');  
+        $('#voteCount').html('<span id="1"><span class="selector">0</span> of '+JSON.parse(res).length+'</span> ('+event.data.votesNeededToPass + ' needed)');
     });
+    setTimer(event.data.timeRemaining - 1, voting);     
 });
 
 dew.on("VotingOptionsUpdated", function(event) {
     votingType = "voting";
-    clearInterval(interval);
 
     $('.top').css('height', '530px');
-    $('#description').text('Vote for game and map...');
     $('#vetoButton, #vetoCount').hide();
-    $('#votingDesc').html('Voting round ends in: <span id="timer"></span>');
+    $('#votingDesc').html('Vote for game and map... <span id="timer"></span>');
 
     $('#votingOptions').empty();
     event.data.votingOptions.forEach(function(entry, i) {
@@ -201,14 +206,14 @@ dew.on("VotingOptionsUpdated", function(event) {
                     "class": "votingOption none",
                     "id": entry.index
                 })
-                .html('NONE OF THE ABOVE<span class="selector">0</span><span class="votebox" style="top: 11px;"></span><span class="vote" style="top: 23px;"></span>')
+                .html('<span class="votebox"></span>None of the above<span class="selector">0</span>')
                 .appendTo($("#votingOptions"));
         } else if (entry.mapname != '') {
             $("<div>", {
                     "class": "votingOption",
                     "id": entry.index
                 })
-                .html('<img class="mapImage" src="dew://assets/maps/small/'+entry.image+'.png"><span class="gameType">'+entry.typename+'</span><span class="mapName">'+entry.mapname+'</span><span class="selector">0</span><span class="votebox"></span><span class="vote"></span>')
+                .html('<span class="votebox"></span><img class="mapImage" src="dew://assets/maps/small/'+entry.image+'.png"><span class="gameType">'+entry.typename+'</span><span class="mapName">'+entry.mapname+'</span><span class="selector">0</span>')
                 .appendTo($("#votingOptions"));
         }
     });
@@ -216,15 +221,6 @@ dew.on("VotingOptionsUpdated", function(event) {
     itemNumber = 1;
     updateSelection(itemNumber, false);
     
-    seconds_left = event.data.timeRemaining-1;
-    interval = setInterval(function() {
-        document.getElementById('timer').innerHTML = --seconds_left + " seconds";
-        if (seconds_left <= 0) {
-            document.getElementById('timer').innerHTML = "";
-            clearInterval(interval);
-        }
-    }, 1000);
-
     $(".votingOption").off('click').on('click', function() {
         $(".votingOption").removeClass("selected");
 		var WinnerChosen = document.getElementsByClassName('winner');
@@ -240,6 +236,7 @@ dew.on("VotingOptionsUpdated", function(event) {
             updateSelection(itemNumber, false);
         }
     });
+    setTimer(event.data.timeRemaining - 1, true); 
 });
 
 dew.on("VoteCountsUpdated", function(event) {
@@ -252,6 +249,11 @@ dew.on("VoteCountsUpdated", function(event) {
     });
 });
 
+dew.on('VoteEnded', function(event) {
+    clearInterval(interval);
+    compactMode = false;
+});
+
 dew.on('controllerinput', function(e){       
     if(settingsArray['Settings.Gamepad'] == 1){
         if(e.data.A == 1){
@@ -259,9 +261,6 @@ dew.on('controllerinput', function(e){
         }
         if(e.data.Select == 1){
             dew.show('scoreboard',{'locked':true});
-        }
-        if(e.data.Start == 1){
-            dew.show('settings');
         }
         if(e.data.Up == 1){
             upNav();
@@ -280,7 +279,7 @@ dew.on('controllerinput', function(e){
             stickTicks.down = 0;
         }
         if(e.data.X == 1 && votingType == "veto"){
-            vote(1);
+            veto();
         }            
         if(e.data.B == 1){
             hideScreen();
@@ -289,13 +288,12 @@ dew.on('controllerinput', function(e){
 });
 
 function initGamepad(){
+    $("#scoreboardButton img").attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_Back.png');  
+    $("#settingsButton img").attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_Start.png');  
+    $("#vetoButton img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
+    $("#closeButton img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_B.png');
+    $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
     if(settingsArray['Settings.Gamepad'] == 1){
-        $("#scoreboardButton img").attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_Back.png');  
-        $("#settingsButton img").attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_Start.png');  
-        $("#vetoButton img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
-        $("#closeButton img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_B.png');
-        $(".vetoBox img").attr('src','dew://assets/buttons/' + settingsArray['Game.IconSet'] + '_X.png');
-        $(".button").show();
         if(!repGP){
             repGP = window.setInterval(checkGamepad,1000/60);
         }
@@ -344,4 +342,24 @@ function downNav(){
         itemNumber++;
         updateSelection(itemNumber, true);
     }           
+}
+
+function onShow() {
+    if(compactMode) {
+        $('#window').fadeOut('fast');
+        $('.window-compact').fadeIn('fast');
+        dew.captureInput(false);
+        dew.capturePointer(true);
+    } else {
+        $('#window').fadeIn('fast');
+        $('.window-compact').fadeOut('fast');
+        dew.captureInput(true);
+        dew.capturePointer(true);
+    }
+}
+
+function cancelVote() {
+    if(isHost) {
+        dew.command("server.CancelVote");
+    }
 }

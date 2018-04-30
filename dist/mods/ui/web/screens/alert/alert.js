@@ -43,45 +43,53 @@ dew.on("show", function (event) {
 	if(event.data.type == "url"|event.data.type == "update"){ 
         okText = 'Yes'; 
     }
+
+    var buttonContainer = $('<div>', {
+        'class': 'alertButtonContainerBottom'
+    });
 	
-    form.append( 
-        $("<button>", {
+    buttonContainer.append($("<button>", {
             id: 'ok',
             html: '<img class="button">'+okText,
             click: function(e){ 
                 e.preventDefault();
-                $(this).parent().parent().remove();
+                $(this).parent().parent().parent().remove();
                 if(!$('.dialog').length){
 					if(event.data.type == "url"){
 						window.open(event.data.url, '_blank');
 					}else if(event.data.type == "update"){
+						
                         dew.command('Game.Update', function() {
                             //Update go!
                         }).catch(function (error) {
                              dew.show('alert',{"title":"Error", "body":error.message});
                         });
                     }
+					dew.command('Game.PlaySound 0xb00');
                     dew.hide();
                 };
             }
-        })
-    );
+        }));
+    
 	
-	if(event.data.type == "url"|event.data.type == "update"){
-		form.append( 
+	if(event.data.type == "url" || event.data.type == "update"){
+		buttonContainer.append( 
 			$("<button>", {
 				id: 'cancel',
 				html: '<img class="button">No',
 				click: function(e){ 
 					e.preventDefault();
-					$(this).parent().parent().remove();
+					$(this).parent().parent().parent().remove();
 					if(!$('.dialog').length){
+						dew.command('Game.PlaySound 0xb01');
 						dew.hide();
 					};
 				}
 			})
 		);
-	}
+    }
+    
+    form.append(buttonContainer);
 
     form.wrap( 
         $("<div>", {
