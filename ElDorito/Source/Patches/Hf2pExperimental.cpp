@@ -113,9 +113,9 @@ namespace
 	void Hf2pShutdownHook();
 	void Hf2pTickHook();
 	void Hf2pLoadPreferencesHook();
-	bool SpawnTimerDisplayHook(int hudIndex, wchar_t* buff, int len, int a4);
 	void game_engine_tick_hook();
 	int game_engine_get_delta_ticks_hook();
+	void __fastcall c_game_engine_object_runtime_manager__update_hook(void *thisptr, void *unused);
 
 	void UI_StartMenuScreenWidget_OnDataItemSelectedHook();
 
@@ -145,7 +145,6 @@ namespace Patches::Hf2pExperimental
 
 		Hook(0x6F740E, UI_StartMenuScreenWidget_OnDataItemSelectedHook).Apply();
 
-		Hook(0x6963C6, SpawnTimerDisplayHook, HookFlags::IsCall).Apply();
 		// fixes race condition with client respawn timer
 		Patch(0x1391B5, { 0xEB }).Apply();
 
@@ -153,6 +152,8 @@ namespace Patches::Hf2pExperimental
 		Hook(0x1527F7, game_engine_tick_hook, HookFlags::IsCall).Apply();
 		// infection
 		Hook(0x5DD4BE, game_engine_get_delta_ticks_hook, HookFlags::IsCall).Apply();
+		// runtime (weapon drop times)
+		Hook(0x152783, c_game_engine_object_runtime_manager__update_hook, HookFlags::IsCall).Apply();
 
 		Patches::Core::OnMapLoaded(OnMapLoaded);
 	}
@@ -167,6 +168,8 @@ namespace
 	const auto UI_ScreenManager_AnyActiveScreens = (bool(__thiscall *)(void *thisptr, int a2))(0x00AAA970);
 	const auto UI_GetScreenManager = (void*(*)())(0x00AAD930);
 	const auto UI_PlaySound = (void(*)(int index, uint32_t uiseTagIndex))(0x00AA5CD0);
+
+	const auto game_engine_in_state = (bool(*)(uint8_t state))(0x005523A0);
 
 	void Hf2pInitHook()
 	{
@@ -460,43 +463,10 @@ namespace
 		}
 	}
 
-	bool SpawnTimerDisplayHook(int hudIndex, wchar_t* buff, int len, int a4)
-	{
-		const auto game_engine_round_in_progress = (bool(*)())(0x00550F90);
-		const auto sub_6E4AA0 = (bool(__cdecl *)(int a1, wchar_t *DstBuf, int bufflen, char a4))(0x6E4AA0);
-		if (sub_6E4AA0(hudIndex, buff, len, a4))
-			return true;
-		auto playerIndex = Blam::Players::GetLocalPlayer(0);
-		if (playerIndex == Blam::DatumHandle::Null)
-			return false;
-		auto player = Blam::Players::GetPlayers().Get(playerIndex);
-		if (!player)
-			return false;
-
-		auto secondsUntilSpawn = Pointer(player)(0x2CBC).Read<int>();
-		if (player->SlaveUnit == Blam::DatumHandle::Null && secondsUntilSpawn > 0)
-		{
-			if (!game_engine_round_in_progress())
-				return false;
-
-			auto firstTimeSpawning = Pointer(player)(0x4).Read<uint32_t>() & 8;
-
-			if(firstTimeSpawning)
-				swprintf(buff, L"Spawn in %d", secondsUntilSpawn);
-			else
-				swprintf(buff, L"Respawning in %d", secondsUntilSpawn);
-
-			return true;
-		}
-
-		return false;
-	}
-
-
 	void game_engine_tick_hook()
 	{
 		const auto game_get_current_engine = (void*(*)())(0x005CE150);
-		const auto game_engine_in_state = (bool(*)(uint8_t state))(0x005523A0);
+
 		auto engine = game_get_current_engine();
 		if (!engine)
 			return;
@@ -518,5 +488,13 @@ namespace
 			delta = 0;
 
 		return delta;
+	}
+
+	void __fastcall c_game_engine_object_runtime_manager__update_hook(void *thisptr, void *unused)
+	{
+		const auto c_game_engine_object_runtime_manager__update = (void(__thiscall*)(void *thisptr))(0x005913E0);
+
+		if (!game_engine_in_state(4))
+			c_game_engine_object_runtime_manager__update(thisptr);
 	}
 }

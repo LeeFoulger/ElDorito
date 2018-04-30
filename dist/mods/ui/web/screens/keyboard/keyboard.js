@@ -1,11 +1,22 @@
-var pageWidth, pageHeight;
-var basePage = {
-    width: 1280,
-    height: 720,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1
-};
+var settingsArray = { 'Settings.Gamepad': '0' , 'Game.IconSet': '360'};
+
+dew.on("variable_update", function(e){
+    for(i = 0; i < e.data.length; i++){
+        if(e.data[i].name in settingsArray){
+            settingsArray[e.data[i].name] = e.data[i].value;
+        }
+    }
+});
+
+function loadSettings(i){
+	if (i != Object.keys(settingsArray).length) {
+		dew.command(Object.keys(settingsArray)[i], {}).then(function(response) {
+			settingsArray[Object.keys(settingsArray)[i]] = response;
+			i++;
+			loadSettings(i);
+		});
+	}
+}
 
 dew.on("show", function (event) {
     $("#title").text(event.data.title);
@@ -19,40 +30,21 @@ dew.on("show", function (event) {
     }else{
         $('#text').attr({'maxlength':'15','rows':'1'});
     };
+    
+    if(settingsArray['Settings.Gamepad'] == 1){
+        $('#ok .button').attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_A.png');
+        $('#cancel .button').attr('src','dew://assets/buttons/'+settingsArray['Game.IconSet']+'_B.png');
+        $('.button').show();   
+    }else{
+        $('.button').hide();   
+    }
 });
 
 dew.on("hide", function (event) {
     $(".dialog").hide();
 });
 
-$(function(){
-    var $page = $('.page_content');
-
-    getPageSize();
-    scalePages($page, pageWidth, pageHeight);
-  
-    $(window).resize(function() {
-        getPageSize();            
-        scalePages($page, pageWidth, pageHeight);
-    });
-  
-    function getPageSize() {
-        pageHeight = $('#container').height();
-        pageWidth = $('#container').width();
-    }
-
-    function scalePages(page, maxWidth, maxHeight) {            
-        var scaleX = 1, scaleY = 1;                      
-        scaleX = maxWidth / basePage.width;
-        scaleY = maxHeight / basePage.height;
-        basePage.scaleX = scaleX;
-        basePage.scaleY = scaleY;
-        basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
-        page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');');
-    }
-});
-
-$(window).load(function () {
+$(document).ready(function(){
     $(".dialog").hide();
 
     $("html").on("submit", "form", function (event) {
@@ -66,30 +58,39 @@ $(window).load(function () {
 
     $("html").on("keydown", function (event) {
         if (event.keyCode === 13 /* Enter */) {
+			dew.command('Game.PlaySound 0xb00');
             event.preventDefault();
             $("form").submit();
         } else if (event.keyCode === 27 /* Escape */) {
+			dew.command('Game.PlaySound 0xb01');
             dew.cancelVirtualKeyboard().then(() => dew.hide());
         }
     });
     
-    $("#ok").on("click", function (){
+    $("#ok").off("click").on("click", function (){
+		dew.command('Game.PlaySound 0xb00');
         $("form").submit();
     });
     
-    $("#cancel").on("click", function (){
+    $("#cancel").off("click").on("click", function (){
+		dew.command('Game.PlaySound 0xb01');
         dew.cancelVirtualKeyboard().then(() => dew.hide());
     });
+    
+    loadSettings(0);
 });
 
 dew.on('controllerinput', function(e){    
     if(e.data.A == 1){
+		dew.command('Game.PlaySound 0xb00');
         $("form").submit();
     }
     if(e.data.B == 1){
+		dew.command('Game.PlaySound 0xb01');
         dew.cancelVirtualKeyboard().then(() => dew.hide());
     }
     if(e.data.Start == 1){
+		dew.command('Game.PlaySound 0xb00');
         $("form").submit();
     }
 });

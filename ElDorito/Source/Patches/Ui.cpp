@@ -4,6 +4,8 @@
 #include "../Patch.hpp"
 #include "../Patches/Core.hpp"
 #include "../Patches/Input.hpp"
+#include "../Patches/Events.hpp"
+#include "../Blam//BlamEvents.hpp"
 #include "../Blam/BlamInput.hpp"
 #include "../Blam/Tags/TagInstance.hpp"
 #include "../Blam/Tags/UI/ChudGlobalsDefinition.hpp"
@@ -18,6 +20,7 @@
 #include "../Blam/Tags/UI/GfxTexturesList.hpp"
 #include "../Blam/BlamNetwork.hpp"
 #include "../Blam/BlamObjects.hpp"
+#include "../Blam/BlamTime.hpp"
 #include "../Modules/ModuleGraphics.hpp"
 #include "../Modules/ModuleInput.hpp"
 #include "../Modules/ModuleGame.hpp"
@@ -40,6 +43,8 @@ namespace
 {
 	void __fastcall UI_MenuUpdateHook(void* a1, int unused, int menuIdToLoad);
 
+	void OnEvent(Blam::DatumHandle player, const Blam::Events::Event *event, const Blam::Events::EventDefinition *definition);
+
 	int UI_ShowHalo3PauseMenu(uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5);
 	void UI_EndGame();
 	char __fastcall UI_Forge_ButtonPressHandlerHook(void* a1, int unused, uint8_t* controllerStruct);
@@ -54,6 +59,8 @@ namespace
 	void __cdecl UI_UpdateH3HUDHook(int playerMappingIndex);
 	void GetActionButtonNameHook();
 	void UI_GetHUDGlobalsIndexHook();
+	void __fastcall UI_GameVariantSavePromptFix(void *thisptr, void *unused, int a2);
+
 	void __fastcall c_main_menu_screen_widget_item_select_hook(void* thisptr, void* unused, int a2, int a3, void* a4, void* a5);
 	void __fastcall c_start_menu_pane_screen_widget__handle_spinner_chosen_hook(void *thisptr, void *unused, uint8_t *widget);
 	void __fastcall c_ui_view_draw_hook(void* thisptr, void* unused);
@@ -109,6 +116,8 @@ namespace
 	void MenuSelectedMapIDChangedHook();
 	void GetGlobalDynamicColorHook();
 	void GetWeaponOutlineColorHook();
+
+	bool HUDStateDisplayHook(int hudIndex, wchar_t* buff, int len, int a4);
 
 	void FindUiTagIndices();
 	void FindHUDDistortionTagData();
@@ -331,12 +340,20 @@ namespace Patches::Ui
 
 		Hook(0x721F03, c_gui_screen_pregame_lobby_switch_network_hook).Apply();
 
+		// prevent transition_out immediately after saving
+		Hook(0x6A8706, UI_GameVariantSavePromptFix, HookFlags::IsCall).Apply();
+
 		Hook(0x691FD0, c_gui_alert_manager__show).Apply();
 
 		Hook(0x62D58D, c_hud_camera_view__render_outlines_hook, HookFlags::IsCall).Apply();
 
 		// fix 'none' game variant weapon option
 		Patch(0x1CE52D, { 0xEB }).Apply();
+
+		// Fixes some broken hud state strings, including the respawn timer.
+		Hook(0x6963C6, HUDStateDisplayHook, HookFlags::IsCall).Apply();
+
+		Patches::Events::OnEvent(OnEvent);
 	}
 
 	const auto UI_Alloc = reinterpret_cast<void *(__cdecl *)(int32_t)>(0xAB4ED0);
@@ -389,7 +406,7 @@ namespace Patches::Ui
 		//Make sure the sound exists before playing
 		if (Blam::Tags::TagInstance::IsLoaded('lsnd', pttLsndIndex))
 		{
-			if(enabled)
+			if (enabled)
 				Sound_LoopingSound_Start(pttLsndIndex, -1, 1065353216, 0, 0);
 			else
 				Sound_LoopingSound_Stop(pttLsndIndex, -1);
@@ -430,7 +447,7 @@ namespace Patches::Ui
 			for (size_t i = 0; i < hud_name.length(); i++)
 				chud_talking_player_name[i] = hud_name[i];
 		}
-		else 
+		else
 			return;
 	}
 
@@ -897,11 +914,11 @@ namespace
 			pop ebp
 			ret
 
-		fallback:
+			fallback :
 			// Execute replaced code and jump back to original function
 			sub esp, 0x800
-			mov edx, 0x51E049
-			jmp edx
+				mov edx, 0x51E049
+				jmp edx
 		}
 	}
 
@@ -911,7 +928,7 @@ namespace
 		{
 			// call sub that handles showing game options
 			mov ecx, esi
-			push [edi+0x10]
+			push[edi + 0x10]
 			mov eax, 0xB225B0
 			call eax
 			// jump back to original function
@@ -1279,9 +1296,9 @@ namespace
 			mov esp, ebp
 			pop ebp
 			retn
-			DEFAULT:
+			DEFAULT :
 			mov eax, 0xABCA79
-			jmp eax
+				jmp eax
 		}
 	}
 
@@ -1584,20 +1601,20 @@ namespace
 				cmp[ebp + 0xC], 0xF
 				je primary_color
 
-			tag_color:
-				mov eax, [eax + edi * 4 + 4]
+				tag_color :
+			mov eax, [eax + edi * 4 + 4]
 				jmp eldorado_return
 
-			primary_color :
-				mov eax, Patches::Ui::customPrimaryHUDColor
+				primary_color :
+			mov eax, Patches::Ui::customPrimaryHUDColor
 				jmp eldorado_return
 
-			secondary_color :
-				mov eax, Patches::Ui::customSecondaryHUDColor
+				secondary_color :
+			mov eax, Patches::Ui::customSecondaryHUDColor
 				jmp eldorado_return
 
-			eldorado_return :
-				pop edi
+				eldorado_return :
+			pop edi
 				pop esi
 				pop ebx
 				pop ebp
@@ -1615,15 +1632,15 @@ namespace
 				cmp ecx, 0
 				je secondary_color
 
-			tag_color:
-				push [eax+ecx*4+0x7C]
+				tag_color :
+			push[eax + ecx * 4 + 0x7C]
 				jmp eldorado_return
 
-			secondary_color:
-				push customSecondaryHUDColor
+				secondary_color :
+			push customSecondaryHUDColor
 
-			eldorado_return:
-				mov ebx, 0xAC9AA0
+				eldorado_return :
+			mov ebx, 0xAC9AA0
 				call ebx
 				add esp, 0xC
 				pop ebp
@@ -1766,8 +1783,7 @@ namespace
 		Blam::Players::PlayerDatum *player;
 
 		if (playerIndex != Blam::DatumHandle::Null && (player = Blam::Players::GetPlayers().Get(playerIndex))
-			&& player->SlaveUnit != Blam::DatumHandle::Null && Blam::Objects::Get(player->SlaveUnit)
-			&& !moduleTweaks.VarDisableWeaponOutline->ValueInt)
+			&& player->SlaveUnit != Blam::DatumHandle::Null && Blam::Objects::Get(player->SlaveUnit))
 		{
 			// outlines are only rendered if we have a unit regardless
 			c_hud_camera_view__render_outlines_hook(thisptr, localProfileIndex, playerMappingIndex, a3);
@@ -1787,31 +1803,123 @@ namespace
 		}
 	}
 
-	void __fastcall chud_add_player_marker_hook(void *thisptr, void *unused, uint8_t *data)
+	bool PlayerMarkerIsDisabled(uint32_t playerIndex)
 	{
-		const auto chud_add_player_marker = (void(__thiscall*)(void *thisptr, uint8_t *data))(0xAAF9D0);
+		auto &players = Blam::Players::GetPlayers();
 
-		auto playerIndex = *(uint32_t*)data;
-		if (playerIndex != -1)
+		if (playerIndex == -1)
+			return false;
+
+		auto player = Blam::Players::GetPlayers().Get(playerIndex);
+		if (!player)
+			return false;
+
+		auto localPlayerDatumIndex = Blam::Players::GetLocalPlayer(0);
+		if (localPlayerDatumIndex == Blam::DatumHandle::Null)
+			return false;
+
+		auto localPlayer = players.Get(localPlayerDatumIndex);
+		if (!localPlayer)
+			return false;
+
+		auto waypointTrait = *(uint8_t*)((uint8_t*)player + 0x2DC1);
+
+		switch (waypointTrait)
 		{
-			auto localPlayerDatumIndex = Blam::Players::GetLocalPlayer(0);
-			if (localPlayerDatumIndex == Blam::DatumHandle::Null)
-				return;
+		case 4:
+			return player->Properties.TeamIndex != localPlayer->Properties.TeamIndex; // team only
+		case 5:
+			return true;
+		};
 
-			const auto &players = Blam::Players::GetPlayers();
-			auto localPlayer = players.Get(localPlayerDatumIndex);
-			if (!localPlayer)
-				return;
+		return false;
+	}
 
-			auto player = players.Get(playerIndex);
-			if (player && *(uint8_t*)((uint8_t*)player + 0x2DC1) == 4  // waypoint 
-				&& localPlayer->Properties.TeamIndex != player->Properties.TeamIndex) // do not hide if they're on the same team as us
+	void __fastcall chud_add_player_marker_hook(void *thisptr, void *unused, uint8_t *data_)
+	{
+		struct s_chud_player_marker_data
+		{
+			uint32_t player_index;
+			uint32_t field_4;
+			uint32_t field_8;
+			uint32_t color;
+			uint32_t flags;
+			uint32_t field_14;
+			wchar_t text[5];
+			uint16_t field_22;
+			Blam::Math::RealVector3D position;
+		};
+		static_assert(sizeof(s_chud_player_marker_data) == 0x30, "s_chud_player_marker_data invalid");
+
+		struct s_chud_player_marker_state
+		{
+			s_chud_player_marker_data data;
+			bool is_valid;
+			uint32_t time;
+			float scale;
+			uint8_t field_3C[0x2C];
+			uint32_t state;
+			uint32_t field_6C;
+			uint32_t field_70;
+		};
+		static_assert(sizeof(s_chud_player_marker_state) == 0x74, "s_chud_player_marker_state invalid");
+
+		const auto sub_AAF560 = (int(__thiscall *)(void *thisptr))(0xAAF560);
+
+		auto data = (s_chud_player_marker_data*)data_;
+		auto index = 0;
+		auto state = (s_chud_player_marker_state *)thisptr;
+		while (!state->is_valid || state->data.player_index != data->player_index)
+		{
+			++index;
+			++state;
+			if (index >= 0x14)
 			{
-				return;
+				index = -1;
+				break;
 			}
 		}
 
-		chud_add_player_marker(thisptr, data);
+		if (PlayerMarkerIsDisabled(data->player_index))
+		{
+			if (index != -1)
+			{
+				// existing state found, mark it as invalid
+				auto newState = &((s_chud_player_marker_state*)thisptr)[sub_AAF560(thisptr)];
+				newState->is_valid = false;
+				newState->data.player_index = -1;
+			}
+		}
+		else
+		{
+
+			if (index == -1)
+			{
+				auto newState = &((s_chud_player_marker_state*)thisptr)[sub_AAF560(thisptr)];
+				memcpy(&newState->data, data, sizeof(s_chud_player_marker_data));
+				newState->is_valid = 1;
+				newState->state = -1;
+				newState->field_6C = 0;
+				newState->time = Blam::Time::GetGameTicks();
+				return;
+			}
+
+			// player scaling
+			if (data->player_index != -1)
+			{
+				auto player = Blam::Players::GetPlayers().Get(data->player_index);
+				if (player && player->SlaveUnit != Blam::DatumHandle::Null)
+				{
+					auto unitObject = Blam::Objects::Get(player->SlaveUnit);
+					if (unitObject)
+						data->position.K = data->position.K - 0.05f + std::pow(unitObject->Scale, 1.0f) * 0.05f;
+				}
+			}
+
+			auto existingState = &((s_chud_player_marker_state*)thisptr)[index];
+			memcpy(&existingState->data, data, sizeof(s_chud_player_marker_data));
+			existingState->time = Blam::Time::GetGameTicks();
+		}
 	}
 
 	unsigned int __stdcall IsPlayerSpeaking(int handle)
@@ -2261,5 +2369,185 @@ namespace
 			c_gui_list_widget__set_selected(widget, 0x111, selectedGametype, 0);
 			break;
 		}
+	}
+
+	void __fastcall UI_GameVariantSavePromptFix(void *thisptr, void *unused, int a2)
+	{
+		const auto c_gui_screen_widget__transition_out = (void(__thiscall*)(void *thisptr, int a2))(0x00AB2830);
+
+		auto name = *(uint32_t*)((uint8_t*)thisptr + 0x40);
+		if (name != 0x103A9) // game_options
+			c_gui_screen_widget__transition_out(thisptr, a2);
+	}
+
+	std::string teamNames[8] = { "Red", "Blue", "Green", "Orange", "Purple", "Gold", "Brown", "Pink" };
+
+	const float winnereDisplayTime = 5;
+	uint32_t winnerDisplayed;
+	std::wstring winnerString;
+
+	const float welcomeDisplayTime = 5;
+	uint32_t welcomeDisplayed;
+	bool welcome;
+	//TODO: Find a better way to determine this.
+	//It defaults to true because it's set to false in game if the game hasn't started,
+	//but remains true if the player joins a game that has already started.
+	bool gameHasStarted = true;
+
+	bool respawning;
+
+	void OnEvent(Blam::DatumHandle player, const Blam::Events::Event *event, const Blam::Events::EventDefinition *definition)
+	{
+		if (event->NameStringId == 0x4004D) // "general_event_game_over"
+		{
+			winnerDisplayed = Blam::Time::GetGameTicks();
+			auto session = Blam::Network::GetActiveSession();
+			auto get_multiplayer_scoreboard = (Blam::MutiplayerScoreboard*(*)())(0x00550B80);
+			auto* scoreboard = get_multiplayer_scoreboard();
+
+			if (!session || !session->IsEstablished() || !scoreboard)
+				return;
+
+			std::wstringstream ss;
+
+			if (session->HasTeams())
+			{
+				bool tied = false;
+				int prevHighTeam = 0;
+				int16_t prevHighScore = scoreboard->TeamScores[0].TotalScore;
+				for (int t = 1; t < 8; t++)
+				{
+					uint16_t currentScore = scoreboard->TeamScores[t].TotalScore;
+					if (prevHighScore == currentScore)
+					{
+						tied = true;
+					}
+					else if (currentScore > prevHighScore)
+					{
+						prevHighTeam = t;
+						prevHighScore = currentScore;
+						tied = false;
+					}
+				}
+
+				std::string teamName = teamNames[prevHighTeam];
+
+				if (tied)
+					ss << L"Tie game!";
+				else
+					ss << Utils::String::WidenString(teamName) << L" Team wins!";
+			}
+			else
+			{
+				int playerIdx = session->MembershipInfo.FindFirstPlayer();
+				std::wstring prevHighPlayer;
+				std::uint16_t prevHighScore;
+				bool tied = false;
+
+				if (playerIdx == -1)
+					return;
+
+				auto player = session->MembershipInfo.PlayerSessions[playerIdx];
+				prevHighPlayer = player.Properties.DisplayName;
+				prevHighScore = scoreboard->PlayerScores[playerIdx].TotalScore;
+
+				playerIdx = session->MembershipInfo.FindNextPlayer(playerIdx);
+
+				while (playerIdx != -1)
+				{
+					uint16_t currentScore = scoreboard->PlayerScores[playerIdx].TotalScore;
+					if (currentScore == prevHighScore)
+					{
+						tied = true;
+					}
+					else if (currentScore > prevHighScore)
+					{
+						player = session->MembershipInfo.PlayerSessions[playerIdx];
+						prevHighScore = currentScore;
+						prevHighPlayer = player.Properties.DisplayName;
+					}
+					playerIdx = session->MembershipInfo.FindNextPlayer(playerIdx);
+				}
+
+				if (tied)
+					ss << L"Tie game!";
+				else
+					ss << prevHighPlayer << L" wins!";
+			}
+
+			winnerString = ss.str();
+		}
+	}
+
+	bool HUDStateDisplayHook(int hudIndex, wchar_t* buff, int len, int a4)
+	{
+		const auto game_engine_round_in_progress = (bool(*)())(0x00550F90);
+		const auto sub_6E4AA0 = (bool(__cdecl *)(int a1, wchar_t *DstBuf, int bufflen, char a4))(0x6E4AA0);
+		if (sub_6E4AA0(hudIndex, buff, len, a4))
+			return true;
+		auto playerIndex = Blam::Players::GetLocalPlayer(0);
+		if (playerIndex == Blam::DatumHandle::Null)
+			return false;
+		auto player = Blam::Players::GetPlayers().Get(playerIndex);
+		if (!player)
+			return false;
+
+		//TODO:
+		//Use strings from tags as templates, rather than hardcoding.
+
+		//mp_respawn_timer
+		auto secondsUntilSpawn = Pointer(player)(0x2CBC).Read<int>();
+		auto firstTimeSpawning = Pointer(player)(0x4).Read<uint32_t>() & 8;
+		if (player->SlaveUnit == Blam::DatumHandle::Null && secondsUntilSpawn > 0)
+		{
+			if (!game_engine_round_in_progress())
+			{
+				return false;
+			}
+
+			respawning = true;
+
+			if (firstTimeSpawning)
+			{
+				swprintf(buff, L"Spawn in %d", secondsUntilSpawn);
+				gameHasStarted = false; //Make sure it's reset after games.
+			}
+			else
+				swprintf(buff, L"Respawn in %d", secondsUntilSpawn);
+
+			return true;
+		}
+
+		//state_recently_started
+		if (!firstTimeSpawning && !gameHasStarted)
+		{
+			welcome = true;
+			welcomeDisplayed = Blam::Time::GetGameTicks();
+			gameHasStarted = true;
+			swprintf(buff, L"Welcome!");
+			return true;
+		}
+		if (welcome)
+		{
+			swprintf(buff, L"Welcome!");
+
+			if (Blam::Time::TicksToSeconds(Blam::Time::GetGameTicks() - welcomeDisplayed) > welcomeDisplayTime)
+				welcome = false;
+
+			return true;
+		}
+
+		//state_game_over_lost_*
+		if (winnerString != L"")
+		{
+			swprintf(buff, winnerString.c_str());
+
+			if (Blam::Time::TicksToSeconds(Blam::Time::GetGameTicks() - winnerDisplayed) > winnereDisplayTime)
+				winnerString = L"";
+
+			return true;
+		}
+
+		return false;
 	}
 }

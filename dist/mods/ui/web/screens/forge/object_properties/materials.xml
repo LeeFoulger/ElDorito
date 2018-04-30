@@ -99,6 +99,7 @@
 			<item name="Streaked, Light" value="098" />
 			<item name="Streaked, Dark" value="152" />
 			<item name="Vent" value="129" />
+			<item name="Chainlink Fence" value="158" />
 		</category>
 	</category>
 	<category name="Natural">
@@ -164,7 +165,6 @@
 	</category>
 	<category name="Glass">
 		<item name="Crystal #1" value="139" />
-		<item name="Crystal #2" value="144" />
 		<item name="Forerunner" value="141" />
 		<item name="Frosted #1" value="142" />
 		<item name="Frosted #2" value="143" />

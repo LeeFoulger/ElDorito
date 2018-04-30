@@ -7,16 +7,18 @@
 	<script type="text/javascript" src="title.js"></script>
     <link rel="stylesheet" href="title.css">
     <base target="_blank">
+		<!-- Window Resize-->
+    <script src="dew://lib/window-resize.js"></script>
+    <link rel="stylesheet" type="text/css" href="dew://lib/window-resize.css"/>
 </head>
 <body>
     <div id="blackLayer"></div>
     <div class="genericLoader">
-        <div class="stars"></div>
-        <div class="ring"></div>
-        <div class="clouds"></div>
+        <div class="background"></div>
         <div class="eldorito"></div>
-        <div class="title">ELDEWRITO</div>
         <div class="instructionText">Press <img src="dew://assets/buttons/Keyboard_White_Enter.png"> To Continue</div>
+        <div class="title">ElDewrito is not endorsed or affiliated in any way with Microsoft, Saber Interactive, Bungie, or 343 Industries.</div>
+	      <div class="teamlogo"></div>
         <div class="legend">
             <div id="navigate">Menu Controls:</div>
             <img id="dpad">
@@ -27,11 +29,16 @@
             <img id="esc" src="dew://assets/buttons/Keyboard_White_Esc.png">
             <img id="enter" src="dew://assets/buttons/Keyboard_White_Enter.png">           
         </div>
-    </div>
-    <!--
-    <div id="announcementBox">
-        <div id="buttonNav"><a onclick="nextAnnounce()">Next</a><a onclick="closeAnnounce()">Close</a></div>
-    </div>
-    -->
+
+				
+<div id="container">	
+	<div class="page_content">	
+		<div id="announcementBox">	
+				<div id="buttonNav"><img id="closeAnnounceButton" src="dew://assets/buttons/XboxOne_A.png"><a onclick="closeAnnounce()">Let's go!</a></div>	
+		</div>	
+	</div>	
+</div>	
+<div id="announcementBG" ></div>
+</div>    
 </body>
 </html>

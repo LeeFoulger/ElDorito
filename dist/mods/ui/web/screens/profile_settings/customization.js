@@ -137,6 +137,12 @@ $(document).ready(function(){
             if(e.keyCode == 32 || e.keyCode == 13){ //Space and Enter
                 selectElement();
             }
+            if(e.keyCode == 81){//Q
+                prevPage();
+            }
+            if(e.keyCode == 69){//E
+                nextPage();
+            }
         }else{
             if(e.keyCode == 13){ //Enter to submit inputBox
                 $('#inputBox #okButton').click();
@@ -155,13 +161,11 @@ $(document).ready(function(){
     setRadioList('colorsSecondary', h3ColorArray);
     setRadioList('colorsVisor', h3ColorArray);
     setRadioList('colorsLights', h3ColorArray);
-    $('.tabs li a').click(function(e){
+    $('.tabs li a').off('click').on('click', function(e){
         $('.tabs li').removeClass('selected');
         $(this).parent().addClass('selected');
-        window.location.href = e.target.href;
-        if(e.target.hash){
-            activePage = e.target.hash;
-        }
+        window.location.href = $(this).attr('href');
+        activePage = $(this).prop('hash');
         itemNumber = 0;
         $(e).ready(function(){
             updateSelection(itemNumber, false, true);
@@ -181,7 +185,7 @@ $(document).ready(function(){
 		
         dew.command('Game.PlaySound 0x0B00');
     });
-    $('.colorForm input, .armorForm input').on('change click', function(e){
+    $('.colorForm input, .armorForm input').off('click').on('change click', function(e){
         $(this).parent().parent().parent().find('.chosenElement').removeClass('chosenElement');
         $(this).parent().parent().addClass('chosenElement');
         $.grep(settingsToLoad, function(result){
@@ -194,7 +198,7 @@ $(document).ready(function(){
         $(location.hash+' #infoBox #infoText').text($(this).attr('desc'));
 		setUrl(false);
     });
-    $('#colorsPrimaryText, #colorsSecondaryText,#colorsVisorText,#colorsLightsText').on('click', function(e){
+    $('#colorsPrimaryText, #colorsSecondaryText,#colorsVisorText,#colorsLightsText').off('click').on('click', function(e){
         $('.colorForm').hide();
         colorPicker = dew.makeColorPicker(document.querySelector('#colorPicker'));
         var whichColor = $(this);
@@ -214,10 +218,10 @@ $(document).ready(function(){
     $('.colorForm, .armorForm').submit(function() {
         return false;
     });
-    $('#applyButton').on('click', function(e){
+    $('#applyButton').off('click').on('click', function(e){
         applyButton();
     });
-    $('#cancelButton').on('click', function(e){
+    $('#cancelButton').off('click').on('click', function(e){
         cancelButton();
     });
     setControlValues();
@@ -227,6 +231,7 @@ $(document).ready(function(){
             if(e.data.A == 1){
                 if(activePage.endsWith('inputBox')){
                     dew.command('Player.Name '+$('#inputBox input').val());
+                    dew.notify("settings-update", [['Player.Name',$('#inputBox input').val()]]);
                     dismissButton();
                 }else{
                     selectElement();
@@ -246,11 +251,6 @@ $(document).ready(function(){
 					toggleIcon();
 				}
             }
-			if(e.data.Start == 1){
-				if(activePage.startsWith('#page3') && needApply){
-					ApplyEmblem(true);
-				}
-			}
 			if(e.data.Y == 1){
 				if(activePage.startsWith('#page1')){
                     randomArmor();
@@ -384,9 +384,10 @@ $(document).ready(function(){
             $(this).removeClass('selectedElement');
         }
     }); 
-    $('#inputBox #okButton').on('click', function(){
+    $('#inputBox #okButton').off('click').on('click', function(){
         if($('#inputBox #pName').is(':visible')){
             dew.command('Player.Name "'+$('#inputBox #pName').val()+'"');
+            dew.notify("settings-update", [['Player.Name',$('#inputBox #pName').val()]]);
 			if(hasValidConnection){
 				SetupEmblems(false, false, false, function(){
 					ApplyEmblem(false);
@@ -397,7 +398,7 @@ $(document).ready(function(){
         }
         hideInputBox(true);
     });
-    $('#inputBox #dismissButton').on('click', function(){
+    $('#inputBox #dismissButton').off('click').on('click', function(){
         hideInputBox(true);
     });
 
@@ -429,7 +430,6 @@ function setButtons(){
         $('#randomColors img').attr('src','dew://assets/buttons/' + response + '_Y.png');
         $('#applyButton img').attr('src','dew://assets/buttons/' + response + '_Start.png');
         $('#cancelButton img').attr('src','dew://assets/buttons/' + response + '_B.png');
-		$('#applyEmblemButton img').attr('src','dew://assets/buttons/'+ response + '_Start.png');
 		$('#toggleIconButton img').attr('src','dew://assets/buttons/'+ response + '_X.png');
 		$('#randomEmblem img').attr('src','dew://assets/buttons/'+ response + '_Y.png');
         $('#dismissButton img').attr('src','dew://assets/buttons/' + response + '_B.png');
@@ -557,6 +557,9 @@ function cancelButton(){
     dew.command('writeconfig');
     effectReset();
 	page1();
+	if(needApply){
+		ApplyEmblem(false);
+	}
 }
 
 function dismissButton(){
@@ -766,7 +769,7 @@ function inputBox(type){
        $('#pName').show();
        $('#inputBox .header').text('Player Name');
         dew.command('Player.Name', {}).then(function(response) {
-            $('#inputBox #pName').val(response);
+            $('#inputBox #pName').val(response.substring(0, 15));
             $('#inputBox').fadeIn(100);
             activePage = activePage+'inputBox';
             $('#dismissButton').show();
@@ -911,7 +914,6 @@ function adjustBiped(){
 }
 
 function SetupEmblems(resetEmblemList, setRadiosLists, setEmblem, onFinish, runFinish){
-	$("#applyEmblemButton").hide();
 	$("#toggleIconButton").hide();
 	$("#randomEmblem").hide();
 	
@@ -952,12 +954,11 @@ function SetupEmblems(resetEmblemList, setRadiosLists, setEmblem, onFinish, runF
 						setEmblemColorRadioList('colorsEmblemImage', h3ColorArray);
 					}
 					
-					$('#emblemIcon input, #emblemBackgroundImage input, #colorsEmblemPrimary input, #colorsEmblemSecondary input, #colorsEmblemImage input, #colorsEmblemBackground input').on('change click', function(e) {
-						$('#applyEmblemButton').show();
+					$('#emblemIcon input, #emblemBackgroundImage input, #colorsEmblemPrimary input, #colorsEmblemSecondary input, #colorsEmblemImage input, #colorsEmblemBackground input').off('click').on('change click', function(e) {
 						needApply = true;
 					});
 					
-					$('.emblemForm input, .emblemColorForm input').on('change click', function(e){
+					$('.emblemForm input, .emblemColorForm input').off('click').on('change click', function(e){
 						$(this).parent().parent().parent().find('.selectedElement').removeClass('selectedElement');
 						$(this).parent().parent().parent().find('.chosenElement').removeClass('chosenElement');
 						$(this).parent().parent().addClass('chosenElement');
@@ -1148,7 +1149,6 @@ function setUrl(isLastEmblem){
 	}
 	if(lastEmblem == emblemurl){
 		needApply = false;
-		$("#applyEmblemButton").hide();
 	}
 	
 	document.getElementById("emblemBox").src = 'http://' + apiServer + emblemGeneratorAPI + emblemurl;
@@ -1188,7 +1188,6 @@ function ApplyEmblem(ShowAlert) {
 		contentType: 'application/json',
 		data: JSON.stringify(jsonObj),
 		success: function(data){
-			$('#applyEmblemButton').hide();
 			if(ShowAlert){
 				dew.show('alert', {
 							icon: 0,
@@ -1215,7 +1214,6 @@ function ApplyEmblem(ShowAlert) {
 
 function toggleIcon(){
 	emblemToggle = 1 - emblemToggle;
-	$('#applyEmblemButton').show();
 	needApply = true;
 	setUrl(false);
 }
@@ -1228,18 +1226,22 @@ function page3(){
 	$("#randomEmblem").show();
 }
 function page2(){
-	$("#applyEmblemButton").hide();
 	$("#toggleIconButton").hide();
 	$("#randomArmor").hide();
 	$("#randomColors").show();
 	$("#randomEmblem").hide();
+	if(needApply){
+		ApplyEmblem(false);
+	}
 }
 function page1(){
-	$("#applyEmblemButton").hide();
 	$("#toggleIconButton").hide();
 	$("#randomArmor").show();
 	$("#randomColors").hide();
 	$("#randomEmblem").hide();
+	if(needApply){
+		ApplyEmblem(false);
+	}
 }
 
 function ping(ip, callback) {
