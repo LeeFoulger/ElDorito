@@ -76,7 +76,6 @@ namespace
 	void chud_update_marker_sprite_hook();
 	void chud_update_player_marker_icon_height_hook();
 	void chud_update_player_marker_name_height_hook();
-	void chud_marker_bitmap_hook();
 
 	template <int MaxItems>
 	struct c_gui_generic_category_datasource
@@ -175,6 +174,8 @@ namespace Patches::Ui
 	bool enableCustomHUDColors = false;
 	int customPrimaryHUDColor = -1;
 	int customSecondaryHUDColor = 0;
+
+	bool eliteHUD = false;
 
 	void ApplyAfterTagsLoaded()
 	{
@@ -311,14 +312,12 @@ namespace Patches::Ui
 		//Show speaking player markers
 		Hook(0x349450, chud_update_player_marker_state_hook).Apply();
 		
-		//Restore some old/removed marker functionality.
+		//Restore player marker waypoints1 bitmap.
 		Hook(0x349469, chud_update_player_marker_sprite_hook).Apply();
 		Hook(0x6CED6A, chud_update_marker_sprite_hook).Apply();
 
-		//Repurpose some of saber's hacky code to scale marker sprites
-		//Allows upscaled textures to be used replacing the pixelated leftover spritesheet
-		//Also switches to the old spritesheet.
-		Hook(0x6C6A0E, chud_marker_bitmap_hook).Apply();
+		//Jump over player marker waypoints2 bitmap code.
+		Patch(0x6C6A11, { 0xEB }).Apply();
 
 		//Stop the assault bomb from overwriting the player marker bitmap sprite index.
 		Patch(0x2E805F, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).Apply();
@@ -503,7 +502,7 @@ namespace Patches::Ui
 
 			// Adjust motion sensor blip to match the UI resolution
 			globals->HudGlobals[0].HudAttributes[0].MotionSensorOffsetX = HUDMotionSensorOffsetX;
-			globals->HudGlobals[0].HudAttributes[0].MotionSensorOffsetY = (float)(globals->HudGlobals[0].HudAttributes[0].ResolutionHeight - (globals->HudGlobals[0].HudAttributes[0].MotionSensorRadius - globals->HudGlobals[0].HudAttributes[0].MotionSensorScale));
+			globals->HudGlobals[0].HudAttributes[0].MotionSensorOffsetY = (float)(globals->HudGlobals[0].HudAttributes[0].ResolutionHeight - (globals->HudGlobals[0].HudAttributes[0].MotionSensorRadius - globals->HudGlobals[0].HudAttributes[0].MotionSensorScale) - 4);
 
 			// Search for the visor bottom and fix it if found
 			for (auto &widget : spartanChud->HudWidgets)
@@ -1317,9 +1316,8 @@ namespace
 			return 2;
 		case 0x1119: //mp_elite
 		case 0xCC: // dervish
-			return 1;
 		default:
-			return 0;
+			return eliteHUD;
 		}
 	}
 
@@ -1437,9 +1435,8 @@ namespace
 			return 4;
 		case 0x1119: //mp_elite
 		case 0xCC: // dervish
-			return 2;
 		default:
-			return 1;
+			return eliteHUD + 1;
 		}
 	}
 
@@ -2285,7 +2282,7 @@ namespace
 				je      eldorado_return
 
 			raise_icon:
-				mov eax, 0x40000000 //2f, may need adjustment
+				mov eax, 0x40300000 //2.75f, may need adjustment
 				movd xmm1, eax
 				movss xmm0, [ebp - 0xC]
 				mulss xmm0, xmm1
@@ -2314,20 +2311,6 @@ namespace
 
 			mov ebx, 0xACF0D3
 			jmp ebx
-		}
-	}
-
-	__declspec(naked) void chud_marker_bitmap_hook()
-	{
-		__asm
-		{
-			movss xmm1, [eax + 0x2AC] //waypoint_scale
-			lea edi, [eax + 0x168] //waypoints (bitm)
-			movss xmm0, [ebp + 0x18]
-			mulss xmm0, xmm1
-
-			mov eax, 0xAC6A4D
-			jmp eax
 		}
 	}
 
