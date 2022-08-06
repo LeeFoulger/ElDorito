@@ -6,9 +6,346 @@
 #include "../BlamObjects.hpp"
 #include "../BlamPlayers.hpp"
 
+namespace Blam
+{
+	#pragma region Bad Bad Bad
+
+	union byte_flags_t
+	{
+		unsigned char value;
+		struct
+		{
+			unsigned char bit00 : 1;
+			unsigned char bit01 : 1;
+			unsigned char bit02 : 1;
+			unsigned char bit03 : 1;
+			unsigned char bit04 : 1;
+			unsigned char bit05 : 1;
+			unsigned char bit06 : 1;
+			unsigned char bit07 : 1;
+		} typed;
+	};
+
+	union word_flags_t
+	{
+		unsigned short value;
+		struct
+		{
+			unsigned short bit00 : 1;
+			unsigned short bit01 : 1;
+			unsigned short bit02 : 1;
+			unsigned short bit03 : 1;
+			unsigned short bit04 : 1;
+			unsigned short bit05 : 1;
+			unsigned short bit06 : 1;
+			unsigned short bit07 : 1;
+			unsigned short bit08 : 1;
+			unsigned short bit09 : 1;
+			unsigned short bit10 : 1;
+			unsigned short bit11 : 1;
+			unsigned short bit12 : 1;
+			unsigned short bit13 : 1;
+			unsigned short bit14 : 1;
+			unsigned short bit15 : 1;
+		} typed;
+	};
+
+	union dword_flags_t
+	{
+		unsigned long value;
+		struct
+		{
+			unsigned long bit00 : 1;
+			unsigned long bit01 : 1;
+			unsigned long bit02 : 1;
+			unsigned long bit03 : 1;
+			unsigned long bit04 : 1;
+			unsigned long bit05 : 1;
+			unsigned long bit06 : 1;
+			unsigned long bit07 : 1;
+			unsigned long bit08 : 1;
+			unsigned long bit09 : 1;
+			unsigned long bit10 : 1;
+			unsigned long bit11 : 1;
+			unsigned long bit12 : 1;
+			unsigned long bit13 : 1;
+			unsigned long bit14 : 1;
+			unsigned long bit15 : 1;
+			unsigned long bit16 : 1;
+			unsigned long bit17 : 1;
+			unsigned long bit18 : 1;
+			unsigned long bit19 : 1;
+			unsigned long bit20 : 1;
+			unsigned long bit21 : 1;
+			unsigned long bit22 : 1;
+			unsigned long bit23 : 1;
+			unsigned long bit24 : 1;
+			unsigned long bit25 : 1;
+			unsigned long bit26 : 1;
+			unsigned long bit27 : 1;
+			unsigned long bit28 : 1;
+			unsigned long bit29 : 1;
+			unsigned long bit30 : 1;
+			unsigned long bit31 : 1;
+		} typed;
+	};
+
+	#pragma endregion
+
+	struct s_cluster_reference
+	{
+		unsigned char bsp_index;
+		unsigned char cluster_index;
+	};
+	static_assert(sizeof(s_cluster_reference) == 0x2);
+
+	struct s_location
+	{
+		s_cluster_reference cluster_reference;
+		unsigned short __unknown2;
+	};
+	static_assert(sizeof(s_location) == 0x4);
+
+	enum e_director_mode : long
+	{
+		_director_mode_game = 0,
+		_director_mode_saved_film,
+		_director_mode_observer,
+		_director_mode_debug,
+		_director_mode_unused,
+		_director_mode_editor,
+
+		k_number_of_director_modes
+	};
+
+	enum e_director_perspective : long
+	{
+		_director_perspective_first_person = 0,
+
+		// c_following_camera, c_dead_camera, c_orbiting_camera
+		_director_perspective_1,
+
+		// c_scripted_camera
+		_director_perspective_2,
+
+		// c_null_camera, (c_authored_camera default)
+		_director_perspective_3,
+
+		k_number_of_director_perspectives,
+	};
+
+	enum e_camera_mode : unsigned long
+	{
+		_camera_mode_following = 0,
+		_camera_mode_orbiting,
+		_camera_mode_flying,
+		_camera_mode_first_person,
+		_camera_mode_dead,
+		_camera_mode_static,
+		_camera_mode_scripted,
+		_camera_mode_authored,
+
+		k_number_of_camera_modes,
+		k_camera_mode_null = 0xFFFFFFFF,
+	};
+
+	struct s_observer_command
+	{
+		dword_flags_t flags;              // ulong flags;
+		float position[3];                // real_point3d position;
+		float focus_offset[3];            // real_vector3d focus_offset
+		float look_shift[2];              // real_point2d crosshair_location;
+		float focus_distance;             // real focus_distance;
+		float field_of_view;              // real field_of_view;
+		float forward[3];                 // real_vector3d forward;
+		float up[3];                      // real_vector3d up;
+		float velocities[3];              // real_vector3d velocities;
+
+		// real_matrix4x3 focus_space;
+		float focus_space_scale;
+		float focus_space_forward[3];
+		float focus_space_left[3];
+		float focus_space_up[3];
+		float focus_space_position[3];
+
+		unsigned long __unknown84;        // ulong __unknown84;
+		float center[3];                  // real_point3d center;
+		float timer;                      // real timer;
+		char __data98[40];                // char __data98[40];
+		char __unknownC0[24];             // char __unknownC0[24];
+		char __dataD8[20];                // char __dataD8[20];
+	};
+	static_assert(sizeof(s_observer_command) == 0xEC);
+
+	struct s_observer_result
+	{
+		float focus_point[3];
+		s_location location;
+		float __unknown10[3];
+		float __unknown1C[3];
+		float forward[3];
+		float up[3];
+		float horizontal_field_of_view;
+		char __data44[36];
+		float vertical_field_of_view;
+		float __unknown60;
+	};
+
+	struct s_observer
+	{
+		unsigned long header_signature;
+		s_observer_command* pending_command;
+		s_observer_command command;
+		bool updated_for_frame;
+		bool __unknownF5;
+		bool __unknownF6;
+		bool __unknownF7;
+		float __unknownF8;
+		char __dataFC[16];
+		s_observer_result result;
+		float positions_focus_position[3];
+		float positions_focus_offset[3];
+		float positions_look_shift[2];
+		float positions_focus_distance;
+		float horizontal_field_of_view;
+		float positions_forward[3];
+		float positions_up[3];
+
+		// real_matrix4x3 focus_space;
+		float focus_space_scale;
+		float focus_space_forward[3];
+		float focus_space_left[3];
+		float focus_space_up[3];
+		float focus_space_position[3];
+
+		float velocities_v[3];
+		float velocities_fo[3];
+		char __data208[16];
+		float velocities_r[3];
+		float accelerations_a[3];
+		float accelerations_r[3];
+		char __data244[16];
+		float accelerations_fo[3];
+		char __data258[364];
+		unsigned long trailer_signature;
+	};
+	static_assert(sizeof(s_observer) == 0x3C8);
+
+	struct c_camera;
+	struct c_camera_vtbl
+	{
+		e_camera_mode(__fastcall* get_type)(c_camera*);
+		long(__fastcall* get_perspective)(c_camera*); // e_director_perspective
+
+		unsigned long __funcs[14-2];
+	};
+
+	struct c_camera
+	{
+		c_camera_vtbl* __vftable;
+
+		unsigned long m_object_index;
+		unsigned long __unknown8;
+		unsigned long __unknownC;
+	};
+	static_assert(sizeof(c_camera) == 0x10);
+
+	union c_camera_storage
+	{
+		c_camera camera;
+		char __data[0x4C];
+	};
+	static_assert(sizeof(c_camera_storage) == 0x4C);
+
+	struct c_director
+	{
+		unsigned long __vftable;
+
+		c_camera_storage m_camera;
+		s_observer_command m_observer_command;
+		float m_transition_time;
+		long m_user_index;
+		long m_player_index;
+		char __data[0x18];
+	};
+	static_assert(sizeof(c_director) == 0x160);
+
+	struct s_director_info
+	{
+		e_director_mode director_mode;
+		long director_perspective; // e_director_perspective
+		e_camera_mode camera_mode;
+	};
+	static_assert(sizeof(s_director_info) == 0xC);
+
+	inline unsigned long director_mode_vtable_get(e_director_mode director_mode)
+	{
+		unsigned long vtable_addr = 0x0165A64C; // c_director
+
+		switch (director_mode)
+		{
+		case _director_mode_game:
+			vtable_addr = 0x01671F58;
+			break;
+		case _director_mode_saved_film:
+			vtable_addr = 0x01672358;
+			break;
+		case _director_mode_observer:
+			vtable_addr = 0x016722E8;
+			break;
+		case _director_mode_debug:
+			vtable_addr = 0x016721D4;
+			break;
+		case _director_mode_editor:
+			vtable_addr = 0x016723D0;
+			break;
+		}
+
+		return vtable_addr;
+	}
+
+	inline unsigned long camera_mode_vtable_get(e_camera_mode camera_mode)
+	{
+		unsigned long vtable_addr = 0x01672130; // c_camera
+
+		switch (camera_mode)
+		{
+		case _camera_mode_following:
+			vtable_addr = 0x016724D4;
+			break;
+		case _camera_mode_orbiting:
+			vtable_addr = 0x0167265C;
+			break;
+		case _camera_mode_flying:
+			vtable_addr = 0x016726D0;
+			break;
+		case _camera_mode_first_person:
+			vtable_addr = 0x0166ACB0;
+			break;
+		case _camera_mode_dead:
+			vtable_addr = 0x016725DC;
+			break;
+		case _camera_mode_static:
+			vtable_addr = 0x016728A8;
+			break;
+		case _camera_mode_scripted:
+			vtable_addr = 0x0167280C;
+			break;
+		case _camera_mode_authored:
+			vtable_addr = 0x01672920;
+			break;
+			//case k_camera_mode_null:
+			//	vtable_addr = 0x01672920;
+			//	break;
+		}
+
+		return vtable_addr;
+	}
+}
+
 namespace Blam::Memory
 {
-	struct tls_data;
+	struct s_thread_local_storage;
 	struct simulation_gamestate_entities;
 	struct main_gamestate_timing;
 	struct main_render_timing;
@@ -22,7 +359,7 @@ namespace Blam::Memory
 	struct breakable_surface_globals;
 	struct breakable_surface_set_broken_event;
 	struct player_mapping;
-	struct director_globals;
+	struct s_director_globals;
 	struct director_scripting;
 	struct hs_thread_deterministic_data;
 	struct hs_runtime;
@@ -46,7 +383,7 @@ namespace Blam::Memory
 	struct structure_seam_globals;
 	struct visibility_active_portals;
 	struct campaign_metagame;
-	struct observer;
+	struct s_observer_globals;
 	struct observer_gamestate;
 	struct rumble;
 	struct bink_gamestate;
@@ -167,368 +504,368 @@ namespace Blam::Memory
 	struct formations;
 	struct vision_mode;
 
-	inline tls_data *GetTlsData()
+	inline s_thread_local_storage* GetTlsData()
 	{
 		// TODO: Replace all instances of GetMainTls with GetTlsData 
-		// once all the needed structs for tls_data are written out.
-		return *(tls_data **)ElDorito::GetMainTls();
+		// once all the needed structs for s_thread_local_storage are written out.
+		return ElDorito::GetMainTls().Read<s_thread_local_storage*>();
 	}
 
-	struct tls_data
+	struct s_thread_local_storage
 	{
-		char *unknown0;
-		char *unknown4;
-		simulation_gamestate_entities *simulation_gamestate_entities;
-		main_gamestate_timing *main_gamestate_timing;
-		main_render_timing *main_render_timing;
-		main_time_globals *main_time_globals;
-		Blam::Preferences *preferences;
-		char *unknown1C;
-		char *unknown20;
-		char *unknown24;
-		char *unknown28;
-		char *unknown2C;
-		char *unknown30;
-		random_math_globals *random_math_globals;
-		char *filo_related;
-		game_globals *game_globals;
-		DataArray<Blam::Players::PlayerDatum> *players_header;
-		players_globals *players_globals;
-		game_engine_globals *game_engine_globals;
-		local_game_engine_globals *local_game_engine_globals;
-		game_time *game_time;
-		breakable_surface_globals *breakable_surface_globals;
-		breakable_surface_set_broken_event *breakable_surface_set_broken_event;
-		player_mapping *player_mapping;
-		director_globals *director_globals;
-		director_scripting *director_scripting;
-		hs_thread_deterministic_data *hs_thread_deterministic_data;
-		hs_runtime *hs_runtime;
-		hs_global_data *hs_global_data;
-		hs_distributed_global_data *hs_distributed_global_data;
-		hs_thread_tracking_data *hs_thread_tracking_data;
-		hs_thread_non_deterministic_data *hs_thread_non_deterministic_data;
-		char *unknown80;
-		char *unknown84;
-		char *unknown88;
-		char *unknown8C;
-		char *unknown90;
-		char *unknown94;
-		char *unknown98;
-		char *unknown9C;
-		effect *effect;
-		effect_event *effect_event;
-		effect_location *effect_location;
-		effect_counts *effect_counts;
-		effect_geometry_sample *effect_geometry_sample;
-		effect_messaging_queue *effect_messaging_queue;
-		effect_lightprobes *effect_lightprobes;
-		havok_gamestate *havok_gamestate;
-		char *unknownC0;
-		player_control_globals *player_control_globals;
-		player_control_globals_deterministic *player_control_globals_deterministic;
-		object_looping_sounds *object_looping_sounds;
-		game_sound_globals *game_sound_globals;
-		game_sound_scripted_impulses *game_sound_scripted_impulses;
-		structure_seam_globals *structure_seam_globals;
-		visibility_active_portals *visibility_active_portals;
-		campaign_metagame *campaign_metagame;
-		observer_gamestate *observer_gamestate;
-		observer *observer;
-		rumble *rumble;
-		bink_gamestate *bink_gamestate;
-		char *unknownF4;
-		char *c_font_cache_mt_safe;
-		sound_classes *sound_classes;
-		game_allegiance_globals *game_allegiance_globals;
-		atmosphere_fog_globals *atmosphere_fog_globals;
-		scenario_soft_surface_globals *scenario_soft_surface_globals;
-		game_sound_player_effects_globals *game_sound_player_effects_globals;
-		char *havok_proxies;
-		char *unknown114;
-		char *unknown118;
-		char *unknown11C;
-		char *unknown120;
-		char *unknown124;
-		char *unknown128;
-		char *unknown12C;
-		char *unknown130;
-		char *unknown134;
-		char *unknown138;
-		char *unknown13C;
-		char *unknown140;
-		char *unknown144;
-		char *unknown148;
-		char *unknown14C;
-		char *unknown150;
-		char *unknown154;
-		char *unknown158;
-		char *unknown15C;
-		char *unknown160;
-		char *unknown164;
-		char *unknown168;
-		char *unknown16C;
-		char *unknown170;
-		char *unknown174;
-		char *unknown178;
-		char *unknown17C;
-		char *unknown180;
-		char *unknown184;
-		char *unknown188;
-		char *unknown18C;
-		char *unknown190;
-		char *unknown194;
-		char *unknown198;
-		char *unknown19C;
-		char *unknown1A0;
-		char *unknown1A4;
-		char *unknown1A8;
-		char *unknown1AC;
-		char *unknown1B0;
-		char *unknown1B4;
-		char *unknown1B8;
-		char *unknown1BC;
-		char *unknown1C0;
-		char *unknown1C4;
-		char *unknown1C8;
-		char *unknown1CC;
-		char *unknown1D0;
-		char *unknown1D4;
-		char *unknown1D8;
-		char *unknown1Dc;
-		char *unknown1E0;
-		char *unknown1E4;
-		char *unknown1E8;
-		char *unknown1EC;
-		char *unknown1F0;
-		char *unknown1F4;
-		char *unknown1F8;
-		char *unknown1FC;
-		char *unknown200;
-		char *unknown204;
-		char *unknown208;
-		char *unknown20C;
-		char *unknown210;
-		char *unknown214;
-		char *unknown218;
-		char *unknown21C;
-		char *unknown220;
-		char *unknown224;
-		char *unknown228;
-		char *unknown22C;
-		char *unknown230;
-		char *unknown234;
-		char *unknown238;
-		char *unknown23C;
-		char *unknown240;
-		char *unknown244;
-		char *unknown248;
-		char *unknown24C;
-		char *unknown250;
-		char *unknown254;
-		char *unknown258;
-		char *unknown25C;
-		char *unknown260;
-		char *unknown264;
-		char *unknown268;
-		char *unknown26C;
-		char *unknown270;
-		char *unknown274;
-		char *unknown278;
-		char *unknown27C;
-		char *unknown280;
-		char *unknown284;
-		char *unknown288;
-		char *unknown28C;
-		char *unknown290;
-		char *unknown294;
-		char *unknown298;
-		char *unknown29C;
-		char *unknown2A0;
-		char *unknown2A4;
-		char *unknown2A8;
-		char *unknown2AC;
-		char *unknown2B0;
-		char *unknown2B4;
-		char *unknown2B8;
-		char *unknown2BC;
-		char *unknown2C0;
-		char *unknown2C4;
-		char *unknown2C8;
-		char *unknown2CC;
-		char *unknown2D0;
-		char *unknown2D4;
-		char *unknown2D8;
-		char *unknown2DC;
-		char *unknown2E0;
-		char *unknown2E4;
-		char *unknown2E8;
-		char *unknown2EC;
-		char *unknown2F0;
-		char *unknown2F4;
-		char *unknown2F8;
-		char *unknown2FC;
-		char *unknown300;
-		char *unknown304;
-		char *unknown308;
-		char *unknown30C;
-		char *unknown310;
-		char *unknown314;
-		char *unknown318;
-		char *unknown31C;
-		cinematic_new_globals *cinematic_new_globals;
-		cinematic_globals *cinematic_globals;
-		cinematic_light_globals *cinematic_light_globals;
-		physics_constants *physics_constants;
-		recorded_animations *recorded_animations;
-		game_save_globals *game_save_globals;
-		Blam::DataArray<s_rasterizer_screen_effect> *rasterizer_screen_effects;
-		player_effects *player_effects;
-		scenario_interpolator_globals *scenario_interpolator_globals;
-		survival_mode_globals *survival_mode_globals;
-		player_training_globals *player_training_globals;
-		scenario_kill_trigger_volume_state *scenario_kill_trigger_volume_state;
-		deterministic_game_sound_globals *deterministic_game_sound_globals;
-		Blam::DataArray<s_decal_system_datum> *decal_system;
-		decal_counts *decal_counts;
-		decal *decal;
-		decal_messaging_queue *decal_messaging_queue;
-		impact_globals *impact_globals;
-		impacts *impacts;
-		impact_arrays *impact_arrays;
-		object_list_header *object_list_header;
-		list_object *list_object;
-		scripted_camera_globals *scripted_camera_globals;
-		Blam::DataArrayBase *particles;
-		Blam::DataArray<s_particle_system_datum> *particle_system;
-		contrail_system *contrail_system;
-		contrail *contrail;
-		contrail_location *contrail_location;
-		contrail_profile *contrail_profile;
-		particle_location *particle_location;
-		light_volume_system *light_volume_system;
-		light_volume_location *light_volume_location;
-		light_volume *light_volume;
-		beam_system *beam_system;
-		beam *beam;
-		beam_location *beam_location;
-		char *unknown3B0_render_postprocess_color_tweaking;
-		ragdolls *ragdolls;
-		particle_emitter *particle_emitter;
-		rasterizer_game_states *rasterizer_game_states;
-		hue_saturation_control *hue_saturation_control;
-		char *unknown3C4;
-		scripted_exposure_globals *scripted_exposure_globals;
-		render_hud_globals *render_hud_globals;
-		water_interaction_ripples *water_interaction_ripples;
-		render_texture_globals *render_texture_globals;
-		render_game_globals *render_game_globals;
-		depth_of_field_globals *depth_of_field_globals;
-		cached_object_render_states *cached_object_render_states;
-		particle_emitter_gpu_row *particle_emitter_gpu_row;
-		particle_emitter_gpu_1 *particle_emitter_gpu_1;
-		char *particle_emitter_gpu_2;
-		beam_gpu *beam_gpu;
-		beam_gpu_row *beam_gpu_row;
-		char *particle_emitter_gpu_3;
-		contrail_gpu_row *contrail_gpu_row;
-		contrail_gpu *contrail_gpu;
-		char *particle_emitter_gpu_4;
-		light_volume_gpu *light_volume_gpu;
-		light_volume_gpu_row *light_volume_gpu_row;
-		char *particle_emitter_gpu_5;
-		char *rasterizer_implicit_geometry_data;
-		render_object_globals *render_object_globals;
-		shield_render_cache_message *shield_render_cache_message;
-		chud_persistent_user_data *chud_persistent_user_data;
-		chud_persistent_global_data *chud_persistent_global_data;
-		user_widget *user_widget_0;
-		user_widget *user_widget_1;
-		user_widget *user_widget_2;
-		user_widget *user_widget_3;
-		first_person_orientations *first_person_orientations;
-		first_person_weapons *first_person_weapons;
-		cortana_globals *cortana_globals;
-		campaign_objectives *campaign_objectives;
-		DataArray<Blam::Objects::ObjectHeader> *object_header;
-		object_globals *object_globals;
-		objects_memory_pool *objects_memory_pool;
-		object_name_list *object_name_list;
-		object_messaging_queue *object_messaging_queue;
-		char *collideable_object;
-		damage_globals *damage_globals;
-		char *unknown464;
-		char *noncollideable_object;
-		char *unknown46C;
-		char *unknown470;
-		object_render_data *object_render_data;
-		char *damage;
-		object_placement *object_placement;
-		device_groups *device_groups;
-		object_scripting *object_scripting;
-		object_broadphase *object_broadphase;
-		object_early_movers *object_early_movers;
-		object_schedule_globals *object_schedule_globals;
-		object_activation_regions *object_activation_regions;
-		lights *lights;
-		lights_globals *lights_globals;
-		char *light_data_reference;
-		char *light_cluster_reference;
-		char *light_first_data;
-		nondeterministic_render_light_data *nondeterministic_render_light_data;
-		widget *widget;
-		recycling_volumes *recycling_volumes;
-		recycling_group *recycling_group;
-		muffin *muffin;
-		leaf_system *leaf_system;
-		antenna *antenna;
-		cloth *cloth;
-		char *unknown4CC;
-		char *unknown4D0;
-		char *unknown4D4;
-		char *unknown4D8;
-		char *unknown4DC;
-		char *unknown4E0;
-		char *unknown4E4;
-		char *unknown4E8;
-		char *unknown4EC;
-		char *unknown4F0;
-		char *unknown4F4;
-		char *unknown4F8;
-		char *unknown4FC;
-		char *unknown500;
-		char *unknown504;
-		char *unknown508;
-		char *unknown50C;
-		char *unknown510;
-		char *unknown514;
-		char *unknown518;
-		actor *actor;
-		actor_firing_position *actor_firing_position;
-		ai_reference_frame *ai_reference_frame;
-		ai_globals *ai_globals;
-		ai_player_state *ai_player_state;
-		vocalization_records *vocalization_records;
-		vocalization_timers *vocalization_timers;
-		command_scripts *command_scripts;
-		objectives *objectives;
-		task_records *task_records;
-		squad *squad;
-		squad_group *squad_group;
-		swarm *swarm;
-		swarm_spawner *swarm_spawner;
-		spawner_globals *spawner_globals;
-		dynamic_firing_points *dynamic_firing_points;
-		propref *propref;
-		prop *prop;
-		tracking *tracking;
-		joint_state *joint_state;
-		clump *clump;
-		squad_patrol *squad_patrol;
-		flocks *flocks;
-		formations *formations;
-		vision_mode *vision_mode;
-		char *unknown580;
+		char* unknown0;
+		char* unknown4;
+		simulation_gamestate_entities* simulation_gamestate_entities;
+		main_gamestate_timing* main_gamestate_timing;
+		main_render_timing* main_render_timing;
+		main_time_globals* main_time_globals;
+		Blam::Preferences* preferences;
+		char* unknown1C;
+		char* unknown20;
+		char* unknown24;
+		char* unknown28;
+		char* unknown2C;
+		char* unknown30;
+		random_math_globals* random_math_globals;
+		char* filo_related;
+		game_globals* game_globals;
+		DataArray<Blam::Players::PlayerDatum>* players_header;
+		players_globals* players_globals;
+		game_engine_globals* game_engine_globals;
+		local_game_engine_globals* local_game_engine_globals;
+		game_time* game_time;
+		breakable_surface_globals* breakable_surface_globals;
+		breakable_surface_set_broken_event* breakable_surface_set_broken_event;
+		player_mapping* player_mapping;
+		s_director_globals* director_globals;
+		director_scripting* director_scripting;
+		hs_thread_deterministic_data* hs_thread_deterministic_data;
+		hs_runtime* hs_runtime;
+		hs_global_data* hs_global_data;
+		hs_distributed_global_data* hs_distributed_global_data;
+		hs_thread_tracking_data* hs_thread_tracking_data;
+		hs_thread_non_deterministic_data* hs_thread_non_deterministic_data;
+		char* unknown80;
+		char* unknown84;
+		char* unknown88;
+		char* unknown8C;
+		char* unknown90;
+		char* unknown94;
+		char* unknown98;
+		char* unknown9C;
+		effect* effect;
+		effect_event* effect_event;
+		effect_location* effect_location;
+		effect_counts* effect_counts;
+		effect_geometry_sample* effect_geometry_sample;
+		effect_messaging_queue* effect_messaging_queue;
+		effect_lightprobes* effect_lightprobes;
+		havok_gamestate* havok_gamestate;
+		char* unknownC0;
+		player_control_globals* player_control_globals;
+		player_control_globals_deterministic* player_control_globals_deterministic;
+		object_looping_sounds* object_looping_sounds;
+		game_sound_globals* game_sound_globals;
+		game_sound_scripted_impulses* game_sound_scripted_impulses;
+		structure_seam_globals* structure_seam_globals;
+		visibility_active_portals* visibility_active_portals;
+		campaign_metagame* campaign_metagame;
+		observer_gamestate* observer_gamestate;
+		s_observer_globals* g_observer_globals;
+		rumble* rumble;
+		bink_gamestate* bink_gamestate;
+		char* unknownF4;
+		char* c_font_cache_mt_safe;
+		sound_classes* sound_classes;
+		game_allegiance_globals* game_allegiance_globals;
+		atmosphere_fog_globals* atmosphere_fog_globals;
+		scenario_soft_surface_globals* scenario_soft_surface_globals;
+		game_sound_player_effects_globals* game_sound_player_effects_globals;
+		char* havok_proxies;
+		char* unknown114;
+		char* unknown118;
+		char* unknown11C;
+		char* unknown120;
+		char* unknown124;
+		char* unknown128;
+		char* unknown12C;
+		char* unknown130;
+		char* unknown134;
+		char* unknown138;
+		char* unknown13C;
+		char* unknown140;
+		char* unknown144;
+		char* unknown148;
+		char* unknown14C;
+		char* unknown150;
+		char* unknown154;
+		char* unknown158;
+		char* unknown15C;
+		char* unknown160;
+		char* unknown164;
+		char* unknown168;
+		char* unknown16C;
+		char* unknown170;
+		char* unknown174;
+		char* unknown178;
+		char* unknown17C;
+		char* unknown180;
+		char* unknown184;
+		char* unknown188;
+		char* unknown18C;
+		char* unknown190;
+		char* unknown194;
+		char* unknown198;
+		char* unknown19C;
+		char* unknown1A0;
+		char* unknown1A4;
+		char* unknown1A8;
+		char* unknown1AC;
+		char* unknown1B0;
+		char* unknown1B4;
+		char* unknown1B8;
+		char* unknown1BC;
+		char* unknown1C0;
+		char* unknown1C4;
+		char* unknown1C8;
+		char* unknown1CC;
+		char* unknown1D0;
+		char* unknown1D4;
+		char* unknown1D8;
+		char* unknown1Dc;
+		char* unknown1E0;
+		char* unknown1E4;
+		char* unknown1E8;
+		char* unknown1EC;
+		char* unknown1F0;
+		char* unknown1F4;
+		char* unknown1F8;
+		char* unknown1FC;
+		char* unknown200;
+		char* unknown204;
+		char* unknown208;
+		char* unknown20C;
+		char* unknown210;
+		char* unknown214;
+		char* unknown218;
+		char* unknown21C;
+		char* unknown220;
+		char* unknown224;
+		char* unknown228;
+		char* unknown22C;
+		char* unknown230;
+		char* unknown234;
+		char* unknown238;
+		char* unknown23C;
+		char* unknown240;
+		char* unknown244;
+		char* unknown248;
+		char* unknown24C;
+		char* unknown250;
+		char* unknown254;
+		char* unknown258;
+		char* unknown25C;
+		char* unknown260;
+		char* unknown264;
+		char* unknown268;
+		char* unknown26C;
+		char* unknown270;
+		char* unknown274;
+		char* unknown278;
+		char* unknown27C;
+		char* unknown280;
+		char* unknown284;
+		char* unknown288;
+		char* unknown28C;
+		char* unknown290;
+		char* unknown294;
+		char* unknown298;
+		char* unknown29C;
+		char* unknown2A0;
+		char* unknown2A4;
+		char* unknown2A8;
+		char* unknown2AC;
+		char* unknown2B0;
+		char* unknown2B4;
+		char* unknown2B8;
+		char* unknown2BC;
+		char* unknown2C0;
+		char* unknown2C4;
+		char* unknown2C8;
+		char* unknown2CC;
+		char* unknown2D0;
+		char* unknown2D4;
+		char* unknown2D8;
+		char* unknown2DC;
+		char* unknown2E0;
+		char* unknown2E4;
+		char* unknown2E8;
+		char* unknown2EC;
+		char* unknown2F0;
+		char* unknown2F4;
+		char* unknown2F8;
+		char* unknown2FC;
+		char* unknown300;
+		char* unknown304;
+		char* unknown308;
+		char* unknown30C;
+		char* unknown310;
+		char* unknown314;
+		char* unknown318;
+		char* unknown31C;
+		cinematic_new_globals* cinematic_new_globals;
+		cinematic_globals* cinematic_globals;
+		cinematic_light_globals* cinematic_light_globals;
+		physics_constants* physics_constants;
+		recorded_animations* recorded_animations;
+		game_save_globals* game_save_globals;
+		Blam::DataArray<s_rasterizer_screen_effect>* rasterizer_screen_effects;
+		player_effects* player_effects;
+		scenario_interpolator_globals* scenario_interpolator_globals;
+		survival_mode_globals* survival_mode_globals;
+		player_training_globals* player_training_globals;
+		scenario_kill_trigger_volume_state* scenario_kill_trigger_volume_state;
+		deterministic_game_sound_globals* deterministic_game_sound_globals;
+		Blam::DataArray<s_decal_system_datum>* decal_system;
+		decal_counts* decal_counts;
+		decal* decal;
+		decal_messaging_queue* decal_messaging_queue;
+		impact_globals* impact_globals;
+		impacts* impacts;
+		impact_arrays* impact_arrays;
+		object_list_header* object_list_header;
+		list_object* list_object;
+		scripted_camera_globals* scripted_camera_globals;
+		Blam::DataArrayBase* particles;
+		Blam::DataArray<s_particle_system_datum>* particle_system;
+		contrail_system* contrail_system;
+		contrail* contrail;
+		contrail_location* contrail_location;
+		contrail_profile* contrail_profile;
+		particle_location* particle_location;
+		light_volume_system* light_volume_system;
+		light_volume_location* light_volume_location;
+		light_volume* light_volume;
+		beam_system* beam_system;
+		beam* beam;
+		beam_location* beam_location;
+		char* unknown3B0_render_postprocess_color_tweaking;
+		ragdolls* ragdolls;
+		particle_emitter* particle_emitter;
+		rasterizer_game_states* rasterizer_game_states;
+		hue_saturation_control* hue_saturation_control;
+		char* unknown3C4;
+		scripted_exposure_globals* scripted_exposure_globals;
+		render_hud_globals* render_hud_globals;
+		water_interaction_ripples* water_interaction_ripples;
+		render_texture_globals* render_texture_globals;
+		render_game_globals* render_game_globals;
+		depth_of_field_globals* depth_of_field_globals;
+		cached_object_render_states* cached_object_render_states;
+		particle_emitter_gpu_row* particle_emitter_gpu_row;
+		particle_emitter_gpu_1* particle_emitter_gpu_1;
+		char* particle_emitter_gpu_2;
+		beam_gpu* beam_gpu;
+		beam_gpu_row* beam_gpu_row;
+		char* particle_emitter_gpu_3;
+		contrail_gpu_row* contrail_gpu_row;
+		contrail_gpu* contrail_gpu;
+		char* particle_emitter_gpu_4;
+		light_volume_gpu* light_volume_gpu;
+		light_volume_gpu_row* light_volume_gpu_row;
+		char* particle_emitter_gpu_5;
+		char* rasterizer_implicit_geometry_data;
+		render_object_globals* render_object_globals;
+		shield_render_cache_message* shield_render_cache_message;
+		chud_persistent_user_data* chud_persistent_user_data;
+		chud_persistent_global_data* chud_persistent_global_data;
+		user_widget* user_widget_0;
+		user_widget* user_widget_1;
+		user_widget* user_widget_2;
+		user_widget* user_widget_3;
+		first_person_orientations* first_person_orientations;
+		first_person_weapons* first_person_weapons;
+		cortana_globals* cortana_globals;
+		campaign_objectives* campaign_objectives;
+		DataArray<Blam::Objects::ObjectHeader>* object_header;
+		object_globals* object_globals;
+		objects_memory_pool* objects_memory_pool;
+		object_name_list* object_name_list;
+		object_messaging_queue* object_messaging_queue;
+		char* collideable_object;
+		damage_globals* damage_globals;
+		char* unknown464;
+		char* noncollideable_object;
+		char* unknown46C;
+		char* unknown470;
+		object_render_data* object_render_data;
+		char* damage;
+		object_placement* object_placement;
+		device_groups* device_groups;
+		object_scripting* object_scripting;
+		object_broadphase* object_broadphase;
+		object_early_movers* object_early_movers;
+		object_schedule_globals* object_schedule_globals;
+		object_activation_regions* object_activation_regions;
+		lights* lights;
+		lights_globals* lights_globals;
+		char* light_data_reference;
+		char* light_cluster_reference;
+		char* light_first_data;
+		nondeterministic_render_light_data* nondeterministic_render_light_data;
+		widget* widget;
+		recycling_volumes* recycling_volumes;
+		recycling_group* recycling_group;
+		muffin* muffin;
+		leaf_system* leaf_system;
+		antenna* antenna;
+		cloth* cloth;
+		char* unknown4CC;
+		char* unknown4D0;
+		char* unknown4D4;
+		char* unknown4D8;
+		char* unknown4DC;
+		char* unknown4E0;
+		char* unknown4E4;
+		char* unknown4E8;
+		char* unknown4EC;
+		char* unknown4F0;
+		char* unknown4F4;
+		char* unknown4F8;
+		char* unknown4FC;
+		char* unknown500;
+		char* unknown504;
+		char* unknown508;
+		char* unknown50C;
+		char* unknown510;
+		char* unknown514;
+		char* unknown518;
+		actor* actor;
+		actor_firing_position* actor_firing_position;
+		ai_reference_frame* ai_reference_frame;
+		ai_globals* ai_globals;
+		ai_player_state* ai_player_state;
+		vocalization_records* vocalization_records;
+		vocalization_timers* vocalization_timers;
+		command_scripts* command_scripts;
+		objectives* objectives;
+		task_records* task_records;
+		squad* squad;
+		squad_group* squad_group;
+		swarm* swarm;
+		swarm_spawner* swarm_spawner;
+		spawner_globals* spawner_globals;
+		dynamic_firing_points* dynamic_firing_points;
+		propref* propref;
+		prop* prop;
+		tracking* tracking;
+		joint_state* joint_state;
+		clump* clump;
+		squad_patrol* squad_patrol;
+		flocks* flocks;
+		formations* formations;
+		vision_mode* vision_mode;
+		char* unknown580;
 	};
 
 	// TODO: Move all these out of this file (it could get quite large check https://gist.github.com/theTwist84/33ca9c90bc49728ec7d043794ddfbd98/cb0d6b7389c444f464a1c6204a47b93c3e8cc815)
@@ -707,11 +1044,13 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(player_mapping) == 0xE8);
 
-	struct director_globals
+	struct s_director_globals
 	{
-		char unknown[0x5C0];
+		c_director directors[4];
+		s_director_info infos[4];
+		float __unknown5B0[4];
 	};
-	static_assert(sizeof(director_globals) == 0x5C0);
+	static_assert(sizeof(s_director_globals) == 0x5C0);
 
 	struct director_scripting
 	{
@@ -856,11 +1195,13 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(campaign_metagame) == 0x1A158);
 
-	struct observer
+	struct s_observer_globals
 	{
-		char unknown[0xF28];
+		float __unknown0;
+		s_observer observers[4];
+		char __dataF24[4];
 	};
-	static_assert(sizeof(observer) == 0xF28);
+	static_assert(sizeof(s_observer_globals) == 0xF28);
 
 	struct observer_gamestate
 	{

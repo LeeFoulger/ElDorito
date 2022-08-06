@@ -553,7 +553,7 @@ namespace
 	{
 		const auto sub_694430 = (int(__fastcall *)(void * /*this*/, void * /*unused*/, int))0x694430;
 
-		auto *tls = (Blam::Memory::tls_data *)ElDorito::Instance().GetMainTls();
+		Blam::Memory::s_thread_local_storage *tls = ElDorito::Instance().GetMainTls();
 
 		if (tls->decal_system == nullptr || *(long *)0x46DE700 <= 0)
 			return;
