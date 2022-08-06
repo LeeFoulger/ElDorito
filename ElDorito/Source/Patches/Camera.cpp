@@ -21,7 +21,6 @@ namespace Patches::Camera
 	void ApplyAll()
 	{
 		Hook(0x32E18C, GetScriptedCameraFovHook, HookFlags::IsCall).Apply();
-		Hook(0x32E18C, GetScriptedCameraFovHook, HookFlags::IsCall).Apply();
 		Hook(0x2122C5, DeadCameraFovHook).Apply();
 		Pointer(0x016724DC).Write(uint32_t(&c_following_camera__update_hook));
 
