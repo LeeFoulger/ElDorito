@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 #include "../Blam/BlamObjects.hpp"
 #include "../Modules/ModuleCamera.hpp"
+#include "../Blam/Memory/TlsData.hpp"
 #include <cstdint>
 
 namespace
@@ -8,6 +9,9 @@ namespace
 	float GetScriptedCameraFovHook();
 	void DeadCameraFovHook();
 	void __fastcall c_following_camera__update_hook(void *ptr, void *unused, int localPlayerIndex, int a4, uint8_t *state);
+
+	long director_get_perspective_hook(long user_index);
+	bool director_in_unit_perspective_hook(long user_index);
 
 	bool LodIncreased = false;
 }
@@ -17,8 +21,13 @@ namespace Patches::Camera
 	void ApplyAll()
 	{
 		Hook(0x32E18C, GetScriptedCameraFovHook, HookFlags::IsCall).Apply();
+		Hook(0x32E18C, GetScriptedCameraFovHook, HookFlags::IsCall).Apply();
 		Hook(0x2122C5, DeadCameraFovHook).Apply();
 		Pointer(0x016724DC).Write(uint32_t(&c_following_camera__update_hook));
+
+		Hook(0x001C211F, director_get_perspective_hook, HookFlags::IsCall).Apply();
+		Hook(0x00645340, director_get_perspective_hook, HookFlags::IsCall).Apply();
+		Hook(0x00645396, director_in_unit_perspective_hook, HookFlags::IsCall).Apply();
 	}
 
 	const char *IncreaseLOD()
@@ -128,5 +137,31 @@ namespace
 		auto s = (float)std::pow(targetObject->Scale, 0.5);
 		definition.Depth *= s;
 		definition.PositionShift *= s;
+	}
+
+	long director_get_perspective_hook(long user_index)
+	{
+		static long(*director_get_perspective)(long) = reinterpret_cast<decltype(director_get_perspective)>(0x00591A40);
+		if (!((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals)
+			return director_get_perspective(user_index);
+
+
+		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
+		Blam::s_director_info& director_info = director_globals.infos[user_index];
+
+		return director_info.director_perspective;
+	}
+
+	bool director_in_unit_perspective_hook(long user_index)
+	{
+		static bool(*director_in_unit_perspective)(long) = reinterpret_cast<decltype(director_in_unit_perspective)>(0x00591BA0);
+		if (!((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals)
+			return director_in_unit_perspective(user_index);
+
+
+		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
+		Blam::s_director_info& director_info = director_globals.infos[user_index];
+
+		return ((1 << director_info.director_perspective) & 3) != 0;
 	}
 }
