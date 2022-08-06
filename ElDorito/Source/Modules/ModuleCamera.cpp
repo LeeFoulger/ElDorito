@@ -5,6 +5,8 @@
 #include "../Patches/Ui.hpp"
 #include "../Blam/BlamInput.hpp"
 #include "ModuleInput.hpp"
+#include "../Blam/Memory/TlsData.hpp"
+#include "../Blam/Math/MathUtil.hpp"
 
 namespace
 {
@@ -191,77 +193,89 @@ namespace
 	//	return true;
 	//}
 
-	bool VariableCameraPositionUpdate(const std::vector<std::string>& Arguments, std::string& returnInfo) {
-		Pointer directorGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
+	bool VariableCameraPositionUpdate(const std::vector<std::string>& Arguments, std::string& returnInfo)
+	{
+		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
+		Blam::c_director& director = director_globals.directors[0];
+
+		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
+		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
+
+		float(&position)[3] = observer.positions_focus_position; // 0x834, 0x838, 0x83C
 
 		if (Arguments.size() < 3) {
 			std::stringstream ss;
-			ss << "X: " << directorGlobalsPtr(0x834).Read<float>() << ", Y: " << directorGlobalsPtr(0x838).Read<float>() << ", Z: " << directorGlobalsPtr(0x83C).Read<float>();
+			ss << "X: " << position[0] << ", Y: " << position[1] << ", Z: " << position[2];
 			returnInfo = ss.str();
 			return false;
 		}
 
 		// update position
-		directorGlobalsPtr(0x834).Write<float>(std::stof(Arguments[0]));// X
-		directorGlobalsPtr(0x838).Write<float>(std::stof(Arguments[1]));// Y
-		directorGlobalsPtr(0x83C).Write<float>(std::stof(Arguments[2]));// Z
+		position[0] = std::stof(Arguments[0]);// X
+		position[1] = std::stof(Arguments[1]);// Y
+		position[2] = std::stof(Arguments[2]);// Z
 		return true;
 	}
 
-	bool VariableCameraModeUpdate(const std::vector<std::string>& Arguments, std::string& returnInfo)
+	bool VariableCameraModeUpdate(const std::vector<std::string>&Arguments, std::string & returnInfo)
 	{
 		auto mode = Utils::String::ToLower(Modules::ModuleCamera::Instance().VarCameraMode->ValueString);
 
 		flying = false;
-			
-		Pointer directorGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
 
-		// get new camera perspective function offset
-		size_t offset = -1;
+		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
+		Blam::c_director& director = director_globals.directors[0];
+		Blam::s_director_info& director_info = director_globals.infos[director.m_user_index];
+
+		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
+		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
+
+		// get new camera perspective function camera_vtable
+		Blam::e_camera_mode camera_mode = Blam::k_camera_mode_null;
 		if (!mode.compare("default"))
 		{
 		}
 		else if (!mode.compare("first")) // c_first_person_camera
 		{
-			offset = 0x166ACB0;
-			directorGlobalsPtr(0x840).Write(0.0f);			// x camera shift
-			directorGlobalsPtr(0x844).Write(0.0f);			// y camera shift
-			directorGlobalsPtr(0x848).Write(0.0f);			// z camera shift
-			directorGlobalsPtr(0x84C).Write(0.0f);			// horizontal look shift
-			directorGlobalsPtr(0x850).Write(0.0f);			// vertical look shift
-			directorGlobalsPtr(0x854).Write(0.0f);			// depth
+			camera_mode = Blam::_camera_mode_first_person; // 0x166ACB0;
+			observer.positions_focus_offset[0] = 0.0f;
+			observer.positions_focus_offset[1] = 0.0f;
+			observer.positions_focus_offset[2] = 0.0f;
+			observer.positions_look_shift[0] = 0.0f;
+			observer.positions_look_shift[1] = 0.0f;
+			observer.positions_focus_distance = 0.0f;
 		}
 		else if (!mode.compare("third")) // c_following_camera
 		{
-			offset = 0x16724D4;
-			directorGlobalsPtr(0x840).Write(0.0f);			// x camera shift
-			directorGlobalsPtr(0x844).Write(0.0f);			// y camera shift
-			directorGlobalsPtr(0x848).Write(0.1f);			// z camera shift
-			directorGlobalsPtr(0x84C).Write(0.0f);			// horizontal look shift
-			directorGlobalsPtr(0x850).Write(0.0f);			// vertical look shift
-			directorGlobalsPtr(0x854).Write(0.5f);			// depth
-			directorGlobalsPtr(0x858).Write(1.91986218f);	// 110 degrees
+			camera_mode = Blam::_camera_mode_following; // 0x16724D4;
+			observer.positions_focus_offset[0] = 0.0f;
+			observer.positions_focus_offset[1] = 0.0f;
+			observer.positions_focus_offset[2] = 0.1f;
+			observer.positions_look_shift[0] = 0.0f;
+			observer.positions_look_shift[1] = 0.0f;
+			observer.positions_focus_distance = 0.5f;
+			observer.horizontal_field_of_view = 110.0f * Blam::Math::RAD;
 		}
 		else if (!mode.compare("flying")) // c_flying_camera
 		{
-			offset = 0x16726D0;
-			directorGlobalsPtr(0x840).Write(0.0f);			// x camera shift
-			directorGlobalsPtr(0x844).Write(0.0f);			// y camera shift
-			directorGlobalsPtr(0x848).Write(0.0f);			// z camera shift
-			directorGlobalsPtr(0x84C).Write(0.0f);			// horizontal look shift
-			directorGlobalsPtr(0x850).Write(0.0f);			// vertical look shift
-			directorGlobalsPtr(0x854).Write(0.0f);			// depth
+			camera_mode = Blam::_camera_mode_flying; // 0x16726D0;
+			observer.positions_focus_offset[0] = 0.0f;
+			observer.positions_focus_offset[1] = 0.0f;
+			observer.positions_focus_offset[2] = 0.0f;
+			observer.positions_look_shift[0] = 0.0f;
+			observer.positions_look_shift[1] = 0.0f;
+			observer.positions_focus_distance = 0.0f;
 			flying = true;
 		}
 		else if (!mode.compare("static")) // c_static_camera
 		{
-			offset = 0x16728A8;
-			directorGlobalsPtr(0x840).Write(0.0f);			// x camera shift
-			directorGlobalsPtr(0x844).Write(0.0f);			// y camera shift
-			directorGlobalsPtr(0x848).Write(0.0f);			// z camera shift
-			directorGlobalsPtr(0x84C).Write(0.0f);			// horizontal look shift
-			directorGlobalsPtr(0x850).Write(0.0f);			// vertical look shift
-			directorGlobalsPtr(0x854).Write(0.0f);			// depth
+			camera_mode = Blam::_camera_mode_static; // 0x16728A8;
+			observer.positions_focus_offset[0] = 0.0f;
+			observer.positions_focus_offset[1] = 0.0f;
+			observer.positions_focus_offset[2] = 0.0f;
+			observer.positions_look_shift[0] = 0.0f;
+			observer.positions_look_shift[1] = 0.0f;
+			observer.positions_focus_distance = 0.0f;
 		}
 		else
 		{
@@ -271,23 +285,17 @@ namespace
 
 		/*
 		else if (!mode.compare("dead")) // c_dead_camera
-			offset = 0x16725DC;
+			camera_mode = Blam::_camera_mode_dead; // 0x16725DC;
 		else if (!mode.compare("scripted")) // c_scripted_camera
-			offset = 0x167280C;
-		else if (!mode.compare("pancam1")) // c_director
-			offset = 0x165A64C;
-		else if (!mode.compare("pancam2"))
-			offset = 0x165A680;
-		else if (!mode.compare("pancam3"))
-			offset = 0x165A674;
-		else if (!mode.compare("unk1")) // c_orbiting_camera
-			offset = 0x167265C;
+			camera_mode = Blam::_camera_mode_scripted; // 0x167280C;
+		else if (!mode.compare("orbiting")) // c_orbiting_camera
+			camera_mode = Blam::_camera_mode_orbiting; // 0x167265C;
 		else if (!mode.compare("debug")) // c_camera
-			offset = 0x1672130;
-		else if (!mode.compare("debug2")) // c_null_camera - crashes
-			offset = 0x165A6E4;
-		else if (!mode.compare("unk4")) // c_authored_camera
-			offset = 0x1672920;
+			camera_vtable = 0x1672130;
+		else if (!mode.compare("null")) // c_null_camera - crashes
+			camera_mode = Blam::k_camera_mode_null; // 0x165A6E4;
+		else if (!mode.compare("authored")) // c_authored_camera
+			camera_mode = Blam::_camera_mode_authored; // 0x1672920;
 		*/
 
 		// prevent the game from updating certain camera values depending on the current camera mode
@@ -313,14 +321,36 @@ namespace
 
 		// disable player movement while in flycam
 		Pointer playerControlGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0]);
-		playerControlGlobalsPtr(GameGlobals::Input::DisablePlayerInputIndex).Write(mode == "flying");	
+		playerControlGlobalsPtr(GameGlobals::Input::DisablePlayerInputIndex).Write(mode == "flying");
 
-		if (offset != -1)
+		if (camera_mode != Blam::k_camera_mode_null)
 		{
-			// update camera perspective function
-			Pointer directorPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
-			size_t oldOffset = directorPtr(GameGlobals::Director::CameraFunctionIndex).Read<size_t>();
-			directorPtr(GameGlobals::Director::CameraFunctionIndex).Write(offset);
+			unsigned long camera_vtable = Blam::camera_mode_vtable_get(camera_mode);
+			Blam::c_camera& camera = director.m_camera.camera;
+
+			// update camera vtable
+			Blam::c_camera_vtbl* old_camera_vtable = camera.__vftable;
+			camera.__vftable = reinterpret_cast<Blam::c_camera_vtbl*>(camera_vtable);
+
+			long director_perspective = 3;
+			//if (game_in_progress())
+			{
+				director_perspective = camera.__vftable->get_perspective(&camera);
+				if (!director_perspective)
+					director_perspective = director.m_transition_time > 0.0;
+				//if (game_is_ui_shell())
+				//	director_perspective = 3;
+			}
+
+			if (director_info.director_perspective != director_perspective || director_info.camera_mode != camera_mode)
+			{
+				director_info.director_perspective = (Blam::e_director_perspective)director_perspective;
+				director_info.camera_mode = camera_mode;
+
+				void(*first_person_weapon_perspective_changed)(long) =
+					reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
+				first_person_weapon_perspective_changed(director.m_user_index);
+			}
 		}
 
 		return true;
@@ -409,7 +439,12 @@ namespace Modules
 		if (!flying)
 			return;
 
-		Pointer directorGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
+		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
+		Blam::c_director& director = director_globals.directors[0];
+
+		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
+		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
+
 		Pointer playerControlGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0]);
 
 		float moveDelta = Modules::ModuleCamera::Instance().VarCameraSpeed->ValueFloat;
@@ -418,22 +453,22 @@ namespace Modules
 		// current values
 		float hLookAngle = playerControlGlobalsPtr(0x30C).Read<float>();
 		float vLookAngle = playerControlGlobalsPtr(0x310).Read<float>();
-		float xPos = directorGlobalsPtr(0x834).Read<float>();
-		float yPos = directorGlobalsPtr(0x838).Read<float>();
-		float zPos = directorGlobalsPtr(0x83C).Read<float>();
-		float xShift = directorGlobalsPtr(0x840).Read<float>();
-		float yShift = directorGlobalsPtr(0x844).Read<float>();
-		float zShift = directorGlobalsPtr(0x845).Read<float>();
-		float hShift = directorGlobalsPtr(0x84C).Read<float>();
-		float vShift = directorGlobalsPtr(0x850).Read<float>();
-		float depth = directorGlobalsPtr(0x854).Read<float>();
-		float fov = directorGlobalsPtr(0x858).Read<float>();
-		float iForward = directorGlobalsPtr(0x85C).Read<float>();
-		float jForward = directorGlobalsPtr(0x860).Read<float>();
-		float kForward = directorGlobalsPtr(0x864).Read<float>();
-		float iUp = directorGlobalsPtr(0x868).Read<float>();
-		float jUp = directorGlobalsPtr(0x86C).Read<float>();
-		float kUp = directorGlobalsPtr(0x870).Read<float>();
+		float xPos = observer.positions_focus_position[0];
+		float yPos = observer.positions_focus_position[1];
+		float zPos = observer.positions_focus_position[2];
+		float xShift = observer.positions_focus_offset[0];
+		float yShift = observer.positions_focus_offset[1];
+		float zShift = observer.positions_focus_offset[2];
+		float hShift = observer.positions_look_shift[0];
+		float vShift = observer.positions_look_shift[1];
+		float depth = observer.positions_focus_distance;
+		float fov = observer.horizontal_field_of_view;
+		float iForward = observer.positions_forward[0];
+		float jForward = observer.positions_forward[1];
+		float kForward = observer.positions_forward[2];
+		float iUp = observer.positions_up[0];
+		float jUp = observer.positions_up[1];
+		float kUp = observer.positions_up[2];
 		float iRight = cos(hLookAngle + 3.14159265359f / 2);
 		float jRight = sin(hLookAngle + 3.14159265359f / 2);
 
@@ -482,19 +517,19 @@ namespace Modules
 		}
 
 		// update position
-		directorGlobalsPtr(0x834).WriteFast<float>(xPos);
-		directorGlobalsPtr(0x838).WriteFast<float>(yPos);
-		directorGlobalsPtr(0x83C).WriteFast<float>(zPos);
+		observer.positions_focus_position[0] = xPos;
+		observer.positions_focus_position[1] = yPos;
+		observer.positions_focus_position[2] = zPos;
 
 		// update look angles
-		directorGlobalsPtr(0x85C).WriteFast<float>(cos(hLookAngle) * cos(vLookAngle));
-		directorGlobalsPtr(0x860).WriteFast<float>(sin(hLookAngle) * cos(vLookAngle));
-		directorGlobalsPtr(0x864).WriteFast<float>(sin(vLookAngle));
-		directorGlobalsPtr(0x868).WriteFast<float>(-cos(hLookAngle) * sin(vLookAngle));
-		directorGlobalsPtr(0x86C).WriteFast<float>(-sin(hLookAngle) * sin(vLookAngle));
-		directorGlobalsPtr(0x870).WriteFast<float>(cos(vLookAngle));
+		observer.positions_forward[0] = cos(hLookAngle) * cos(vLookAngle);
+		observer.positions_forward[1] = sin(hLookAngle) * cos(vLookAngle);
+		observer.positions_forward[2] = sin(vLookAngle);
+		observer.positions_up[0] = -cos(hLookAngle) * sin(vLookAngle);
+		observer.positions_up[1] = -sin(hLookAngle) * sin(vLookAngle);
+		observer.positions_up[2] = cos(vLookAngle);
 
-		directorGlobalsPtr(0x858).WriteFast<float>(fov);
+		observer.horizontal_field_of_view = fov;
 	}
 
 	bool ModuleCamera::IsFlying() const
