@@ -10,9 +10,9 @@ namespace blam
 
 	struct particle
 	{
-		long_flags flags;
+		dword_flags flags;
 		tag_block attachments;
-		long_flags appearance_flags;
+		dword_flags appearance_flags;
 		short_enum particle_billboard_style;
 		short runtime_m_texture_array_size;
 		short first_sequence_index;
@@ -29,7 +29,7 @@ namespace blam
 		tag_mapping color;
 		tag_mapping intensity;
 		tag_mapping alpha;
-		long_flags animation_flags;
+		dword_flags animation_flags;
 		tag_mapping frame_index;
 		tag_mapping animation_rate;
 		tag_mapping palette_animation;

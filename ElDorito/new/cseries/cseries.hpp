@@ -70,8 +70,8 @@ namespace blam
 	static_assert(sizeof(word_flags) == 0x2);
 
 	// 32-bit flags container
-	typedef long long_flags;
-	static_assert(sizeof(long_flags) == 0x4);
+	typedef dword dword_flags;
+	static_assert(sizeof(dword_flags) == 0x4);
 
 	// 32-bit floating-point number ranging from 1.175494351e-38F to 3.402823466e+38F
 	typedef float real;

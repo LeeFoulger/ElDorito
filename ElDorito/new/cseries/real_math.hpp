@@ -126,4 +126,22 @@ namespace blam
 		angle roll;
 	};
 	static_assert(sizeof(real_euler_angles3d) == 0xC);
+
+	struct real_matrix3x3
+	{
+		real_vector3d forward;
+		real_vector3d left;
+		real_vector3d up;
+	};
+	static_assert(sizeof(real_matrix3x3) == 0x24);
+
+	struct real_matrix4x3
+	{
+		real scale;
+		real_vector3d forward;
+		real_vector3d left;
+		real_vector3d up;
+		real_vector3d position;
+	};
+	static_assert(sizeof(real_matrix4x3) == 0x34);
 }
