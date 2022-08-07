@@ -1,8 +1,13 @@
 #include "Camera.hpp"
 #include "../Blam/BlamObjects.hpp"
 #include "../Modules/ModuleCamera.hpp"
-#include "../Blam/Memory/TlsData.hpp"
 #include <cstdint>
+
+namespace blam
+{
+	extern struct c_director* director_get(long user_index);
+	extern long director_get_perspective(long user_index);
+}
 
 namespace
 {
@@ -140,27 +145,19 @@ namespace
 
 	long director_get_perspective_hook(long user_index)
 	{
+		if (blam::director_get(user_index))
+			return blam::director_get_perspective(user_index);
+
 		static long(*director_get_perspective)(long) = reinterpret_cast<decltype(director_get_perspective)>(0x00591A40);
-		if (!((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals)
-			return director_get_perspective(user_index);
-
-
-		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
-		Blam::s_director_info& director_info = director_globals.infos[user_index];
-
-		return director_info.director_perspective;
+		return director_get_perspective(user_index);
 	}
 
 	bool director_in_unit_perspective_hook(long user_index)
 	{
+		if (blam::director_get(user_index))
+			return ((1 << blam::director_get_perspective(user_index)) & 3) != 0;
+
 		static bool(*director_in_unit_perspective)(long) = reinterpret_cast<decltype(director_in_unit_perspective)>(0x00591BA0);
-		if (!((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals)
-			return director_in_unit_perspective(user_index);
-
-
-		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
-		Blam::s_director_info& director_info = director_globals.infos[user_index];
-
-		return ((1 << director_info.director_perspective) & 3) != 0;
+		return director_in_unit_perspective(user_index);
 	}
 }
