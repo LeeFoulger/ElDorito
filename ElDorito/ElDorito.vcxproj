@@ -195,6 +195,7 @@
     <ClInclude Include="new\input\input.hpp" />
     <ClInclude Include="new\memory\data.hpp" />
     <ClInclude Include="new\memory\resources.hpp" />
+    <ClInclude Include="new\memory\thread_local.h" />
     <ClInclude Include="new\objects\object_data.hpp" />
     <ClInclude Include="new\objects\object_types.hpp" />
     <ClInclude Include="new\players\player_data.hpp" />

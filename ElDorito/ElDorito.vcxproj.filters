@@ -1458,6 +1458,7 @@
     <ClInclude Include="Source\Blam\Tags\Enum.hpp">
       <Filter>Blam\Tags</Filter>
     </ClInclude>
+    <ClInclude Include="new\memory\thread_local.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
