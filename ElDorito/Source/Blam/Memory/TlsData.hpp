@@ -6,341 +6,11 @@
 #include "../BlamObjects.hpp"
 #include "../BlamPlayers.hpp"
 
-namespace Blam
+namespace blam
 {
-	#pragma region Bad Bad Bad
-
-	union byte_flags_t
-	{
-		unsigned char value;
-		struct
-		{
-			unsigned char bit00 : 1;
-			unsigned char bit01 : 1;
-			unsigned char bit02 : 1;
-			unsigned char bit03 : 1;
-			unsigned char bit04 : 1;
-			unsigned char bit05 : 1;
-			unsigned char bit06 : 1;
-			unsigned char bit07 : 1;
-		} typed;
-	};
-
-	union word_flags_t
-	{
-		unsigned short value;
-		struct
-		{
-			unsigned short bit00 : 1;
-			unsigned short bit01 : 1;
-			unsigned short bit02 : 1;
-			unsigned short bit03 : 1;
-			unsigned short bit04 : 1;
-			unsigned short bit05 : 1;
-			unsigned short bit06 : 1;
-			unsigned short bit07 : 1;
-			unsigned short bit08 : 1;
-			unsigned short bit09 : 1;
-			unsigned short bit10 : 1;
-			unsigned short bit11 : 1;
-			unsigned short bit12 : 1;
-			unsigned short bit13 : 1;
-			unsigned short bit14 : 1;
-			unsigned short bit15 : 1;
-		} typed;
-	};
-
-	union dword_flags_t
-	{
-		unsigned long value;
-		struct
-		{
-			unsigned long bit00 : 1;
-			unsigned long bit01 : 1;
-			unsigned long bit02 : 1;
-			unsigned long bit03 : 1;
-			unsigned long bit04 : 1;
-			unsigned long bit05 : 1;
-			unsigned long bit06 : 1;
-			unsigned long bit07 : 1;
-			unsigned long bit08 : 1;
-			unsigned long bit09 : 1;
-			unsigned long bit10 : 1;
-			unsigned long bit11 : 1;
-			unsigned long bit12 : 1;
-			unsigned long bit13 : 1;
-			unsigned long bit14 : 1;
-			unsigned long bit15 : 1;
-			unsigned long bit16 : 1;
-			unsigned long bit17 : 1;
-			unsigned long bit18 : 1;
-			unsigned long bit19 : 1;
-			unsigned long bit20 : 1;
-			unsigned long bit21 : 1;
-			unsigned long bit22 : 1;
-			unsigned long bit23 : 1;
-			unsigned long bit24 : 1;
-			unsigned long bit25 : 1;
-			unsigned long bit26 : 1;
-			unsigned long bit27 : 1;
-			unsigned long bit28 : 1;
-			unsigned long bit29 : 1;
-			unsigned long bit30 : 1;
-			unsigned long bit31 : 1;
-		} typed;
-	};
-
-	#pragma endregion
-
-	struct s_cluster_reference
-	{
-		unsigned char bsp_index;
-		unsigned char cluster_index;
-	};
-	static_assert(sizeof(s_cluster_reference) == 0x2);
-
-	struct s_location
-	{
-		s_cluster_reference cluster_reference;
-		unsigned short __unknown2;
-	};
-	static_assert(sizeof(s_location) == 0x4);
-
-	enum e_director_mode : long
-	{
-		_director_mode_game = 0,
-		_director_mode_saved_film,
-		_director_mode_observer,
-		_director_mode_debug,
-		_director_mode_unused,
-		_director_mode_editor,
-
-		k_number_of_director_modes
-	};
-
-	enum e_director_perspective : long
-	{
-		_director_perspective_first_person = 0,
-
-		// c_following_camera, c_dead_camera, c_orbiting_camera
-		_director_perspective_1,
-
-		// c_scripted_camera
-		_director_perspective_2,
-
-		// c_null_camera, (c_authored_camera default)
-		_director_perspective_3,
-
-		k_number_of_director_perspectives,
-	};
-
-	enum e_camera_mode : unsigned long
-	{
-		_camera_mode_following = 0,
-		_camera_mode_orbiting,
-		_camera_mode_flying,
-		_camera_mode_first_person,
-		_camera_mode_dead,
-		_camera_mode_static,
-		_camera_mode_scripted,
-		_camera_mode_authored,
-
-		k_number_of_camera_modes,
-		k_camera_mode_null = 0xFFFFFFFF,
-	};
-
-	struct s_observer_command
-	{
-		dword_flags_t flags;              // ulong flags;
-		float position[3];                // real_point3d position;
-		float focus_offset[3];            // real_vector3d focus_offset
-		float look_shift[2];              // real_point2d crosshair_location;
-		float focus_distance;             // real focus_distance;
-		float field_of_view;              // real field_of_view;
-		float forward[3];                 // real_vector3d forward;
-		float up[3];                      // real_vector3d up;
-		float velocities[3];              // real_vector3d velocities;
-
-		// real_matrix4x3 focus_space;
-		float focus_space_scale;
-		float focus_space_forward[3];
-		float focus_space_left[3];
-		float focus_space_up[3];
-		float focus_space_position[3];
-
-		unsigned long __unknown84;        // ulong __unknown84;
-		float center[3];                  // real_point3d center;
-		float timer;                      // real timer;
-		char __data98[40];                // char __data98[40];
-		char __unknownC0[24];             // char __unknownC0[24];
-		char __dataD8[20];                // char __dataD8[20];
-	};
-	static_assert(sizeof(s_observer_command) == 0xEC);
-
-	struct s_observer_result
-	{
-		float focus_point[3];
-		s_location location;
-		float __unknown10[3];
-		float __unknown1C[3];
-		float forward[3];
-		float up[3];
-		float horizontal_field_of_view;
-		char __data44[36];
-		float vertical_field_of_view;
-		float __unknown60;
-	};
-
-	struct s_observer
-	{
-		unsigned long header_signature;
-		s_observer_command* pending_command;
-		s_observer_command command;
-		bool updated_for_frame;
-		bool __unknownF5;
-		bool __unknownF6;
-		bool __unknownF7;
-		float __unknownF8;
-		char __dataFC[16];
-		s_observer_result result;
-		float positions_focus_position[3];
-		float positions_focus_offset[3];
-		float positions_look_shift[2];
-		float positions_focus_distance;
-		float horizontal_field_of_view;
-		float positions_forward[3];
-		float positions_up[3];
-
-		// real_matrix4x3 focus_space;
-		float focus_space_scale;
-		float focus_space_forward[3];
-		float focus_space_left[3];
-		float focus_space_up[3];
-		float focus_space_position[3];
-
-		float velocities_v[3];
-		float velocities_fo[3];
-		char __data208[16];
-		float velocities_r[3];
-		float accelerations_a[3];
-		float accelerations_r[3];
-		char __data244[16];
-		float accelerations_fo[3];
-		char __data258[364];
-		unsigned long trailer_signature;
-	};
-	static_assert(sizeof(s_observer) == 0x3C8);
-
-	struct c_camera;
-	struct c_camera_vtbl
-	{
-		e_camera_mode(__fastcall* get_type)(c_camera*);
-		long(__fastcall* get_perspective)(c_camera*); // e_director_perspective
-
-		unsigned long __funcs[14-2];
-	};
-
-	struct c_camera
-	{
-		c_camera_vtbl* __vftable;
-
-		unsigned long m_object_index;
-		unsigned long __unknown8;
-		unsigned long __unknownC;
-	};
-	static_assert(sizeof(c_camera) == 0x10);
-
-	union c_camera_storage
-	{
-		c_camera camera;
-		char __data[0x4C];
-	};
-	static_assert(sizeof(c_camera_storage) == 0x4C);
-
-	struct c_director
-	{
-		unsigned long __vftable;
-
-		c_camera_storage m_camera;
-		s_observer_command m_observer_command;
-		float m_transition_time;
-		long m_user_index;
-		long m_player_index;
-		char __data[0x18];
-	};
-	static_assert(sizeof(c_director) == 0x160);
-
-	struct s_director_info
-	{
-		e_director_mode director_mode;
-		long director_perspective; // e_director_perspective
-		e_camera_mode camera_mode;
-	};
-	static_assert(sizeof(s_director_info) == 0xC);
-
-	inline unsigned long director_mode_vtable_get(e_director_mode director_mode)
-	{
-		unsigned long vtable_addr = 0x0165A64C; // c_director
-
-		switch (director_mode)
-		{
-		case _director_mode_game:
-			vtable_addr = 0x01671F58;
-			break;
-		case _director_mode_saved_film:
-			vtable_addr = 0x01672358;
-			break;
-		case _director_mode_observer:
-			vtable_addr = 0x016722E8;
-			break;
-		case _director_mode_debug:
-			vtable_addr = 0x016721D4;
-			break;
-		case _director_mode_editor:
-			vtable_addr = 0x016723D0;
-			break;
-		}
-
-		return vtable_addr;
-	}
-
-	inline unsigned long camera_mode_vtable_get(e_camera_mode camera_mode)
-	{
-		unsigned long vtable_addr = 0x01672130; // c_camera
-
-		switch (camera_mode)
-		{
-		case _camera_mode_following:
-			vtable_addr = 0x016724D4;
-			break;
-		case _camera_mode_orbiting:
-			vtable_addr = 0x0167265C;
-			break;
-		case _camera_mode_flying:
-			vtable_addr = 0x016726D0;
-			break;
-		case _camera_mode_first_person:
-			vtable_addr = 0x0166ACB0;
-			break;
-		case _camera_mode_dead:
-			vtable_addr = 0x016725DC;
-			break;
-		case _camera_mode_static:
-			vtable_addr = 0x016728A8;
-			break;
-		case _camera_mode_scripted:
-			vtable_addr = 0x0167280C;
-			break;
-		case _camera_mode_authored:
-			vtable_addr = 0x01672920;
-			break;
-			//case k_camera_mode_null:
-			//	vtable_addr = 0x01672920;
-			//	break;
-		}
-
-		return vtable_addr;
-	}
+	struct s_director_globals;
+	struct s_observer_globals;
+	struct s_player_control_globals;
 }
 
 namespace Blam::Memory
@@ -359,7 +29,6 @@ namespace Blam::Memory
 	struct breakable_surface_globals;
 	struct breakable_surface_set_broken_event;
 	struct player_mapping;
-	struct s_director_globals;
 	struct director_scripting;
 	struct hs_thread_deterministic_data;
 	struct hs_runtime;
@@ -375,7 +44,6 @@ namespace Blam::Memory
 	struct effect_messaging_queue;
 	struct effect_lightprobes;
 	struct havok_gamestate;
-	struct player_control_globals;
 	struct player_control_globals_deterministic;
 	struct object_looping_sounds;
 	struct game_sound_globals;
@@ -383,7 +51,6 @@ namespace Blam::Memory
 	struct structure_seam_globals;
 	struct visibility_active_portals;
 	struct campaign_metagame;
-	struct s_observer_globals;
 	struct observer_gamestate;
 	struct rumble;
 	struct bink_gamestate;
@@ -537,7 +204,7 @@ namespace Blam::Memory
 		breakable_surface_globals* breakable_surface_globals;
 		breakable_surface_set_broken_event* breakable_surface_set_broken_event;
 		player_mapping* player_mapping;
-		s_director_globals* director_globals;
+		blam::s_director_globals* director_globals;
 		director_scripting* director_scripting;
 		hs_thread_deterministic_data* hs_thread_deterministic_data;
 		hs_runtime* hs_runtime;
@@ -562,7 +229,7 @@ namespace Blam::Memory
 		effect_lightprobes* effect_lightprobes;
 		havok_gamestate* havok_gamestate;
 		char* unknownC0;
-		player_control_globals* player_control_globals;
+		blam::s_player_control_globals* player_control_globals;
 		player_control_globals_deterministic* player_control_globals_deterministic;
 		object_looping_sounds* object_looping_sounds;
 		game_sound_globals* game_sound_globals;
@@ -571,7 +238,7 @@ namespace Blam::Memory
 		visibility_active_portals* visibility_active_portals;
 		campaign_metagame* campaign_metagame;
 		observer_gamestate* observer_gamestate;
-		s_observer_globals* g_observer_globals;
+		blam::s_observer_globals* g_observer_globals;
 		rumble* rumble;
 		bink_gamestate* bink_gamestate;
 		char* unknownF4;
@@ -1044,14 +711,6 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(player_mapping) == 0xE8);
 
-	struct s_director_globals
-	{
-		c_director directors[4];
-		s_director_info infos[4];
-		float __unknown5B0[4];
-	};
-	static_assert(sizeof(s_director_globals) == 0x5C0);
-
 	struct director_scripting
 	{
 		char unknown0;
@@ -1147,12 +806,6 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(havok_gamestate) == 0x8);
 
-	struct player_control_globals
-	{
-		char unknown[0x8B0];
-	};
-	static_assert(sizeof(player_control_globals) == 0x8B0);
-
 	struct player_control_globals_deterministic
 	{
 		char unknown[0x80];
@@ -1194,14 +847,6 @@ namespace Blam::Memory
 		char unknown[0x1A158];
 	};
 	static_assert(sizeof(campaign_metagame) == 0x1A158);
-
-	struct s_observer_globals
-	{
-		float __unknown0;
-		s_observer observers[4];
-		char __dataF24[4];
-	};
-	static_assert(sizeof(s_observer_globals) == 0xF28);
 
 	struct observer_gamestate
 	{
