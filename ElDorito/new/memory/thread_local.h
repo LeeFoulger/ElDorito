@@ -2,6 +2,7 @@
 
 #include <ElDorito.hpp>
 #include "cseries\cseries.hpp"
+#include "memory\data.hpp"
 
 namespace blam
 {
@@ -140,156 +141,157 @@ namespace blam
 		return director_globals;
 	}
 
-	struct c_camera;
-	struct c_camera_vtbl
-	{
-		e_camera_mode(__thiscall* get_type)(c_camera*);
-		e_director_perspective(__thiscall* get_perspective)(c_camera*);
-		void(__thiscall* update)(c_camera*, long, real, s_observer_command*);
-		long(__thiscall* get_target)(c_camera*);
-		void(__thiscall* set_target)(c_camera*, long);
-		void(__thiscall* set_position)(c_camera*, real_point3d*);
-		void(__thiscall* set_forward)(c_camera*, real_vector3d*);
-		void(__thiscall* set_roll)(c_camera*, real);
-		void(__thiscall* enable_orientation)(c_camera*, bool);
-		void(__thiscall* enable_movement)(c_camera*, bool);
-		void(__thiscall* enable_roll)(c_camera*, bool);
-		void(__thiscall* handle_deleted_player)(c_camera*, long);
-		void(__thiscall* handle_deleted_object)(c_camera*, long);
-	};
-
 	struct c_camera
 	{
-		#pragma region c_camera::vftable
-		c_camera_vtbl* vftable;
+		virtual e_camera_mode get_type();
+		virtual e_director_perspective get_perspective();
+		virtual void update(long, real, s_observer_command*);
+		virtual long get_target();
+		virtual void set_target(long);
+		virtual void set_position(real_point3d const*);
+		virtual void set_forward(real_vector3d const*);
+		virtual void set_roll(real);
+		virtual void enable_orientation(bool);
+		virtual void enable_movement(bool);
+		virtual void enable_roll(bool);
+		virtual void handle_deleted_player(long);
+		virtual void handle_deleted_object(long);
+		virtual real get_unknown(); // c_flying_camera, c_static_camera, c_scripted_camera
 
-		e_camera_mode get_type()
-		{
-			return vftable->get_type(this);
-		}
-		e_director_perspective get_perspective()
-		{
-			return vftable->get_perspective(this);
-		}
-		void update(long a1, real a2, s_observer_command* result)
-		{
-			return vftable->update(this, a1, a2, result);
-		}
-		long get_target()
-		{
-			return vftable->get_target(this);
-		}
-		void set_target(long a1)
-		{
-			return vftable->set_target(this, a1);
-		}
-		void set_position(real_point3d* position)
-		{
-			return vftable->set_position(this, position);
-		}
-		void set_forward(real_vector3d* forward)
-		{
-			return vftable->set_forward(this, forward);
-		}
-		void set_roll(real roll)
-		{
-			return vftable->set_roll(this, roll);
-		}
-		void enable_orientation(bool enable)
-		{
-			return vftable->enable_orientation(this, enable);
-		}
-		void enable_movement(bool enable)
-		{
-			return vftable->enable_movement(this, enable);
-		}
-		void enable_roll(bool enable)
-		{
-			return vftable->enable_roll(this, enable);
-		}
-		void handle_deleted_player(long a1)
-		{
-			return vftable->handle_deleted_player(this, a1);
-		}
-		void handle_deleted_object(long a1)
-		{
-			return vftable->handle_deleted_object(this, a1);
-		}
-		#pragma endregion
-
-		unsigned long m_object_index;
-		unsigned long __unknown8;
-		unsigned long __unknownC;
-
-		void swap_vtable(unsigned long vftable_addr)
-		{
-			c_camera_vtbl* old_camera_vtable = vftable;
-			vftable = reinterpret_cast<c_camera_vtbl*>(vftable_addr);
-		}
+		datum_index m_object_index;
+		dword __unknown8;
+		dword __unknownC;
 	};
 	static_assert(sizeof(c_camera) == 0x10);
 
-	struct c_director;
-	struct c_director_vtbl
+	struct c_null_camera : public c_camera
 	{
-		e_director_mode(__thiscall* get_type)(c_director*);
-		void(__thiscall* update)(c_director*, real);
-		bool(__thiscall* should_draw_hud)(c_director*);
-		bool(__thiscall* should_draw_hud_saved_film)(c_director*);
-		bool(__thiscall* inhibits_facing)(c_director*);
-		bool(__thiscall* inhibits_input)(c_director*);
-		void(__fastcall* handle_deleted_player)(c_director*, long);
-		void(__fastcall* handle_deleted_object)(c_director*, long);
-		bool(__thiscall* can_use_camera_mode)(c_director*, e_camera_mode);
 	};
+	static_assert(sizeof(c_null_camera) == 0x10);
+
+#pragma pack(push, 2)
+	struct c_following_camera : public c_camera
+	{
+		dword __unknown10;
+		dword __unknown14;
+		real __unknown18;
+		real_vector3d __vector1C;
+		datum_index m_target_object_index;
+		word __unknown2C;
+		dword __unknown2E;
+		word __unknown32;
+	};
+	static_assert(sizeof(c_following_camera) == 0x34);
+#pragma pack(pop)
+
+	struct c_orbiting_camera : public c_camera
+	{
+		real_euler_angles2d m_facing;
+		real m_minimum_distance;
+		real m_z_offset;
+		word __unknown20;
+		bool __unknown22;
+	};
+	static_assert(sizeof(c_orbiting_camera) == 0x24);
+
+	struct c_flying_camera : public c_camera
+	{
+		enum e_flags
+		{
+			_zoomed_bit = 0,
+			_orientation_bit = 3,
+			_movement_bit = 4
+		};
+
+		real_point3d m_position;
+		real_euler_angles2d m_facing;
+		real m_roll;
+		real __unknown28;
+		real __unknown2C;
+		bool __unknown30;
+		real __unknown34;
+		dword_flags m_zoomed_bit : 1;
+		dword_flags m_flag_bit1 : 1;
+		dword_flags m_flag_bit2 : 1;
+		dword_flags m_orientation_enabled : 1;
+		dword_flags m_movement_enabled : 1;
+		dword_flags m_flag_bits5_31 : 3;
+	};
+	static_assert(sizeof(c_flying_camera) == 0x3C);
+
+	struct c_first_person_camera : public c_camera
+	{
+		real m_field_of_view;
+		real_euler_angles2d m_facing;
+		bool __unknown1C;
+	};
+	static_assert(sizeof(c_first_person_camera) == 0x20);
+
+	struct c_dead_camera : public c_camera
+	{
+		real_point3d m_position;
+		real_euler_angles2d m_facing;
+		real m_focus_distance;
+		real m_field_of_view;
+		real __unknown2C;
+		datum_index m_target_player_index;
+		datum_index m_target_object_index;
+		bool __unknown38;
+		byte m_user_index;
+		char __data[18];
+	};
+	static_assert(sizeof(c_dead_camera) == 0x4C);
+
+	struct c_static_camera : public c_camera
+	{
+		real_point3d m_position;
+		real_vector3d m_forward;
+		real m_field_of_view;
+		real __unknown2C;
+		dword __unknown30;
+	};
+	static_assert(sizeof(c_static_camera) == 0x34);
+
+	struct c_scripted_camera : public c_camera
+	{
+	};
+	static_assert(sizeof(c_scripted_camera) == 0x10);
+
+	struct c_authored_camera : public c_camera
+	{
+		bool __unknown10;
+		bool __unknown11;
+		c_first_person_camera m_first_person_camera;
+		real_point3d m_position;
+		real_vector3d m_forward;
+	};
+	static_assert(sizeof(c_authored_camera) == 0x4C);
 
 	struct c_director
 	{
-		#pragma region c_director::vftable
-		c_director_vtbl* vftable;
-
-		e_director_mode get_type()
-		{
-			return vftable->get_type(this);
-		}
-		void update(real a1)
-		{
-			return vftable->update(this, a1);
-		}
-		bool should_draw_hud()
-		{
-			return vftable->should_draw_hud(this);
-		}
-		bool should_draw_hud_saved_film()
-		{
-			return vftable->should_draw_hud_saved_film(this);
-		}
-		bool inhibits_facing()
-		{
-			return vftable->inhibits_facing(this);
-		}
-		bool inhibits_input()
-		{
-			return vftable->inhibits_input(this);
-		}
-		void handle_deleted_player(long a1)
-		{
-			return vftable->handle_deleted_player(this, a1);
-		}
-		void handle_deleted_object(long a1)
-		{
-			return vftable->handle_deleted_object(this, a1);
-		}
-		bool can_use_camera_mode(e_camera_mode camera_mode)
-		{
-			return vftable->can_use_camera_mode(this, camera_mode);
-		}
-		#pragma endregion
+		virtual e_director_mode get_type();
+		virtual void update(real);
+		virtual bool should_draw_hud();
+		virtual bool should_draw_hud_saved_film();
+		virtual bool inhibits_facing();
+		virtual bool inhibits_input();
+		virtual void handle_deleted_player(long);
+		virtual void handle_deleted_object(long);
+		virtual bool can_use_camera_mode(e_camera_mode);
+		//virtual void select_fallback_target(); // c_observer_director, c_saved_film_director
 
 		union
 		{
 			c_camera m_camera;
-			char camera_data[0x4C];
+			c_null_camera m_null;
+			c_following_camera m_following;
+			c_orbiting_camera m_orbiting;
+			c_flying_camera m_flying;
+			c_first_person_camera m_first_person;
+			c_dead_camera m_dead;
+			c_static_camera m_static;
+			c_scripted_camera m_scripted;
+			c_authored_camera m_authored;
 		};
 
 		s_observer_command m_observer_command;
