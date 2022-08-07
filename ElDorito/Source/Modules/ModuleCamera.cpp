@@ -431,8 +431,8 @@ namespace Modules
 		float lookDelta = 0.01f;	// not used yet
 
 		// current values
-		float hLookAngle = player_control_globals->controls[director->m_user_index].state.desired_angles.yaw;
-		float vLookAngle = player_control_globals->controls[director->m_user_index].state.desired_angles.pitch;
+		float hLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.yaw;
+		float vLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.pitch;
 		float xPos = observer->positions_focus_position.x;
 		float yPos = observer->positions_focus_position.y;
 		float zPos = observer->positions_focus_position.z;

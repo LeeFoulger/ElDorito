@@ -500,8 +500,8 @@ namespace blam
 	struct s_aim_assist_targeting_result
 	{
 		bool __unknown0;
-		dword target_player;
-		dword target_object;
+		dword target_player_index;
+		dword target_object_index;
 		dword model_target;
 		real primary_autoaim_level;
 		real secondary_autoaim_level;
@@ -534,22 +534,21 @@ namespace blam
 	};
 	static_assert(sizeof(s_player_control_internal_state) == 0x6C);
 
-	struct s_player_control
-	{
-		dword unit_index;
-		s_player_control_internal_state state;
-		char __data70[120];
-		real_point3d __positionE8;
-		char __dataF4[4];
-	};
-	static_assert(sizeof(s_player_control) == 0xF8);
-
 	struct s_player_control_state
 	{
 		dword unit_index;
 		s_player_control_internal_state internal_state;
 	};
 	static_assert(sizeof(s_player_control_state) == 0x70);
+
+	struct s_player_control
+	{
+		s_player_control_state state;
+		char __data70[120];
+		real_point3d __positionE8;
+		char __dataF4[4];
+	};
+	static_assert(sizeof(s_player_control) == 0xF8);
 
 	struct s_player_control_globals
 	{
