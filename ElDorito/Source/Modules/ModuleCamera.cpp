@@ -5,7 +5,7 @@
 #include "../Patches/Ui.hpp"
 #include "../Blam/BlamInput.hpp"
 #include "ModuleInput.hpp"
-#include "../Blam/Memory/TlsData.hpp"
+#include "../../new/memory/thread_local.h"
 #include "../Blam/Math/MathUtil.hpp"
 
 namespace
@@ -195,163 +195,139 @@ namespace
 
 	bool VariableCameraPositionUpdate(const std::vector<std::string>& Arguments, std::string& returnInfo)
 	{
-		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
-		Blam::c_director& director = director_globals.directors[0];
+		blam::c_director* director = blam::director_get(0);
+		if (!director)
+			return false;
 
-		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
-		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
-
-		float(&position)[3] = observer.positions_focus_position; // 0x834, 0x838, 0x83C
+		blam::s_observer* observer = blam::observer_get(director->m_user_index);
+		if (!observer)
+			return false;
 
 		if (Arguments.size() < 3) {
 			std::stringstream ss;
-			ss << "X: " << position[0] << ", Y: " << position[1] << ", Z: " << position[2];
+			ss << "X: " << observer->positions_focus_position.x << ", ";
+			ss << "Y: " << observer->positions_focus_position.y << ", ";
+			ss << "Z: " << observer->positions_focus_position.z;
 			returnInfo = ss.str();
 			return false;
 		}
 
 		// update position
-		position[0] = std::stof(Arguments[0]);// X
-		position[1] = std::stof(Arguments[1]);// Y
-		position[2] = std::stof(Arguments[2]);// Z
+		observer->positions_focus_position.x = std::stof(Arguments[0]);// X
+		observer->positions_focus_position.y = std::stof(Arguments[1]);// Y
+		observer->positions_focus_position.z = std::stof(Arguments[2]);// Z
 		return true;
 	}
 
 	bool VariableCameraModeUpdate(const std::vector<std::string>&Arguments, std::string & returnInfo)
 	{
-		auto mode = Utils::String::ToLower(Modules::ModuleCamera::Instance().VarCameraMode->ValueString);
+		std::string mode = Utils::String::ToLower(Modules::ModuleCamera::Instance().VarCameraMode->ValueString);
 
 		flying = false;
 
-		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
-		Blam::c_director& director = director_globals.directors[0];
-		Blam::s_director_info& director_info = director_globals.infos[director.m_user_index];
+		blam::c_director* director = blam::director_get(0);
+		if (!director)
+			return false;
 
-		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
-		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
+		blam::s_observer* observer = blam::observer_get(director->m_user_index);
+		if (!observer)
+			return false;
+
+		blam::s_player_control_globals* player_control_globals = *(blam::s_player_control_globals**)ElDorito::GetMainTls(0xC4);
+		if (!player_control_globals)
+			return false;
 
 		// get new camera perspective function camera_vtable
-		Blam::e_camera_mode camera_mode = Blam::k_camera_mode_null;
-		if (!mode.compare("default"))
+		blam::e_camera_mode camera_mode = blam::camera_mode_from_string(mode.c_str());
+		if (camera_mode == blam::k_camera_mode_null)
 		{
 		}
-		else if (!mode.compare("first")) // c_first_person_camera
+		else if (camera_mode == blam::_camera_mode_first_person)
 		{
-			camera_mode = Blam::_camera_mode_first_person; // 0x166ACB0;
-			observer.positions_focus_offset[0] = 0.0f;
-			observer.positions_focus_offset[1] = 0.0f;
-			observer.positions_focus_offset[2] = 0.0f;
-			observer.positions_look_shift[0] = 0.0f;
-			observer.positions_look_shift[1] = 0.0f;
-			observer.positions_focus_distance = 0.0f;
+			observer->positions_focus_offset.i = 0.0f;
+			observer->positions_focus_offset.j = 0.0f;
+			observer->positions_focus_offset.k = 0.0f;
+			observer->positions_look_shift.x = 0.0f;
+			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_distance = 0.0f;
 		}
-		else if (!mode.compare("third")) // c_following_camera
+		else if (camera_mode == blam::_camera_mode_following)
 		{
-			camera_mode = Blam::_camera_mode_following; // 0x16724D4;
-			observer.positions_focus_offset[0] = 0.0f;
-			observer.positions_focus_offset[1] = 0.0f;
-			observer.positions_focus_offset[2] = 0.1f;
-			observer.positions_look_shift[0] = 0.0f;
-			observer.positions_look_shift[1] = 0.0f;
-			observer.positions_focus_distance = 0.5f;
-			observer.horizontal_field_of_view = 110.0f * Blam::Math::RAD;
+			observer->positions_focus_offset.i = 0.0f;
+			observer->positions_focus_offset.j = 0.0f;
+			observer->positions_focus_offset.k = 0.1f;
+			observer->positions_look_shift.x = 0.0f;
+			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_distance = 0.5f;
+			observer->horizontal_field_of_view = 110.0f * Blam::Math::RAD;
 		}
-		else if (!mode.compare("flying")) // c_flying_camera
+		else if (camera_mode == blam::_camera_mode_flying)
 		{
-			camera_mode = Blam::_camera_mode_flying; // 0x16726D0;
-			observer.positions_focus_offset[0] = 0.0f;
-			observer.positions_focus_offset[1] = 0.0f;
-			observer.positions_focus_offset[2] = 0.0f;
-			observer.positions_look_shift[0] = 0.0f;
-			observer.positions_look_shift[1] = 0.0f;
-			observer.positions_focus_distance = 0.0f;
+			observer->positions_focus_offset.i = 0.0f;
+			observer->positions_focus_offset.j = 0.0f;
+			observer->positions_focus_offset.k = 0.0f;
+			observer->positions_look_shift.x = 0.0f;
+			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_distance = 0.0f;
 			flying = true;
 		}
-		else if (!mode.compare("static")) // c_static_camera
+		else if (camera_mode == blam::_camera_mode_static)
 		{
-			camera_mode = Blam::_camera_mode_static; // 0x16728A8;
-			observer.positions_focus_offset[0] = 0.0f;
-			observer.positions_focus_offset[1] = 0.0f;
-			observer.positions_focus_offset[2] = 0.0f;
-			observer.positions_look_shift[0] = 0.0f;
-			observer.positions_look_shift[1] = 0.0f;
-			observer.positions_focus_distance = 0.0f;
+			observer->positions_focus_offset.i = 0.0f;
+			observer->positions_focus_offset.j = 0.0f;
+			observer->positions_focus_offset.k = 0.0f;
+			observer->positions_look_shift.x = 0.0f;
+			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_distance = 0.0f;
 		}
 		else
 		{
-			returnInfo = "valid modes: default, first, third, flying, static";
+			returnInfo = "valid modes: default";
+			for (long i = blam::_camera_mode_following; i < blam::k_number_of_camera_modes; i++)
+			{
+				if (camera_mode == blam::_camera_mode_dead || 
+					camera_mode == blam::_camera_mode_orbiting || 
+					camera_mode == blam::_camera_mode_scripted || 
+					camera_mode == blam::_camera_mode_authored)
+					continue;
+
+				returnInfo += ", ";
+				returnInfo += blam::k_camera_mode_names[i];
+			}
 			return false;
 		}
 
-		/*
-		else if (!mode.compare("dead")) // c_dead_camera
-			camera_mode = Blam::_camera_mode_dead; // 0x16725DC;
-		else if (!mode.compare("scripted")) // c_scripted_camera
-			camera_mode = Blam::_camera_mode_scripted; // 0x167280C;
-		else if (!mode.compare("orbiting")) // c_orbiting_camera
-			camera_mode = Blam::_camera_mode_orbiting; // 0x167265C;
-		else if (!mode.compare("debug")) // c_camera
-			camera_vtable = 0x1672130;
-		else if (!mode.compare("null")) // c_null_camera - crashes
-			camera_mode = Blam::k_camera_mode_null; // 0x165A6E4;
-		else if (!mode.compare("authored")) // c_authored_camera
-			camera_mode = Blam::_camera_mode_authored; // 0x1672920;
-		*/
-
 		// prevent the game from updating certain camera values depending on the current camera mode
-		Modules::ModuleCamera::Instance().CameraPermissionHook.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().CameraPermissionHookAlt1.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().CameraPermissionHookAlt2.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().CameraPermissionHookAlt3.Apply(mode == "default");
+		Modules::ModuleCamera::Instance().CameraPermissionHook.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().CameraPermissionHookAlt1.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().CameraPermissionHookAlt2.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().CameraPermissionHookAlt3.Apply(camera_mode == blam::k_camera_mode_null);
 
 		// prevent the game from automatically switching camera modes depending on the current mode
-		Modules::ModuleCamera::Instance().Debug1CameraPatch.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().Debug2CameraPatch.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().ThirdPersonPatch.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().ThirdPersonPatch2.Apply(mode != "third");
-		Modules::ModuleCamera::Instance().FirstPersonPatch.Apply(mode == "default");
-		Modules::ModuleCamera::Instance().DeadPersonPatch.Apply(mode == "default");
+		Modules::ModuleCamera::Instance().Debug1CameraPatch.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().Debug2CameraPatch.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().ThirdPersonPatch.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().ThirdPersonPatch2.Apply(camera_mode != blam::_camera_mode_following);
+		Modules::ModuleCamera::Instance().FirstPersonPatch.Apply(camera_mode == blam::k_camera_mode_null);
+		Modules::ModuleCamera::Instance().DeadPersonPatch.Apply(camera_mode == blam::k_camera_mode_null);
 
 		// hides the hud when flying or in static camera mode
-		Modules::ModuleCamera::Instance().HideHudPatch.Apply(mode != "flying" && mode != "static");
+		Modules::ModuleCamera::Instance().HideHudPatch.Apply(camera_mode != blam::_camera_mode_flying && camera_mode != blam::_camera_mode_static);
 
 		// prevents death from resetting look angles when in static camera mode
-		Modules::ModuleCamera::Instance().StaticILookVectorPatch.Apply(mode != "static");
-		Modules::ModuleCamera::Instance().StaticKLookVectorPatch.Apply(mode != "static");
+		Modules::ModuleCamera::Instance().StaticILookVectorPatch.Apply(camera_mode != blam::_camera_mode_static);
+		Modules::ModuleCamera::Instance().StaticKLookVectorPatch.Apply(camera_mode != blam::_camera_mode_static);
 
 		// disable player movement while in flycam
-		Pointer playerControlGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0]);
-		playerControlGlobalsPtr(GameGlobals::Input::DisablePlayerInputIndex).Write(mode == "flying");
+		player_control_globals->input_user_states[director->m_user_index].player_input_locked = (camera_mode == blam::_camera_mode_flying);
 
-		if (camera_mode != Blam::k_camera_mode_null)
-		{
-			unsigned long camera_vtable = Blam::camera_mode_vtable_get(camera_mode);
-			Blam::c_camera& camera = director.m_camera.camera;
+		// pan-cam
+		player_control_globals->machinima_camera_enabled = (camera_mode == blam::_camera_mode_flying);
+		player_control_globals->machinima_camera_debug = (camera_mode == blam::_camera_mode_flying);
+		//player_control_globals->machinima_camera_use_old_controls = (camera_mode == blam::_camera_mode_flying);
 
-			// update camera vtable
-			Blam::c_camera_vtbl* old_camera_vtable = camera.__vftable;
-			camera.__vftable = reinterpret_cast<Blam::c_camera_vtbl*>(camera_vtable);
-
-			long director_perspective = 3;
-			//if (game_in_progress())
-			{
-				director_perspective = camera.__vftable->get_perspective(&camera);
-				if (!director_perspective)
-					director_perspective = director.m_transition_time > 0.0;
-				//if (game_is_ui_shell())
-				//	director_perspective = 3;
-			}
-
-			if (director_info.director_perspective != director_perspective || director_info.camera_mode != camera_mode)
-			{
-				director_info.director_perspective = (Blam::e_director_perspective)director_perspective;
-				director_info.camera_mode = camera_mode;
-
-				void(*first_person_weapon_perspective_changed)(long) =
-					reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
-				first_person_weapon_perspective_changed(director.m_user_index);
-			}
-		}
+		if (camera_mode != blam::k_camera_mode_null)
+			director->set_camera_mode(camera_mode, 0.0f);
 
 		return true;
 	}
@@ -439,36 +415,40 @@ namespace Modules
 		if (!flying)
 			return;
 
-		Blam::Memory::s_director_globals& director_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->director_globals;
-		Blam::c_director& director = director_globals.directors[0];
+		blam::c_director* director = blam::director_get(0);
+		if (!director)
+			return;
 
-		Blam::Memory::s_observer_globals& g_observer_globals = *((Blam::Memory::s_thread_local_storage*)ElDorito::GetMainTls())->g_observer_globals;
-		Blam::s_observer& observer = g_observer_globals.observers[director.m_user_index];
+		blam::s_observer* observer = blam::observer_get(director->m_user_index);
+		if (!observer)
+			return;
 
-		Pointer playerControlGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0]);
+		blam::s_player_control_globals* player_control_globals = *(blam::s_player_control_globals**)ElDorito::GetMainTls(0xC4);
+		if (!player_control_globals)
+			return;
 
 		float moveDelta = Modules::ModuleCamera::Instance().VarCameraSpeed->ValueFloat;
 		float lookDelta = 0.01f;	// not used yet
 
 		// current values
-		float hLookAngle = playerControlGlobalsPtr(0x30C).Read<float>();
-		float vLookAngle = playerControlGlobalsPtr(0x310).Read<float>();
-		float xPos = observer.positions_focus_position[0];
-		float yPos = observer.positions_focus_position[1];
-		float zPos = observer.positions_focus_position[2];
-		float xShift = observer.positions_focus_offset[0];
-		float yShift = observer.positions_focus_offset[1];
-		float zShift = observer.positions_focus_offset[2];
-		float hShift = observer.positions_look_shift[0];
-		float vShift = observer.positions_look_shift[1];
-		float depth = observer.positions_focus_distance;
-		float fov = observer.horizontal_field_of_view;
-		float iForward = observer.positions_forward[0];
-		float jForward = observer.positions_forward[1];
-		float kForward = observer.positions_forward[2];
-		float iUp = observer.positions_up[0];
-		float jUp = observer.positions_up[1];
-		float kUp = observer.positions_up[2];
+		float hLookAngle = player_control_globals->controls[director->m_user_index].state.desired_angles.yaw;
+		float vLookAngle = player_control_globals->controls[director->m_user_index].state.desired_angles.pitch;
+		float xPos = observer->positions_focus_position.x;
+		float yPos = observer->positions_focus_position.y;
+		float zPos = observer->positions_focus_position.z;
+		float xShift = observer->positions_focus_offset.i;
+		float yShift = observer->positions_focus_offset.j;
+		float zShift = observer->positions_focus_offset.k;
+		float hShift = observer->positions_look_shift.x;
+		float vShift = observer->positions_look_shift.y;
+		float depth = observer->positions_focus_distance;
+		float fov = observer->horizontal_field_of_view;
+		float iForward = observer->positions_forward.i;
+		float jForward = observer->positions_forward.j;
+		float kForward = observer->positions_forward.k;
+		float iUp = observer->positions_up.i;
+		float jUp = observer->positions_up.j;
+		float kUp = observer->positions_up.k;
 		float iRight = cos(hLookAngle + 3.14159265359f / 2);
 		float jRight = sin(hLookAngle + 3.14159265359f / 2);
 
@@ -517,19 +497,19 @@ namespace Modules
 		}
 
 		// update position
-		observer.positions_focus_position[0] = xPos;
-		observer.positions_focus_position[1] = yPos;
-		observer.positions_focus_position[2] = zPos;
+		observer->positions_focus_position.x = xPos;
+		observer->positions_focus_position.y = yPos;
+		observer->positions_focus_position.z = zPos;
 
 		// update look angles
-		observer.positions_forward[0] = cos(hLookAngle) * cos(vLookAngle);
-		observer.positions_forward[1] = sin(hLookAngle) * cos(vLookAngle);
-		observer.positions_forward[2] = sin(vLookAngle);
-		observer.positions_up[0] = -cos(hLookAngle) * sin(vLookAngle);
-		observer.positions_up[1] = -sin(hLookAngle) * sin(vLookAngle);
-		observer.positions_up[2] = cos(vLookAngle);
+		observer->positions_forward.i = cos(hLookAngle) * cos(vLookAngle);
+		observer->positions_forward.j = sin(hLookAngle) * cos(vLookAngle);
+		observer->positions_forward.k = sin(vLookAngle);
+		observer->positions_up.i = -cos(hLookAngle) * sin(vLookAngle);
+		observer->positions_up.j = -sin(hLookAngle) * sin(vLookAngle);
+		observer->positions_up.k = cos(vLookAngle);
 
-		observer.horizontal_field_of_view = fov;
+		observer->horizontal_field_of_view = fov;
 	}
 
 	bool ModuleCamera::IsFlying() const
