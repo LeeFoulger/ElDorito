@@ -29,7 +29,7 @@
 #include "ChatCommands/ChatCommandMap.hpp"
 #include "Patches/Weapon.hpp"
 #include "Patches/Memory.hpp"
-#include "Patches/Camera.hpp"
+#include "Patches/PatchCamera.hpp"
 #include "Discord/DiscordRPC.h"
 #include "ThirdParty/SOP.hpp"
 
