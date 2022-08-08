@@ -158,9 +158,20 @@ namespace blam
 		virtual void handle_deleted_object(long);
 		virtual real get_unknown(); // c_flying_camera, c_static_camera, c_scripted_camera
 
+		enum e_flags
+		{
+			_next_move_instantly_bit = 0
+		};
+
 		datum_index m_object_index;
-		dword __unknown8;
+		dword_flags m_flags;
 		dword __unknownC;
+
+		inline void set_next_move_instantly()
+		{
+			__unknownC = 5;
+			m_flags |= (1 << _next_move_instantly_bit);
+		}
 	};
 	static_assert(sizeof(c_camera) == 0x10);
 
@@ -187,7 +198,7 @@ namespace blam
 	struct c_orbiting_camera : public c_camera
 	{
 		real_euler_angles2d m_facing;
-		real m_minimum_distance;
+		real m_distance;
 		real m_z_offset;
 		word __unknown20;
 		bool __unknown22;
@@ -198,9 +209,11 @@ namespace blam
 	{
 		enum e_flags
 		{
-			_zoomed_bit = 0,
-			_orientation_bit = 3,
-			_movement_bit = 4
+			_zoomed_bit = 0,            // not the actual name
+			_lock_in_xy_plane_bit = 1,
+			_collision_bit = 2,         // default
+			_orientation_bit = 3,       // default
+			_movement_bit = 4           // default
 		};
 
 		real_point3d m_position;
@@ -210,12 +223,40 @@ namespace blam
 		real __unknown2C;
 		bool __unknown30;
 		real __unknown34;
-		dword_flags m_zoomed_bit : 1;
-		dword_flags m_flag_bit1 : 1;
-		dword_flags m_flag_bit2 : 1;
-		dword_flags m_orientation_enabled : 1;
-		dword_flags m_movement_enabled : 1;
-		dword_flags m_flag_bits5_31 : 3;
+
+		dword_flags m_flags;
+
+		inline void set_lock_in_xy_plane(bool value)
+		{
+			if (value)
+				m_flags |= (1 << _lock_in_xy_plane_bit);
+			else
+				m_flags |= ~(1 << _lock_in_xy_plane_bit);
+		}
+
+		inline void set_collision(bool value)
+		{
+			if (value)
+				m_flags |= (1 << _collision_bit);
+			else
+				m_flags |= ~(1 << _collision_bit);
+		}
+
+		inline void enable_orientation(bool value)
+		{
+			if (value)
+				m_flags |= (1 << _orientation_bit);
+			else
+				m_flags |= ~(1 << _orientation_bit);
+		}
+
+		inline void enable_movement(bool value)
+		{
+			if (value)
+				m_flags |= (1 << _movement_bit);
+			else
+				m_flags |= ~(1 << _movement_bit);
+		}
 	};
 	static_assert(sizeof(c_flying_camera) == 0x3C);
 
@@ -298,7 +339,10 @@ namespace blam
 		real m_transition_time;
 		long m_user_index;
 		long m_player_index;
-		char __data[0x18];
+		bool __unknown148;
+		e_camera_mode m_camera_mode;
+		long __unknown150;
+		char __data[12];
 
 		long get_perspective();
 		bool set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update);
@@ -306,6 +350,23 @@ namespace blam
 		inline bool set_camera_mode(e_camera_mode camera_mode, real transition_time)
 		{
 			return set_camera_mode_internal(camera_mode, transition_time, false);
+		}
+
+		inline c_camera* get_camera()
+		{
+			return &m_camera;
+		}
+
+		inline bool in_free_camera_mode()
+		{
+			e_camera_mode camera_mode = m_camera.get_type();
+			if (camera_mode == _camera_mode_flying || camera_mode == _camera_mode_scripted)
+				return true;
+
+			if (camera_mode == _camera_mode_authored)
+				return m_camera.get_target() == -1;
+
+			return false;
 		}
 	};
 	static_assert(sizeof(c_director) == 0x160);
@@ -322,7 +383,10 @@ namespace blam
 	{
 		c_director directors[4];
 		s_director_info infos[4];
-		real __unknown5B0[4];
+		real __unknown5B0;
+		real __unknown5B4;
+		dword __unknown5B8;
+		char __data5BC[4];
 	};
 	static_assert(sizeof(s_director_globals) == 0x5C0);
 
