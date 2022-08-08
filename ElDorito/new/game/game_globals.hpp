@@ -4,7 +4,7 @@
 
 namespace blam
 {
-	struct game_globals
+	struct game_globals_storage
 	{
 		char unknown0[0x10];
 		game_mode current_game_mode;
@@ -12,7 +12,7 @@ namespace blam
 		short current_insertion_point;
 		char unknown150[0x250B8];
 	};
-	static_assert(sizeof(game_globals) == 0x25208);
+	static_assert(sizeof(game_globals_storage) == 0x25208);
 
-	game_globals *__cdecl game_globals_get();
+	game_globals_storage* game_globals_get();
 }

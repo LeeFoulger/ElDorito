@@ -1,632 +1,1095 @@
 #pragma once
 
-#include <ElDorito.hpp>
-#include "cseries\cseries.hpp"
-#include "memory\data.hpp"
+#include "../game/game_globals.hpp"
+#include "../camera/observer.hpp"
+#include "../camera/camera.hpp"
+#include "../camera/director.hpp"
+#include "../game/player_control.hpp"
 
 namespace blam
 {
-	struct s_cluster_reference
+	//struct simulation_gamestate_entity_datum : datum_header
+
+	struct s_game_tick_time_samples
 	{
-		unsigned char bsp_index;
-		unsigned char cluster_index;
+		long flags;
+		float float4;
+		float float8;
+		float floatC;
+		dword __unknown10;
 	};
-	static_assert(sizeof(s_cluster_reference) == 0x2);
+	static_assert(sizeof(s_game_tick_time_samples) == 0x14);
 
-	struct s_location
+	struct s_main_time_globals
 	{
-		s_cluster_reference cluster_reference;
-		unsigned short __unknown2;
-	};
-	static_assert(sizeof(s_location) == 0x4);
-
-	enum e_director_mode : long
-	{
-		_director_mode_game = 0,
-		_director_mode_saved_film,
-		_director_mode_observer,
-		_director_mode_debug,
-		_director_mode_unused,
-		_director_mode_editor,
-
-		k_number_of_director_modes
-	};
-
-	enum e_director_perspective : long
-	{
-		_director_perspective_first_person = 0,
-
-		// c_following_camera, c_dead_camera, c_orbiting_camera
-		_director_perspective_1,
-
-		// c_scripted_camera
-		_director_perspective_2,
-
-		// c_null_camera, (c_authored_camera default)
-		_director_perspective_3,
-
-		k_number_of_director_perspectives,
-	};
-
-	enum e_camera_mode : unsigned long
-	{
-		_camera_mode_following = 0,
-		_camera_mode_orbiting,
-		_camera_mode_flying,
-		_camera_mode_first_person,
-		_camera_mode_dead,
-		_camera_mode_static,
-		_camera_mode_scripted,
-		_camera_mode_authored,
-
-		k_number_of_camera_modes,
-		k_camera_mode_null = 0xFFFFFFFF,
-	};
-
-	struct s_observer_command
-	{
-		dword_flags flags;
-		real_point3d position;
-		real_vector3d focus_offset;
-		real_point2d look_shift;
-		real focus_distance;
-		real field_of_view;
-		real_vector3d forward;
-		real_vector3d up;
-		real_vector3d velocities;
-		real_matrix4x3 focus_space;
-		dword __unknown84;
-		real_point3d center;
-		real timer;
-		char __data98[40];
-		real __unknownC0[6];
-		char __dataD8[20];
-	};
-	static_assert(sizeof(s_observer_command) == 0xEC);
-
-	struct s_observer_result
-	{
-		real_point3d focus_point;
-		s_location location;
-		float __unknown10[3];
-		float __unknown1C[3];
-		real_vector3d forward;
-		real_vector3d up;
-		real horizontal_field_of_view;
-		char __data44[36];
-		real vertical_field_of_view;
-		real __unknown60;
-	};
-
-	struct s_observer
-	{
-		dword header_signature;
-		s_observer_command* pending_command;
-		s_observer_command command;
-		bool updated_for_frame;
-		bool __unknownF5;
-		bool __unknownF6;
-		bool __unknownF7;
-		float __unknownF8;
-		char __dataFC[16];
-		s_observer_result result;
-		real_point3d positions_focus_position;
-		real_vector3d positions_focus_offset;
-		real_point2d positions_look_shift;
-		real positions_focus_distance;
-		real horizontal_field_of_view;
-		real_vector3d positions_forward;
-		real_vector3d positions_up;
-		real_matrix4x3 focus_space;
-		real_vector3d velocities_v;
-		real_vector3d velocities_forward;
-		char __data208[16];
-		real_vector3d velocities_r;
-		real_vector3d accelerations_a;
-		real_vector3d accelerations_r;
-		char __data244[16];
-		real_vector3d accelerations_forward;
-		char __data258[364];
-		unsigned long trailer_signature;
-	};
-	static_assert(sizeof(s_observer) == 0x3C8);
-
-	struct s_director_globals;
-	s_director_globals* director_globals_get()
-	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
-			return nullptr;
-
-		return director_globals;
-	}
-
-	struct c_camera
-	{
-		virtual e_camera_mode get_type();
-		virtual e_director_perspective get_perspective();
-		virtual void update(long, real, s_observer_command*);
-		virtual long get_target();
-		virtual void set_target(long);
-		virtual void set_position(real_point3d const*);
-		virtual void set_forward(real_vector3d const*);
-		virtual void set_roll(real);
-		virtual void enable_orientation(bool);
-		virtual void enable_movement(bool);
-		virtual void enable_roll(bool);
-		virtual void handle_deleted_player(long);
-		virtual void handle_deleted_object(long);
-		virtual real get_unknown(); // c_flying_camera, c_static_camera, c_scripted_camera
-
-		enum e_flags
-		{
-			_next_move_instantly_bit = 0
-		};
-
-		datum_index m_object_index;
-		dword_flags m_flags;
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
 		dword __unknownC;
-
-		inline void set_next_move_instantly()
-		{
-			__unknownC = 5;
-			m_flags |= (1 << _next_move_instantly_bit);
-		}
-	};
-	static_assert(sizeof(c_camera) == 0x10);
-
-	struct c_null_camera : public c_camera
-	{
-	};
-	static_assert(sizeof(c_null_camera) == 0x10);
-
-#pragma pack(push, 2)
-	struct c_following_camera : public c_camera
-	{
 		dword __unknown10;
 		dword __unknown14;
-		real __unknown18;
-		real_vector3d __vector1C;
-		datum_index m_target_object_index;
-		word __unknown2C;
-		dword __unknown2E;
-		word __unknown32;
-	};
-	static_assert(sizeof(c_following_camera) == 0x34);
-#pragma pack(pop)
-
-	struct c_orbiting_camera : public c_camera
-	{
-		real_euler_angles2d m_facing;
-		real m_distance;
-		real m_z_offset;
-		word __unknown20;
-		bool __unknown22;
-	};
-	static_assert(sizeof(c_orbiting_camera) == 0x24);
-
-	struct c_flying_camera : public c_camera
-	{
-		enum e_flags
-		{
-			_zoomed_bit = 0,            // not the actual name
-			_lock_in_xy_plane_bit = 1,
-			_collision_bit = 2,         // default
-			_orientation_bit = 3,       // default
-			_movement_bit = 4           // default
-		};
-
-		real_point3d m_position;
-		real_euler_angles2d m_facing;
-		real m_roll;
-		real __unknown28;
-		real __unknown2C;
-		bool __unknown30;
-		real __unknown34;
-
-		dword_flags m_flags;
-
-		inline void set_lock_in_xy_plane(bool value)
-		{
-			if (value)
-				m_flags |= (1 << _lock_in_xy_plane_bit);
-			else
-				m_flags |= ~(1 << _lock_in_xy_plane_bit);
-		}
-
-		inline void set_collision(bool value)
-		{
-			if (value)
-				m_flags |= (1 << _collision_bit);
-			else
-				m_flags |= ~(1 << _collision_bit);
-		}
-
-		inline void enable_orientation(bool value)
-		{
-			if (value)
-				m_flags |= (1 << _orientation_bit);
-			else
-				m_flags |= ~(1 << _orientation_bit);
-		}
-
-		inline void enable_movement(bool value)
-		{
-			if (value)
-				m_flags |= (1 << _movement_bit);
-			else
-				m_flags |= ~(1 << _movement_bit);
-		}
-	};
-	static_assert(sizeof(c_flying_camera) == 0x3C);
-
-	struct c_first_person_camera : public c_camera
-	{
-		real m_field_of_view;
-		real_euler_angles2d m_facing;
-		bool __unknown1C;
-	};
-	static_assert(sizeof(c_first_person_camera) == 0x20);
-
-	struct c_dead_camera : public c_camera
-	{
-		real_point3d m_position;
-		real_euler_angles2d m_facing;
-		real m_focus_distance;
-		real m_field_of_view;
-		real __unknown2C;
-		datum_index m_target_player_index;
-		datum_index m_target_object_index;
-		bool __unknown38;
-		byte m_user_index;
-		char __data[18];
-	};
-	static_assert(sizeof(c_dead_camera) == 0x4C);
-
-	struct c_static_camera : public c_camera
-	{
-		real_point3d m_position;
-		real_vector3d m_forward;
-		real m_field_of_view;
-		real __unknown2C;
+		dword __unknown18;
+		dword __unknown1C;
+		dword __unknown20;
+		dword __unknown24;
+		dword __unknown28;
+		dword __unknown2C;
 		dword __unknown30;
+		dword __unknown34;
+		dword __unknown38;
+		dword __unknown3C;
 	};
-	static_assert(sizeof(c_static_camera) == 0x34);
+	static_assert(sizeof(s_main_time_globals) == 0x40);
 
-	struct c_scripted_camera : public c_camera
+	struct random_math_globals
 	{
+		dword __unknown0;
+		dword __unknown4;
 	};
-	static_assert(sizeof(c_scripted_camera) == 0x10);
+	static_assert(sizeof(random_math_globals) == 0x8);
 
-	struct c_authored_camera : public c_camera
+	struct players_globals
 	{
-		bool __unknown10;
-		bool __unknown11;
-		c_first_person_camera m_first_person_camera;
-		real_point3d m_position;
-		real_vector3d m_forward;
+		char __data[0x234];
 	};
-	static_assert(sizeof(c_authored_camera) == 0x4C);
+	static_assert(sizeof(players_globals) == 0x234);
 
-	struct c_director
+	struct game_engine_globals
 	{
-		virtual e_director_mode get_type();
-		virtual void update(real);
-		virtual bool should_draw_hud();
-		virtual bool should_draw_hud_saved_film();
-		virtual bool inhibits_facing();
-		virtual bool inhibits_input();
-		virtual void handle_deleted_player(long);
-		virtual void handle_deleted_object(long);
-		virtual bool can_use_camera_mode(e_camera_mode);
-		//virtual void select_fallback_target(); // c_observer_director, c_saved_film_director
-
-		union
-		{
-			c_camera m_camera;
-			c_null_camera m_null;
-			c_following_camera m_following;
-			c_orbiting_camera m_orbiting;
-			c_flying_camera m_flying;
-			c_first_person_camera m_first_person;
-			c_dead_camera m_dead;
-			c_static_camera m_static;
-			c_scripted_camera m_scripted;
-			c_authored_camera m_authored;
-		};
-
-		s_observer_command m_observer_command;
-		real m_transition_time;
-		long m_user_index;
-		long m_player_index;
-		bool __unknown148;
-		e_camera_mode m_camera_mode;
-		long __unknown150;
-		char __data[12];
-
-		long get_perspective();
-		bool set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update);
-
-		inline bool set_camera_mode(e_camera_mode camera_mode, real transition_time)
-		{
-			return set_camera_mode_internal(camera_mode, transition_time, false);
-		}
-
-		inline c_camera* get_camera()
-		{
-			return &m_camera;
-		}
-
-		inline bool in_free_camera_mode()
-		{
-			e_camera_mode camera_mode = m_camera.get_type();
-			if (camera_mode == _camera_mode_flying || camera_mode == _camera_mode_scripted)
-				return true;
-
-			if (camera_mode == _camera_mode_authored)
-				return m_camera.get_target() == -1;
-
-			return false;
-		}
+		dword Flags;
+		dword __unknown4;
+		dword __unknown8;
+		word __unknownC;
+		word GameSimulation;
+		dword __unknown16[7];
+		dword __unknown2C;
+		dword __unknown30[14390];
+		word __unknownE108;
+		word __unknownE10A;
+		dword __unknownE10C;
+		byte __unknownE110;
+		byte __unknownE111[3];
+		byte __unknownE114[124];
+		byte __unknownE190[1832];
+		byte ForgeLegalNotice;
+		byte __unknownE8B9[4311];
+		word RoundTimeLimit;
+		word __unknownF992;
+		dword RoundTimeLimitTicksPerSecond;
+		byte __unknownF996[1304];
+		byte MultiplayerScoreboard[0x420];
+		byte __unknown102D0[0x3AD0];
+		dword __unknown13DA0;
+		dword __unknown13DA4[3];
+		dword GameType;
+		dword ObjectCount;
+		dword __unknown13DB8;
+		byte __unknown13DBC[6812];
 	};
-	static_assert(sizeof(c_director) == 0x160);
+	static_assert(sizeof(game_engine_globals) == 0x15858);
 
-	struct s_director_info
+	struct local_game_engine_globals
 	{
-		e_director_mode director_mode;
-		long director_perspective; // e_director_perspective
-		e_camera_mode camera_mode;
+		char __data[0xC4];
 	};
-	static_assert(sizeof(s_director_info) == 0xC);
+	static_assert(sizeof(local_game_engine_globals) == 0xC4);
 
-	struct s_director_globals
+	struct game_time_globals_definition
 	{
-		c_director directors[4];
-		s_director_info infos[4];
-		real __unknown5B0;
-		real __unknown5B4;
-		dword __unknown5B8;
-		char __data5BC[4];
+		bool initialized;
+		byte : 8;
+		word flags;
+		word ticks_per_second;
+		word : 16;
+		float seconds_per_tick;
+		dword elapsed_ticks;
+		dword gamespeed;
+		dword __unknown14;
+		dword __unknown18;
+		dword __unknown1C;
+		dword __unknown20;
+		dword __unknown24;
+		dword __unknown28;
 	};
-	static_assert(sizeof(s_director_globals) == 0x5C0);
+	static_assert(sizeof(game_time_globals_definition) == 0x2C);
 
-	struct s_observer_globals
+	struct s_breakable_surface_globals
 	{
-		real __unknown0;
-		s_observer observers[4];
-		char __dataF24[4];
+		char __data[0x3CE18];
 	};
-	static_assert(sizeof(s_observer_globals) == 0xF28);
+	static_assert(sizeof(s_breakable_surface_globals) == 0x3CE18);
 
-	const char* k_camera_mode_names[k_number_of_camera_modes]
+	//struct breakable_surface_set_broken_event_datum : datum_header
+
+	struct s_player_mapping_globals
 	{
-		"following",
-		"orbiting",
-		"flying",
-		"first_person",
-		"dead",
-		"static",
-		"scripted",
-		"authored",
+		word __unknown0;
+		word __unknown2;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+		dword __unknown10;
+		dword __unknown14;
+		dword __unknown18;
+		dword __unknown1C;
+		dword __unknown20;
+		dword __unknown24;
+		dword __unknown28;
+		dword __unknown2C;
+		dword __unknown30;
+		byte __unknown34[64];
+		byte __unknown74[64];
+		word __unknownB4;
+		dword __unknownB8;
+		dword __unknownBC;
+		dword __unknownC0;
+		dword __unknownC4;
+		dword __unknownC8;
+		dword __unknownCC;
+		dword __unknownD0;
+		dword __unknownD4;
+		qword __unknownD8;
+		qword __unknownE0;
+	};
+	static_assert(sizeof(s_player_mapping_globals) == 0xE8);
+
+	//struct hs_thread_deterministic_data : datum_header
+
+	struct hs_runtime
+	{
+		dword __unknown0;
+		dword __unknown4;
+	};
+	static_assert(sizeof(hs_runtime) == 0x8);
+
+	//struct hs_global_data : datum_header
+
+	//struct hs_distributed_global_data : datum_header
+
+	//struct hs_thread_tracking_data : datum_header
+
+	//struct hs_thread_non_deterministic_data : datum_header
+
+	//struct effect_datum : datum_header
+
+	//struct effect_event_datum : datum_header
+
+	//struct effect_location_datum : datum_header
+
+	struct s_effect_counts
+	{
+		char __data[0x18];
+	};
+	static_assert(sizeof(s_effect_counts) == 0x18);
+
+	//struct effect_geometry_sample_datum : datum_header
+
+	struct effect_messaging_queue
+	{
+		char __data[0x17084];
+	};
+	static_assert(sizeof(effect_messaging_queue) == 0x17084);
+
+	struct effect_lightprobes
+	{
+		char __data[0xFE00];
+	};
+	static_assert(sizeof(effect_lightprobes) == 0xFE00);
+
+	struct s_havok_gamestate
+	{
+		dword __unknown0;
+		dword __unknown4;
+	};
+	static_assert(sizeof(s_havok_gamestate) == 0x8);
+
+	struct s_player_control_globals_deterministic
+	{
+		char __data[0x80];
+	};
+	static_assert(sizeof(s_player_control_globals_deterministic) == 0x80);
+
+	//struct game_looping_sound_datum : datum_header
+
+	struct s_game_sound_globals
+	{
+		char __data[0x154];
+	};
+	static_assert(sizeof(s_game_sound_globals) == 0x154);
+
+	struct s_game_sound_impulse_datum
+	{
+		char __data[0x200];
+	};
+	static_assert(sizeof(s_game_sound_impulse_datum) == 0x200);
+
+	struct s_structure_seam_globals
+	{
+		char __data[0x14614];
+	};
+	static_assert(sizeof(s_structure_seam_globals) == 0x14614);
+
+	struct visibility_active_portals
+	{
+		char __data[0x800];
+	};
+	static_assert(sizeof(visibility_active_portals) == 0x800);
+
+	struct s_campaign_metagame_globals
+	{
+		char __data[0x1A158];
+	};
+	static_assert(sizeof(s_campaign_metagame_globals) == 0x1A158);
+
+	struct s_observer_gamestate_globals
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(s_observer_gamestate_globals) == 0xC);
+
+	struct rumble_global_data
+	{
+		char __data[0x22C];
+	};
+	static_assert(sizeof(rumble_global_data) == 0x22C);
+
+	struct s_bink_shared_game_state
+	{
+		dword __unknown0;
+		dword __unknown4;
+	};
+	static_assert(sizeof(s_bink_shared_game_state) == 0x8);
+
+	struct sound_class_datum
+	{
+		char __data[0x1144];
+	};
+	static_assert(sizeof(sound_class_datum) == 0x1144);
+
+	struct s_game_allegiance_globals
+	{
+		char __data[0x184];
+	};
+	static_assert(sizeof(s_game_allegiance_globals) == 0x184);
+
+	struct atmosphere_fog_globals
+	{
+		char __data[0x14];
+	};
+	static_assert(sizeof(atmosphere_fog_globals) == 0x14);
+
+	struct s_scenario_soft_ceilings_globals
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+	};
+	static_assert(sizeof(s_scenario_soft_ceilings_globals) == 0x10);
+
+	struct s_game_sound_player_effects_globals
+	{
+		char __data[0x28];
+	};
+	static_assert(sizeof(s_game_sound_player_effects_globals) == 0x28);
+
+	struct cinematic_new_globals
+	{
+		char __data[0x3C];
+	};
+	static_assert(sizeof(cinematic_new_globals) == 0x3C);
+
+	struct cinematic_globals
+	{
+		char __unknown0[4];
+		char show_letterbox;
+		char start_stop;
+		char skip_start_stop;
+		char suppress_bsp_object_creation;
+		char __unknown8[24];
+		dword subtitle_string_id;
+		float subtitle_time_shown;
+		float subtitle_time_shown2;
+		char __unknown2C[2];
+		char outro_start_stop;
+		char __unknown2F[10201];
+	};
+	static_assert(sizeof(cinematic_globals) == 0x2808);
+
+	struct cinematic_light_globals
+	{
+		char __data[0xB2C8];
+	};
+	static_assert(sizeof(cinematic_light_globals) == 0xB2C8);
+
+	struct physics_constants
+	{
+		dword gravity;
+		dword water_density;
+		dword air_density;
+		dword __unknownC;
+		dword __unknown10;
+		float float14;
+		dword __unknown18;
+		dword __unknown1C;
+	};
+	static_assert(sizeof(physics_constants) == 0x20);
+
+	struct recorded_animations
+	{
+		char __data[0xA4];
+	};
+	static_assert(sizeof(recorded_animations) == 0xA4);
+
+	struct game_save_globals
+	{
+		char __data[0x18];
+	};
+	static_assert(sizeof(game_save_globals) == 0x18);
+
+	//struct s_rasterizer_screen_effect : datum_header
+
+	struct player_effects
+	{
+		char __data[0x3A0];
+	};
+	static_assert(sizeof(player_effects) == 0x3A0);
+
+	struct scenario_interpolator_globals
+	{
+		char __data[0x204];
+	};
+	static_assert(sizeof(scenario_interpolator_globals) == 0x204);
+
+	struct survival_mode_globals
+	{
+		long lives;
+		short set;
+		short round;
+		short wave;
+		short __unknownA;
+		short set_multiplier;
+		short __unknown10;
+		long round_multiplier;
+		short waves_per_round;
+		short rounds_per_set;
+		char __unknown18[4];
+		long __unknown1C;
+		char __unknown20[4];
+		long __unknown24;
+		long __unknown28;
+		char __unknown2C[4];
+		long scoreboard;
+		char __unknown34[464];
+	};
+	static_assert(sizeof(survival_mode_globals) == 0x204);
+
+	struct player_training_globals
+	{
+		char __data[0x8E8];
+	};
+	static_assert(sizeof(player_training_globals) == 0x8E8);
+
+	struct scenario_kill_trigger_volume_state
+	{
+		char __data[0x84];
+	};
+	static_assert(sizeof(scenario_kill_trigger_volume_state) == 0x84);
+
+	struct deterministic_game_sound_globals
+	{
+		char __data[0x1300];
+	};
+	static_assert(sizeof(deterministic_game_sound_globals) == 0x1300);
+
+	//struct s_decal_system_datum : datum_header
+
+	struct decal_counts
+	{
+		char __data[0x20];
+	};
+	static_assert(sizeof(decal_counts) == 0x20);
+
+	struct decal
+	{
+		char __data[0x130];
+	};
+	static_assert(sizeof(decal) == 0x130);
+
+	struct decal_messaging_queue
+	{
+		char __data[0x824];
+	};
+	static_assert(sizeof(decal_messaging_queue) == 0x824);
+
+	struct impact_globals
+	{
+		byte __unknown0[0x8C];
+	};
+	static_assert(sizeof(impact_globals) == 0x8C);
+
+	struct impacts
+	{
+		byte __unknown0[0xB4];
+	};
+	static_assert(sizeof(impacts) == 0xB4);
+
+	struct impact_arrays
+	{
+		byte __unknown0[0x88];
+	};
+	static_assert(sizeof(impact_arrays) == 0x88);
+
+	struct object_list_header
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(object_list_header) == 0xC);
+
+	struct list_object
+	{
+		char __data[0x8C];
+	};
+	static_assert(sizeof(list_object) == 0x8C);
+
+	struct scripted_camera_globals
+	{
+		byte __unknown0[0xF0];
+	};
+	static_assert(sizeof(scripted_camera_globals) == 0xF0);
+
+	//struct s_particle_system_datum : datum_header
+
+	struct contrail_system
+	{
+		char __data[0x4C];
+	};
+	static_assert(sizeof(contrail_system) == 0x4C);
+
+	struct contrail
+	{
+		char __data[0x4C];
+	};
+	static_assert(sizeof(contrail) == 0x4C);
+
+	struct contrail_location
+	{
+		char __data[0x60];
+	};
+	static_assert(sizeof(contrail_location) == 0x60);
+
+	struct contrail_profile
+	{
+		char __data[0x4C];
+	};
+	static_assert(sizeof(contrail_profile) == 0x4C);
+
+	struct particle_location
+	{
+		char __data[0x60];
+	};
+	static_assert(sizeof(particle_location) == 0x60);
+
+	struct light_volume_location
+	{
+		char __data[0x2C];
+	};
+	static_assert(sizeof(light_volume_location) == 0x2C);
+
+	struct light_volume
+	{
+		char __data[0x34];
+	};
+	static_assert(sizeof(light_volume) == 0x34);
+
+	struct light_volume_system
+	{
+		char __data[0x2C];
+	};
+	static_assert(sizeof(light_volume_system) == 0x2C);
+
+	struct beam_system
+	{
+		char __data[0x34];
+	};
+	static_assert(sizeof(beam_system) == 0x34);
+
+	struct beam
+	{
+		char __data[0x2C];
+	};
+	static_assert(sizeof(beam) == 0x2C);
+
+	struct beam_location
+	{
+		char __data[0x30];
+	};
+	static_assert(sizeof(beam_location) == 0x30);
+
+	struct hue_saturation_control
+	{
+		dword graphics_override;
+		dword saturation;
+		dword color;
+		dword __unknownC;
+		dword __unknown10;
+	};
+	static_assert(sizeof(hue_saturation_control) == 0x14);
+
+	struct ragdolls
+	{
+		char __data[0x130];
+	};
+	static_assert(sizeof(ragdolls) == 0x130);
+
+	struct particle_emitter
+	{
+		char __data[0x90];
+	};
+	static_assert(sizeof(particle_emitter) == 0x90);
+
+	struct rasterizer_game_states
+	{
+		char motion_blur;
+		char atmosphere_fog;
+		char patchy_fog;
+		char weather;
+		char cinematic_motion_blur;
+		char __unknown5[39];
+		char autoexposure;
+		char __unknown44[475];
+	};
+	static_assert(sizeof(rasterizer_game_states) == 0x208);
+
+	struct scripted_exposure_globals
+	{
+		char __data[0x34];
+	};
+	static_assert(sizeof(scripted_exposure_globals) == 0x34);
+
+	struct render_hud_globals
+	{
+		char __data[0x480];
+	};
+	static_assert(sizeof(render_hud_globals) == 0x480);
+
+	struct water_interaction_ripples
+	{
+		char __data[0x1400];
+	};
+	static_assert(sizeof(water_interaction_ripples) == 0x1400);
+
+	struct render_texture_globals
+	{
+		char camera_enable;
+		char camera_dynamic_lights_enable;
+		short __unknown2;
+		long camera_render_mode;
+		long __unknown8;
+		long __unknownC;
+		long __unknown10;
+		long __unknown14;
+		long __unknown18;
+		long camera_object_handle;
+		long camera_marker_name;
+		long __unknown24;
+		long camera_position_world_x;
+		long camera_position_world_y;
+		long camera_position_world_z;
+		long camera_target_object_x;
+		long camera_target_object_y;
+		long camera_target_object_z;
+		char __unknown40[28];
+		float camera_fov;
+		long aspect_ratio;
+		long camera_resolution_width;
+		long camera_resolution_height;
+	};
+	static_assert(sizeof(render_texture_globals) == 0x6C);
+
+	struct render_game_globals
+	{
+		char __data[0xD80];
+	};
+	static_assert(sizeof(render_game_globals) == 0xD80);
+
+	struct depth_of_field_globals
+	{
+		bool enable;
+		char __unknown1[3];
+		float __unknown4;
+		float __unknown8;
+		float __unknownC;
+		float intensity;
+		float __unknown14;
+		float __unknown18;
+		float __unknown1C;
+		float __unknown20;
+		float __unknown24;
+		float __unknown28;
+		float __unknown2C;
+		float __unknown30;
+		float __unknown34;
+		float __unknown38;
+		float __unknown3C;
+	};
+	static_assert(sizeof(depth_of_field_globals) == 0x40);
+
+	struct cached_object_render_states
+	{
+		char __data[0x4D8];
+	};
+	static_assert(sizeof(cached_object_render_states) == 0x4D8);
+
+	struct particle_emitter_gpu_row
+	{
+		char __data[0x18];
+	};
+	static_assert(sizeof(particle_emitter_gpu_row) == 0x18);
+
+	struct particle_emitter_gpu_1
+	{
+		char __data[0x14];
+	};
+	static_assert(sizeof(particle_emitter_gpu_1) == 0x14);
+
+	struct beam_gpu
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+	};
+	static_assert(sizeof(beam_gpu) == 0x10);
+
+	struct beam_gpu_row
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(beam_gpu_row) == 0xC);
+
+	struct contrail_gpu_row
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+	};
+	static_assert(sizeof(contrail_gpu_row) == 0x10);
+
+	struct contrail_gpu
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+		dword __unknown10;
+	};
+	static_assert(sizeof(contrail_gpu) == 0x14);
+
+	struct light_volume_gpu
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+	};
+	static_assert(sizeof(light_volume_gpu) == 0x10);
+
+	struct light_volume_gpu_row
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(light_volume_gpu_row) == 0xC);
+
+	struct render_object_globals
+	{
+		char __data[0x3C040];
+	};
+	static_assert(sizeof(render_object_globals) == 0x3C040);
+
+	struct shield_render_cache_message
+	{
+		char __data[0x14];
+	};
+	static_assert(sizeof(shield_render_cache_message) == 0x14);
+
+	struct chud_player_hud_elements
+	{
+		char __unknown0[2];
+		char crosshair;
+		char shield;
+		char grenades;
+		char messages;
+		char motion_sensor;
+		char spike_grenades;
+		char fire_grenades;
+		char compass;
+		char stamina;
+		char energy_meters;
+		char consumables;
 	};
 
-	inline e_camera_mode camera_mode_from_string(const char* str)
+	struct chud_persistent_user_data
 	{
-		e_camera_mode camera_mode = k_camera_mode_null;
-		for (long i = _camera_mode_following; i < k_number_of_camera_modes; i++)
-		{
-			if (strcmp(str, k_camera_mode_names[i]) != 0)
-				continue;
-
-			camera_mode = e_camera_mode(i);
-		}
-
-		return camera_mode;
-	}
-
-	c_director* director_get(long user_index)
-	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
-			return nullptr;
-
-		return &director_globals->directors[user_index];
-	}
-
-	s_director_info* director_get_info(long user_index)
-	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
-			return nullptr;
-
-		return &director_globals->infos[user_index];
-	}
-
-	s_observer* observer_get(long user_index)
-	{
-		s_observer_globals* observer_globals = *(s_observer_globals**)ElDorito::GetMainTls(0xE8);
-		if (!observer_globals)
-			return nullptr;
-
-		return &observer_globals->observers[user_index];
-	}
-
-	long director_get_perspective(long user_index)
-	{
-		c_director* director = director_get(user_index);
-		if (!director)
-			return 0;
-
-		return director->get_perspective();
-	}
-
-	long c_director::get_perspective()
-	{
-		static bool(__cdecl * game_in_progress)() = reinterpret_cast<decltype(game_in_progress)>(0x005314B0);
-		static bool(__cdecl * game_is_ui_shell)() = reinterpret_cast<decltype(game_is_ui_shell)>(0x00531E90);
-
-		if (!game_in_progress())
-			return 3;
-		long director_perspective = m_camera.get_perspective();
-		if (!director_perspective)
-			director_perspective = m_transition_time > 0.0;
-		if (game_is_ui_shell())
-			return 3;
-
-		return director_perspective;
-	}
-
-	bool c_director::set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update)
-	{
-		static void(__thiscall * following_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(following_camera_ctor)>(0x00728630);
-		static void(__thiscall * orbiting_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(orbiting_camera_ctor)>(0x0072A5E0);
-		static void(__thiscall * flying_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(flying_camera_ctor)>(0x0072ACA0);
-		static void(__thiscall * first_person_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(first_person_camera_ctor)>(0x0065F410);
-		static void(__thiscall * dead_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(dead_camera_ctor)>(0x00729E60);
-		static void(__thiscall * static_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(static_camera_ctor)>(0x0072F170);
-		static void(__thiscall * scripted_camera_ctor)(c_camera*) = reinterpret_cast<decltype(scripted_camera_ctor)>(0x0072BEB0);
-		static void(__thiscall * authored_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(authored_camera_ctor)>(0x0072F2E0);
-
-		static long(__cdecl * dead_or_alive_unit_from_user)(long) = reinterpret_cast<decltype(dead_or_alive_unit_from_user)>(0x005916F0);
-		static void(__cdecl * first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
-
-		if (!can_use_camera_mode(camera_mode))
-			return false;
-
-		e_camera_mode current_camera_mode = m_camera.get_type();
-		bool result = camera_mode != current_camera_mode;
-		if (result || force_update)
-		{
-			switch (camera_mode)
-			{
-			case _camera_mode_following:
-				following_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_orbiting:
-				orbiting_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_flying:
-				flying_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_first_person:
-				first_person_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_dead:
-				dead_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_static:
-				static_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_scripted:
-				scripted_camera_ctor(&m_camera);
-				break;
-			case _camera_mode_authored:
-				authored_camera_ctor(&m_camera, m_user_index);
-				break;
-			}
-			m_transition_time = transition_time;
-		}
-
-		long director_perspective = get_perspective();
-		s_director_globals* director_globals = director_globals_get();
-		if (director_globals->infos[m_user_index].director_perspective != director_perspective ||
-			director_globals->infos[m_user_index].camera_mode != camera_mode)
-		{
-			director_globals->infos[m_user_index].director_perspective = director_perspective;
-			director_globals->infos[m_user_index].camera_mode = camera_mode;
-			first_person_weapon_perspective_changed(m_user_index);
-		}
-
-		return result || force_update;
-	}
-
-	struct s_player_control_non_deterministic_input_user_state
-	{
-		char __data0[6];
-		bool player_input_locked;
-		char __data7[0x30-7];
+		char __data[0x14D];
+		chud_player_hud_elements player_hud;
+		char __unknown181[0x316];
 	};
-	static_assert(sizeof(s_player_control_non_deterministic_input_user_state) == 0x30);
+	static_assert(sizeof(chud_persistent_user_data) == 0x470);
 
-	struct s_player_interaction
+	struct chud_persistent_global_data
 	{
-		word interaction_type;
-		word interaction_seat_index;
-		dword interaction_object;
+		char __unknown0[0x14D];
+		chud_player_hud_elements player_hud[4];
+		char __unknown181[0x273];
+		char bonus_round_show_timer;
+		char bonus_round_start_timer;
+		char __unknown3F6[2];
+		long bonus_round_set_timer;
+		long bonus_round_set_target_score;
+		char __unknown3FC[0xF640];
 	};
-	static_assert(sizeof(s_player_interaction) == 0x8);
+	static_assert(sizeof(chud_persistent_global_data) == 0xFA40);
 
-	struct s_player_action_context
+	struct user_widget
 	{
-		s_player_interaction interaction;
-		dword melee_target_unit;
+		char __data[0x18];
 	};
-	static_assert(sizeof(s_player_action_context) == 0xC);
+	static_assert(sizeof(user_widget) == 0x18);
 
-	struct s_aim_assist_targeting_result
+	struct first_person_orientations
 	{
-		bool __unknown0;
-		dword target_player_index;
-		dword target_object_index;
-		dword model_target;
-		real primary_autoaim_level;
-		real secondary_autoaim_level;
-		real_vector3d lead_vector;
-		dword_flags flags;
+		char __data[0x12C00];
 	};
-	static_assert(sizeof(s_aim_assist_targeting_result) == 0x28);
+	static_assert(sizeof(first_person_orientations) == 0x12C00);
 
-	struct s_player_control_internal_state
+	struct first_person_weapons
 	{
-		dword control_flags;
-		dword action_flags;
-		real_euler_angles2d desired_angles;
-		real_point2d throttle;
-		real primary_trigger;
-		real secondary_trigger;
-		word weapon_set_identifier;
-		byte primary_weapon_index;
-		byte secondary_weapon_index;
-		word grenade_index;
-		word zoom_level;
-		s_player_action_context action_context;
-		s_aim_assist_targeting_result targeting;
-		bool map_editor_rotation_valid;
-		bool map_editor_player_locked_for_manipulation;
-		char __data66[2];
-		real_euler_angles2d map_editor_rotation;
-		word_flags map_editor_flags;
-		char __data6A[2];
+		char __data[0x14000];
 	};
-	static_assert(sizeof(s_player_control_internal_state) == 0x6C);
+	static_assert(sizeof(first_person_weapons) == 0x14000);
 
-	struct s_player_control_state
+	struct cortana_globals
 	{
-		dword unit_index;
-		s_player_control_internal_state internal_state;
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
 	};
-	static_assert(sizeof(s_player_control_state) == 0x70);
+	static_assert(sizeof(cortana_globals) == 0x10);
 
-	struct s_player_control
+	struct campaign_objectives
 	{
-		s_player_control_state state;
-		char __data70[120];
-		real_point3d __positionE8;
-		char __dataF4[4];
+		char __data[0x14];
 	};
-	static_assert(sizeof(s_player_control) == 0xF8);
+	static_assert(sizeof(campaign_objectives) == 0x14);
 
-	struct s_player_control_globals
+	struct object_globals
 	{
-		s_player_control_non_deterministic_input_user_state input_user_states[16];
-		s_player_control controls[4];
-		s_player_control_state control_states[4];
-		dword __unknown8A0;
-		dword __unknown8A4;
-		bool machinima_camera_enabled;
-		bool machinima_camera_use_old_controls;
-		bool machinima_camera_debug;
-		char __data8AB[5];
+		char __data[0x6608];
 	};
-	static_assert(sizeof(s_player_control_globals) == 0x8B0);
+	static_assert(sizeof(object_globals) == 0x6608);
+
+	struct objects_memory_pool
+	{
+		char __data[0x44];
+	};
+	static_assert(sizeof(objects_memory_pool) == 0x44);
+
+	struct object_name_list
+	{
+		char __data[0x2000];
+	};
+	static_assert(sizeof(object_name_list) == 0x2000);
+
+	struct object_messaging_queue
+	{
+		char __data[0x4104];
+	};
+	static_assert(sizeof(object_messaging_queue) == 0x4104);
+
+	struct damage_globals
+	{
+		char __data[0x810];
+	};
+	static_assert(sizeof(damage_globals) == 0x810);
+
+	struct object_render_data
+	{
+		char __data[0x2000];
+	};
+	static_assert(sizeof(object_render_data) == 0x2000);
+
+	struct object_placement
+	{
+		char __data[0x320];
+	};
+	static_assert(sizeof(object_placement) == 0x320);
+
+	struct device_groups
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+		dword __unknownC;
+	};
+	static_assert(sizeof(device_groups) == 0x10);
+
+	struct object_scripting
+	{
+		char __data[0x304];
+	};
+	static_assert(sizeof(object_scripting) == 0x304);
+
+	struct object_broadphase
+	{
+		char __data[0x32450];
+	};
+	static_assert(sizeof(object_broadphase) == 0x32450);
+
+	struct object_early_movers
+	{
+		char __data[0x2688];
+	};
+	static_assert(sizeof(object_early_movers) == 0x2688);
+
+	struct object_schedule_globals
+	{
+		char __data[0x27C];
+	};
+	static_assert(sizeof(object_schedule_globals) == 0x27C);
+
+	struct object_activation_regions
+	{
+		char __data[0x28];
+	};
+	static_assert(sizeof(object_activation_regions) == 0x28);
+
+	struct lights
+	{
+		char __data[0xE4];
+	};
+	static_assert(sizeof(lights) == 0xE4);
+
+	struct lights_globals
+	{
+		char __data[0x40];
+	};
+	static_assert(sizeof(lights_globals) == 0x40);
+
+	struct nondeterministic_render_light_data
+	{
+		char __data[0x2580];
+	};
+	static_assert(sizeof(nondeterministic_render_light_data) == 0x2580);
+
+	struct widget
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(widget) == 0xC);
+
+	struct recycling_volumes
+	{
+		char __data[0x148];
+	};
+	static_assert(sizeof(recycling_volumes) == 0x148);
+
+	struct recycling_group
+	{
+		char __data[0x14];
+	};
+	static_assert(sizeof(recycling_group) == 0x14);
+
+	struct muffin
+	{
+		char __data[0x1890];
+	};
+	static_assert(sizeof(muffin) == 0x1890);
+
+	struct leaf_system
+	{
+		char __data[0x94C];
+	};
+	static_assert(sizeof(leaf_system) == 0x94C);
+
+	struct antenna
+	{
+		char __data[0x64];
+	};
+	static_assert(sizeof(antenna) == 0x64);
+
+	struct cloth
+	{
+		char __data[0x1704];
+	};
+	static_assert(sizeof(cloth) == 0x1704);
+
+	struct actor
+	{
+		char __data[0xA98];
+	};
+	static_assert(sizeof(actor) == 0xA98);
+
+	struct actor_firing_position
+	{
+		char __data[0x400];
+	};
+	static_assert(sizeof(actor_firing_position) == 0x400);
+
+	struct ai_reference_frame
+	{
+		char __data[0x4B0];
+	};
+	static_assert(sizeof(ai_reference_frame) == 0x4B0);
+
+	struct ai_globals
+	{
+		char enable;
+		char __unknown1;
+		short flags;
+		char __unknown4;
+		char fast_and_dumb;
+		char __unknown5[1666];
+	};
+	static_assert(sizeof(ai_globals) == 0x688);
+
+	struct ai_player_state
+	{
+		char __data[0xB0];
+	};
+	static_assert(sizeof(ai_player_state) == 0xB0);
+
+	struct vocalization_records
+	{
+		char __data[0x5C];
+	};
+	static_assert(sizeof(vocalization_records) == 0x5C);
+
+	struct vocalization_timers
+	{
+		char __data[0xFB8];
+	};
+	static_assert(sizeof(vocalization_timers) == 0xFB8);
+
+	struct command_scripts
+	{
+		char __data[0x188];
+	};
+	static_assert(sizeof(command_scripts) == 0x188);
+
+	struct objectives
+	{
+		dword __unknown0;
+		dword __unknown4;
+		dword __unknown8;
+	};
+	static_assert(sizeof(objectives) == 0xC);
+
+	struct task_records
+	{
+		char __data[0x61A80];
+	};
+	static_assert(sizeof(task_records) == 0x61A80);
+
+	struct squad
+	{
+		char __data[0xEC];
+	};
+	static_assert(sizeof(squad) == 0xEC);
+
+	struct squad_group
+	{
+		char __data[0x24];
+	};
+	static_assert(sizeof(squad_group) == 0x24);
+
+	struct swarm
+	{
+		char __data[0x34];
+	};
+	static_assert(sizeof(swarm) == 0x34);
+
+	struct swarm_spawner
+	{
+		char __data[0x258];
+	};
+	static_assert(sizeof(swarm_spawner) == 0x258);
+
+	struct spawner_globals
+	{
+		short __unknown0;
+	};
+	static_assert(sizeof(spawner_globals) == 0x2);
+
+	struct dynamic_firing_points
+	{
+		char __data[0x584];
+	};
+	static_assert(sizeof(dynamic_firing_points) == 0x584);
+
+	struct propref
+	{
+		char __data[0x3C];
+	};
+	static_assert(sizeof(propref) == 0x3C);
+
+	struct prop
+	{
+		char __data[0xC4];
+	};
+	static_assert(sizeof(prop) == 0xC4);
+
+	struct tracking
+	{
+		char __data[0x100];
+	};
+	static_assert(sizeof(tracking) == 0x100);
+
+	struct joint_state
+	{
+		char __data[0xCC];
+	};
+	static_assert(sizeof(joint_state) == 0xCC);
+
+	struct clump
+	{
+		char __data[0x108];
+	};
+	static_assert(sizeof(clump) == 0x108);
+
+	struct squad_patrol
+	{
+		char __data[0x6C4];
+	};
+	static_assert(sizeof(squad_patrol) == 0x6C4);
+
+	struct flocks
+	{
+		char __data[0x4C];
+	};
+	static_assert(sizeof(flocks) == 0x4C);
+
+	struct formations
+	{
+		char __data[0x294];
+	};
+	static_assert(sizeof(formations) == 0x294);
+
+	struct vision_mode
+	{
+		char __data[0xF0];
+	};
+	static_assert(sizeof(vision_mode) == 0xF0);
 }

@@ -1,13 +1,10 @@
-#include "Camera.hpp"
+#include "PatchCamera.hpp"
 #include "../Blam/BlamObjects.hpp"
 #include "../Modules/ModuleCamera.hpp"
 #include <cstdint>
 
-namespace blam
-{
-	extern struct c_director* director_get(long user_index);
-	extern long director_get_perspective(long user_index);
-}
+#include <camera/camera.hpp>
+#include <camera/director.hpp>
 
 namespace
 {

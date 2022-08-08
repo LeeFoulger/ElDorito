@@ -30,7 +30,7 @@
 #include "Patches\DirectXHook.hpp"
 #include "Patches\Medals.hpp"
 #include "Patches\Simulation.hpp"
-#include "Patches\Camera.hpp"
+#include "Patches\PatchCamera.hpp"
 #include "Patches\Maps.hpp"
 #include "Patches\GameEngineSettings.hpp"
 #include "Patches\DamageSystem.hpp"

@@ -12,6 +12,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="new\cache\cache_files.cpp" />
+    <ClCompile Include="new\camera\camera.cpp" />
+    <ClCompile Include="new\camera\director.cpp" />
+    <ClCompile Include="new\camera\observer.cpp" />
     <ClCompile Include="new\game\game_globals.cpp" />
     <ClCompile Include="new\hs\hs.cpp" />
     <ClCompile Include="new\memory\data.cpp" />
@@ -82,7 +85,7 @@
     <ClCompile Include="Source\Forge\ForgeVolumes.cpp" />
     <ClCompile Include="Source\Forge\PrematchCamera.cpp" />
     <ClCompile Include="Source\Patches\BottomlessClip.cpp" />
-    <ClCompile Include="Source\Patches\Camera.cpp" />
+    <ClCompile Include="Source\Patches\PatchCamera.cpp" />
     <ClCompile Include="Source\Patches\Campaign.cpp" />
     <ClCompile Include="Source\Patches\DamageSystem.cpp" />
     <ClCompile Include="Source\Patches\DirectXHook.cpp" />
@@ -185,12 +188,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="new\cache\cache_files.hpp" />
+    <ClInclude Include="new\camera\camera.hpp" />
+    <ClInclude Include="new\camera\director.hpp" />
+    <ClInclude Include="new\camera\observer.hpp" />
     <ClInclude Include="new\cseries\cseries.hpp" />
     <ClInclude Include="new\cseries\integer_math.hpp" />
     <ClInclude Include="new\cseries\real_math.hpp" />
     <ClInclude Include="new\effects\particles.hpp" />
     <ClInclude Include="new\game\game_globals.hpp" />
     <ClInclude Include="new\game\game_mode.hpp" />
+    <ClInclude Include="new\game\player_control.hpp" />
     <ClInclude Include="new\hs\hs.hpp" />
     <ClInclude Include="new\input\input.hpp" />
     <ClInclude Include="new\memory\data.hpp" />
@@ -317,7 +324,7 @@
     <ClInclude Include="Source\Forge\ForgeVolumes.hpp" />
     <ClInclude Include="Source\Forge\PrematchCamera.hpp" />
     <ClInclude Include="Source\Patches\BottomlessClip.hpp" />
-    <ClInclude Include="Source\Patches\Camera.hpp" />
+    <ClInclude Include="Source\Patches\PatchCamera.hpp" />
     <ClInclude Include="Source\Patches\Campaign.hpp" />
     <ClInclude Include="Source\Patches\DamageSystem.hpp" />
     <ClInclude Include="Source\Patches\DirectXHook.hpp" />

@@ -3,8 +3,8 @@
 
 namespace blam
 {
-	game_globals *__cdecl game_globals_get()
+	game_globals_storage* game_globals_get()
 	{
-		return *(blam::game_globals **)ElDorito::Instance().GetMainTls(0x3C);
+		return *(blam::game_globals_storage**)ElDorito::Instance().GetMainTls(0x3C);
 	}
 }

@@ -415,7 +415,7 @@
     <ClCompile Include="Source\Patches\Simulation.cpp">
       <Filter>Patches</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Patches\Camera.cpp">
+    <ClCompile Include="Source\Patches\PatchCamera.cpp">
       <Filter>Patches</Filter>
     </ClCompile>
     <ClCompile Include="Source\Patches\DirectXHook.cpp">
@@ -623,6 +623,9 @@
     <ClCompile Include="Source\Blam\Tags\Objects\Object.cpp">
       <Filter>Blam\Tags\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="new\camera\camera.cpp" />
+    <ClCompile Include="new\camera\director.cpp" />
+    <ClCompile Include="new\camera\observer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1044,7 +1047,7 @@
     <ClInclude Include="Source\Patches\Simulation.hpp">
       <Filter>Patches</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Patches\Camera.hpp">
+    <ClInclude Include="Source\Patches\PatchCamera.hpp">
       <Filter>Patches</Filter>
     </ClInclude>
     <ClInclude Include="Source\Patches\Medals.hpp">
@@ -1459,6 +1462,10 @@
       <Filter>Blam\Tags</Filter>
     </ClInclude>
     <ClInclude Include="new\memory\thread_local.h" />
+    <ClInclude Include="new\camera\camera.hpp" />
+    <ClInclude Include="new\camera\director.hpp" />
+    <ClInclude Include="new\camera\observer.hpp" />
+    <ClInclude Include="new\game\player_control.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />

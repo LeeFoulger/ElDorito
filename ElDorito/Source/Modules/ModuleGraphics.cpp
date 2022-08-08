@@ -5,7 +5,7 @@
 #include "../ElDorito.hpp"
 #include "../Blam/BlamTypes.hpp"
 #include "../Patches/Ui.hpp"
-#include "../Patches/Camera.hpp"
+#include "../Patches/PatchCamera.hpp"
 #include "../ThirdParty/rapidjson/stringbuffer.h"
 #include "../ThirdParty/rapidjson/writer.h"
 #include <boost/regex.hpp>

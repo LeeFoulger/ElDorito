@@ -5,8 +5,9 @@
 #include "../Patches/Ui.hpp"
 #include "../Blam/BlamInput.hpp"
 #include "ModuleInput.hpp"
-#include "../../new/memory/thread_local.h"
 #include "../Blam/Math/MathUtil.hpp"
+
+#include <memory/thread_local.h>
 
 namespace
 {
@@ -292,7 +293,7 @@ namespace
 					continue;
 
 				returnInfo += ", ";
-				returnInfo += blam::k_camera_mode_names[i];
+				returnInfo += blam::camera_mode_get_name(i);
 			}
 			return false;
 		}
