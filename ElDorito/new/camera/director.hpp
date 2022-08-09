@@ -104,6 +104,10 @@ namespace blam
 
 		inline bool in_free_camera_mode()
 		{
+			// check the camera has vtable
+			if (*reinterpret_cast<long*>(camera_data) == 0)
+				return false;
+
 			e_camera_mode camera_mode = m_camera.get_type();
 			if (camera_mode == _camera_mode_flying || camera_mode == _camera_mode_scripted)
 				return true;
