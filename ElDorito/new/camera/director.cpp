@@ -134,7 +134,7 @@ namespace blam
 	c_director* director_get(long user_index)
 	{
 		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
+		if (!director_globals || !director_globals->directors[0][0])
 			return nullptr;
 
 		return (c_director*)&director_globals->directors[user_index];
