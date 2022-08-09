@@ -37,6 +37,8 @@
 #include <unordered_map>
 #include "../Web/Ui/ScreenLayer.hpp"
 
+#include <camera/director.hpp>
+
 using namespace Patches::Ui;
 
 namespace
@@ -518,11 +520,10 @@ namespace Patches::Ui
 
 	void UpdateHUDDistortion()
 	{
+		using namespace blam;
+
 		if (!validHUDDistortionTags)
 			return;
-
-		Pointer directorPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
-		auto cameraFunc = directorPtr(GameGlobals::Director::CameraFunctionIndex).Read<size_t>();
 
 		if (Modules::ModuleCamera::Instance().VarCameraHideHud->ValueInt != 0)
 		{
@@ -530,30 +531,25 @@ namespace Patches::Ui
 			return;
 		}
 
-		switch (cameraFunc) //Add cases as required.
-		{
-			//Unknown cameras:
-			//01672130 - c_camera
-			//01672920 - c_authored_camera
-			//0165A64C - c_director?
+		c_director* director = director_get(0);
+		if (!director)
+			return;
 
-		case 0x16724D4: //c_following_camera
-		case 0x16725DC: //c_dead_camera
-		case 0x167265C: //c_orbiting_camera
-		case 0x167280C: //c_scripted_camera
+		switch (director->get_camera()->get_type())
+		{
+		//case _camera_mode_authored:
+		case _camera_mode_following:
+		case _camera_mode_orbiting:
+		case _camera_mode_dead:
+		case _camera_mode_scripted:
 			ToggleHUDDistortion(false);
 			break;
-
-		case 0x166ACB0: //c_first_person_camera
-			if (Modules::ModuleTweaks::Instance().VarFlatHUD->ValueInt == 1)
-				ToggleHUDDistortion(false);
-			else
-				ToggleHUDDistortion(true);
+		case _camera_mode_first_person:
+			ToggleHUDDistortion(Modules::ModuleTweaks::Instance().VarFlatHUD->ValueInt != 1);
 			break;
-
-		case 0x165A6E4: //c_null_camera
-		case 0x16726D0: //c_flying_camera
-		case 0x16728A8: //c_static_camera
+		case _camera_mode_flying:
+		case _camera_mode_static:
+		case k_camera_mode_null:
 		default:
 			ToggleHUDDistortion(true);
 		}
