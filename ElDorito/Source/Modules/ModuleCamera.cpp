@@ -245,40 +245,28 @@ namespace
 		}
 		else if (camera_mode == blam::_camera_mode_first_person)
 		{
-			observer->positions_focus_offset.i = 0.0f;
-			observer->positions_focus_offset.j = 0.0f;
-			observer->positions_focus_offset.k = 0.0f;
-			observer->positions_look_shift.x = 0.0f;
-			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
 			observer->positions_focus_distance = 0.0f;
 		}
 		else if (camera_mode == blam::_camera_mode_following)
 		{
-			observer->positions_focus_offset.i = 0.0f;
-			observer->positions_focus_offset.j = 0.0f;
-			observer->positions_focus_offset.k = 0.1f;
-			observer->positions_look_shift.x = 0.0f;
-			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.1f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
 			observer->positions_focus_distance = 0.5f;
 			observer->horizontal_field_of_view = 110.0f * Blam::Math::RAD;
 		}
 		else if (camera_mode == blam::_camera_mode_flying)
 		{
-			observer->positions_focus_offset.i = 0.0f;
-			observer->positions_focus_offset.j = 0.0f;
-			observer->positions_focus_offset.k = 0.0f;
-			observer->positions_look_shift.x = 0.0f;
-			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
 			observer->positions_focus_distance = 0.0f;
 			flying = true;
 		}
 		else if (camera_mode == blam::_camera_mode_static)
 		{
-			observer->positions_focus_offset.i = 0.0f;
-			observer->positions_focus_offset.j = 0.0f;
-			observer->positions_focus_offset.k = 0.0f;
-			observer->positions_look_shift.x = 0.0f;
-			observer->positions_look_shift.y = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
 			observer->positions_focus_distance = 0.0f;
 		}
 		else
@@ -498,9 +486,7 @@ namespace Modules
 		}
 
 		// update position
-		observer->positions_focus_position.x = xPos;
-		observer->positions_focus_position.y = yPos;
-		observer->positions_focus_position.z = zPos;
+		observer->positions_focus_position = { xPos, yPos, zPos };
 
 		// update look angles
 		observer->positions_forward.i = cos(hLookAngle) * cos(vLookAngle);
