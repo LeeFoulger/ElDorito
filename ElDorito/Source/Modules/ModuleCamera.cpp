@@ -21,8 +21,6 @@ namespace
 		LookVectors = 5
 	};
 
-	bool flying = false;
-
 	// determine which camera definitions are editable based on the current camera mode
 	bool __stdcall IsCameraDefinitionEditable(CameraDefinitionType definition)
 	{
@@ -199,26 +197,27 @@ namespace
 		using namespace blam;
 		using namespace Blam::Memory;
 
-		s_thread_local_storage* tls = ElDorito::GetMainTls();
-		if (!tls)
+		c_director* director = director_get(0);
+		if (!director)
 			return false;
 
-		c_director* director = (c_director*)tls->director_globals->directors[0];
-		s_observer& observer = tls->g_observer_globals->observers[director->m_user_index];
+		s_observer* observer = observer_get(director->m_user_index);
+		if (!observer)
+			return false;
 
 		if (Arguments.size() < 3) {
 			std::stringstream ss;
-			ss << "X: " << observer.positions_focus_position.x << ", ";
-			ss << "Y: " << observer.positions_focus_position.y << ", ";
-			ss << "Z: " << observer.positions_focus_position.z;
+			ss << "X: " << observer->positions_focus_position.x << ", ";
+			ss << "Y: " << observer->positions_focus_position.y << ", ";
+			ss << "Z: " << observer->positions_focus_position.z;
 			returnInfo = ss.str();
 			return false;
 		}
 
 		// update position
-		observer.positions_focus_position.x = std::stof(Arguments[0]);// X
-		observer.positions_focus_position.y = std::stof(Arguments[1]);// Y
-		observer.positions_focus_position.z = std::stof(Arguments[2]);// Z
+		observer->positions_focus_position.x = std::stof(Arguments[0]);// X
+		observer->positions_focus_position.y = std::stof(Arguments[1]);// Y
+		observer->positions_focus_position.z = std::stof(Arguments[2]);// Z
 		return true;
 	}
 
@@ -229,15 +228,17 @@ namespace
 
 		std::string mode = Utils::String::ToLower(Modules::ModuleCamera::Instance().VarCameraMode->ValueString);
 
-		flying = false;
-
-		s_thread_local_storage* tls = ElDorito::GetMainTls();
-		if (!tls)
+		c_director* director = director_get(0);
+		if (!director)
 			return false;
 
-		c_director* director = (c_director*)tls->director_globals->directors[0];
-		s_player_control_globals* player_control_globals = tls->player_control_globals;
-		s_observer& observer = tls->g_observer_globals->observers[director->m_user_index];
+		s_observer* observer = observer_get(director->m_user_index);
+		if (!observer)
+			return false;
+
+		s_player_control_globals* player_control_globals = player_control_globals_get();
+		if (!player_control_globals)
+			return false;
 
 		// get new camera perspective function camera_vtable
 		e_camera_mode camera_mode = camera_mode_from_string(mode.c_str());
@@ -246,29 +247,28 @@ namespace
 		}
 		else if (camera_mode == _camera_mode_first_person)
 		{
-			observer.positions_focus_offset = { 0.0f, 0.0f, 0.0f };
-			observer.positions_look_shift = { 0.0f, 0.0f };
-			observer.positions_focus_distance = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
+			observer->positions_focus_distance = 0.0f;
 		}
 		else if (camera_mode == _camera_mode_following)
 		{
-			observer.positions_focus_offset = { 0.0f, 0.0f, 0.1f };
-			observer.positions_look_shift = { 0.0f, 0.0f };
-			observer.positions_focus_distance = 0.5f;
-			observer.horizontal_field_of_view = 110.0f * Blam::Math::RAD;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.1f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
+			observer->positions_focus_distance = 0.5f;
+			observer->horizontal_field_of_view = 110.0f * Blam::Math::RAD;
 		}
 		else if (camera_mode == _camera_mode_flying)
 		{
-			observer.positions_focus_offset = { 0.0f, 0.0f, 0.0f };
-			observer.positions_look_shift = { 0.0f, 0.0f };
-			observer.positions_focus_distance = 0.0f;
-			flying = true;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
+			observer->positions_focus_distance = 0.0f;
 		}
 		else if (camera_mode == _camera_mode_static)
 		{
-			observer.positions_focus_offset = { 0.0f, 0.0f, 0.0f };
-			observer.positions_look_shift = { 0.0f, 0.0f };
-			observer.positions_focus_distance = 0.0f;
+			observer->positions_focus_offset = { 0.0f, 0.0f, 0.0f };
+			observer->positions_look_shift = { 0.0f, 0.0f };
+			observer->positions_focus_distance = 0.0f;
 		}
 		else
 		{
@@ -405,16 +405,17 @@ namespace Modules
 		using namespace blam;
 		using namespace Blam::Memory;
 
-		if (!flying)
+		c_director* director = director_get(0);
+		if (!director || director->get_camera()->get_type() != _camera_mode_flying)
 			return;
 
-		s_thread_local_storage* tls = ElDorito::GetMainTls();
-		if (!tls)
+		s_observer* observer = observer_get(director->m_user_index);
+		if (!observer)
 			return;
 
-		c_director* director = (c_director*)tls->director_globals->directors[0];
-		s_player_control_globals* player_control_globals = tls->player_control_globals;
-		s_observer& observer = tls->g_observer_globals->observers[director->m_user_index];
+		s_player_control_globals* player_control_globals = player_control_globals_get();
+		if (!player_control_globals)
+			return;
 
 		float moveDelta = Modules::ModuleCamera::Instance().VarCameraSpeed->ValueFloat;
 		float lookDelta = 0.01f;	// not used yet
@@ -422,22 +423,22 @@ namespace Modules
 		// current values
 		float hLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.yaw;
 		float vLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.pitch;
-		float xPos = observer.positions_focus_position.x;
-		float yPos = observer.positions_focus_position.y;
-		float zPos = observer.positions_focus_position.z;
-		float xShift = observer.positions_focus_offset.i;
-		float yShift = observer.positions_focus_offset.j;
-		float zShift = observer.positions_focus_offset.k;
-		float hShift = observer.positions_look_shift.x;
-		float vShift = observer.positions_look_shift.y;
-		float depth = observer.positions_focus_distance;
-		float fov = observer.horizontal_field_of_view;
-		float iForward = observer.positions_forward.i;
-		float jForward = observer.positions_forward.j;
-		float kForward = observer.positions_forward.k;
-		float iUp = observer.positions_up.i;
-		float jUp = observer.positions_up.j;
-		float kUp = observer.positions_up.k;
+		float xPos = observer->positions_focus_position.x;
+		float yPos = observer->positions_focus_position.y;
+		float zPos = observer->positions_focus_position.z;
+		float xShift = observer->positions_focus_offset.i;
+		float yShift = observer->positions_focus_offset.j;
+		float zShift = observer->positions_focus_offset.k;
+		float hShift = observer->positions_look_shift.x;
+		float vShift = observer->positions_look_shift.y;
+		float depth = observer->positions_focus_distance;
+		float fov = observer->horizontal_field_of_view;
+		float iForward = observer->positions_forward.i;
+		float jForward = observer->positions_forward.j;
+		float kForward = observer->positions_forward.k;
+		float iUp = observer->positions_up.i;
+		float jUp = observer->positions_up.j;
+		float kUp = observer->positions_up.k;
 		float iRight = cos(hLookAngle + 3.14159265359f / 2);
 		float jRight = sin(hLookAngle + 3.14159265359f / 2);
 
@@ -486,21 +487,27 @@ namespace Modules
 		}
 
 		// update position
-		observer.positions_focus_position = { xPos, yPos, zPos };
+		observer->positions_focus_position = { xPos, yPos, zPos };
 
 		// update look angles
-		observer.positions_forward.i = cos(hLookAngle) * cos(vLookAngle);
-		observer.positions_forward.j = sin(hLookAngle) * cos(vLookAngle);
-		observer.positions_forward.k = sin(vLookAngle);
-		observer.positions_up.i = -cos(hLookAngle) * sin(vLookAngle);
-		observer.positions_up.j = -sin(hLookAngle) * sin(vLookAngle);
-		observer.positions_up.k = cos(vLookAngle);
+		observer->positions_forward.i = cos(hLookAngle) * cos(vLookAngle);
+		observer->positions_forward.j = sin(hLookAngle) * cos(vLookAngle);
+		observer->positions_forward.k = sin(vLookAngle);
+		observer->positions_up.i = -cos(hLookAngle) * sin(vLookAngle);
+		observer->positions_up.j = -sin(hLookAngle) * sin(vLookAngle);
+		observer->positions_up.k = cos(vLookAngle);
 
-		observer.horizontal_field_of_view = fov;
+		observer->horizontal_field_of_view = fov;
 	}
 
 	bool ModuleCamera::IsFlying() const
 	{
-		return flying;
+		using namespace blam;
+
+		c_director* director = director_get(0);
+		if (!director || director->get_camera()->get_type() != _camera_mode_flying)
+			return false;
+
+		return true;
 	}
 }
