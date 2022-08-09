@@ -6,12 +6,12 @@
 #include "observer.hpp"
 
 #include "camera.hpp"
-//#include "following_camera.hpp"
-//#include "orbiting_camera.hpp"
-//#include "flying_camera.hpp"
-//#include "first_person_camera.hpp"
-//#include "dead_camera.hpp"
-//#include "static_camera.hpp"
+#include "following_camera.hpp"
+#include "orbiting_camera.hpp"
+#include "flying_camera.hpp"
+#include "first_person_camera.hpp"
+#include "dead_camera.hpp"
+#include "static_camera.hpp"
 
 //#include "director.hpp"
 //#include "game_director.hpp"
