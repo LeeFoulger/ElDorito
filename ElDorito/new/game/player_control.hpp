@@ -93,4 +93,6 @@ namespace blam
 		char __data8AB[5];
 	};
 	static_assert(sizeof(s_player_control_globals) == 0x8B0);
+
+	extern s_player_control_globals* player_control_globals_get();
 }

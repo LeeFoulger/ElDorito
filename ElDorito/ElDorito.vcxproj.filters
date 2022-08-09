@@ -626,6 +626,7 @@
     <ClCompile Include="new\camera\camera.cpp" />
     <ClCompile Include="new\camera\director.cpp" />
     <ClCompile Include="new\camera\observer.cpp" />
+    <ClCompile Include="new\game\player_control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">

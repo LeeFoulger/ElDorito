@@ -16,6 +16,7 @@
     <ClCompile Include="new\camera\director.cpp" />
     <ClCompile Include="new\camera\observer.cpp" />
     <ClCompile Include="new\game\game_globals.cpp" />
+    <ClCompile Include="new\game\player_control.cpp" />
     <ClCompile Include="new\hs\hs.cpp" />
     <ClCompile Include="new\memory\data.cpp" />
     <ClCompile Include="new\tag_files\tag_definitions.cpp" />
