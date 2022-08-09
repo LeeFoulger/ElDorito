@@ -5,7 +5,7 @@
 
 namespace blam
 {
-	enum e_camera_mode : unsigned long
+	enum e_camera_mode : dword
 	{
 		_camera_mode_following = 0,
 		_camera_mode_orbiting,
@@ -21,6 +21,7 @@ namespace blam
 	};
 
 	extern const char* camera_mode_get_name(long camera_mode);
+	extern e_camera_mode camera_mode_from_string(const char* str);
 
 	struct c_camera
 	{
@@ -54,7 +55,7 @@ namespace blam
 
 	struct c_null_camera : public c_camera
 	{
+		byte unused[0x3C];
 	};
-	static_assert(sizeof(c_null_camera) == 0x10);
-	extern e_camera_mode camera_mode_from_string(const char* str);
+	static_assert(sizeof(c_null_camera) == 0x4C);
 }

@@ -15,7 +15,9 @@ namespace blam
 		datum_index m_target_object_index;
 		bool __unknown38;
 		byte m_user_index;
-		char __data[18];
+
+		byte pad[0x2];
+		byte unused[0x10];
 	};
 	static_assert(sizeof(c_dead_camera) == 0x4C);
 }

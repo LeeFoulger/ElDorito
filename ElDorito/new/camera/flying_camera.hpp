@@ -18,12 +18,15 @@ namespace blam
 		real_point3d m_position;
 		real_euler_angles2d m_facing;
 		real m_roll;
+
 		real __unknown28;
 		real __unknown2C;
 		bool __unknown30;
 		real __unknown34;
 
 		dword_flags m_flags;
+
+		byte unused[0x10];
 
 		inline void set_lock_in_xy_plane(bool value)
 		{
@@ -57,5 +60,5 @@ namespace blam
 				m_flags |= ~(1 << _movement_bit);
 		}
 	};
-	static_assert(sizeof(c_flying_camera) == 0x3C);
+	static_assert(sizeof(c_flying_camera) == 0x4C);
 }

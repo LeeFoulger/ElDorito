@@ -24,12 +24,6 @@ namespace blam
 		return k_camera_mode_names[camera_mode];
 	}
 
-	void c_camera::set_next_move_instantly()
-	{
-		__unknownC = 5;
-		m_flags |= (1 << _next_move_instantly_bit);
-	}
-
 	e_camera_mode camera_mode_from_string(const char* str)
 	{
 		e_camera_mode camera_mode = k_camera_mode_null;
@@ -42,5 +36,11 @@ namespace blam
 		}
 
 		return camera_mode;
+	}
+
+	void c_camera::set_next_move_instantly()
+	{
+		__unknownC = 5;
+		m_flags |= (1 << _next_move_instantly_bit);
 	}
 }
