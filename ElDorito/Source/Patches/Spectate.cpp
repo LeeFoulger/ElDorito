@@ -14,10 +14,12 @@
 #include "../ThirdParty/rapidjson/writer.h"
 #include "../ThirdParty/rapidjson/stringbuffer.h"
 
+#include <camera/game_director.hpp>
+
 namespace
 {
-	void __fastcall GameDirectorUpdateHook(void* thisptr, void* unused, int a2);
-	void __cdecl GetObserverCameraSensitivityHook(int localPlayerIndex, float* sensitivity);
+	void __fastcall game_director_update_hook(blam::c_director* director, void* unused, int a2);
+	void __cdecl input_abstraction_get_player_look_angular_velocity_hook(long controller_index, blam::real_euler_angles2d* angular_velocity);
 
 	struct
 	{
@@ -30,8 +32,8 @@ namespace Patches::Spectate
 {
 	void ApplyAll()
 	{
-		Pointer(0x01671F5C).Write((uint32_t)GameDirectorUpdateHook);
-		Hook(0x32A8D6, GetObserverCameraSensitivityHook, HookFlags::IsCall).Apply();
+		Pointer(0x01671F5C).Write((uint32_t)game_director_update_hook);
+		Hook(0x32A8D6, input_abstraction_get_player_look_angular_velocity_hook, HookFlags::IsCall).Apply();
 	}
 }
 
@@ -119,12 +121,11 @@ namespace
 			&& !(Pointer(player)(0x4).Read<uint32_t>() & 8u);
 	}
 
-	void __fastcall GameDirectorUpdateHook(void* thisptr, void* unused, int a2)
+	void __fastcall game_director_update_hook(blam::c_director* director, void* unused, int a2)
 	{
-		static auto GameDirectorUpdate = (void(__thiscall*)(void* thisptr, int a2))(0x007219A0);
+		static void(__thiscall* game_director_update)(blam::c_director*, long) = reinterpret_cast<decltype(game_director_update)>(0x007219A0);
 		
-		auto localPlayerIndex = *(uint32_t*)((char*)thisptr + 0x140);
-		if (IsSpectating(localPlayerIndex))
+		if (IsSpectating(director->m_user_index))
 		{
 			if (!state.Active)
 			{
@@ -142,11 +143,10 @@ namespace
 
 			if (state.Active)
 			{
-				auto playerIndex = *(uint32_t*)((char*)thisptr + 0x144);
-				if (state.PlayerIndex != playerIndex)
+				if (state.PlayerIndex != director->m_output_user_index)
 				{
-					state.PlayerIndex = playerIndex;
-					NotifyPlayerChanged(playerIndex);
+					state.PlayerIndex = director->m_output_user_index;
+					NotifyPlayerChanged(director->m_output_user_index);
 				}
 			}
 		}
@@ -160,29 +160,28 @@ namespace
 			}
 		}
 
-		GameDirectorUpdate(thisptr, a2);
+		game_director_update(director, a2);
 	}
 
-	void __cdecl GetObserverCameraSensitivityHook(int localPlayerIndex, float* sensitivity)
+	void __cdecl input_abstraction_get_player_look_angular_velocity_hook(long controller_index, blam::real_euler_angles2d* angular_velocity)
 	{
 		auto& moduleInput = Modules::ModuleInput::Instance();
-		auto& moduleSettings = Modules::ModuleSettings::Instance();
-		auto bindings = moduleInput.GetBindings();
+		Modules::ModuleSettings& moduleSettings = Modules::ModuleSettings::Instance();
+		Blam::Input::BindingsTable* bindings = moduleInput.GetBindings();
 
 		float sens = moduleInput.VarSpectateSensitivity->ValueFloat;
 
 		// the controller defaults are unreasonably sensitive
-		const auto isUsingController = *(bool*)0x0244DE98;
-		if (isUsingController)
+		const bool isUsingController = *(bool*)0x0244DE98;
+		if (!isUsingController)
 		{
-			sens *= 0.015f;
-			sensitivity[0] = bindings->ControllerSensitivityX * 0.017453292f * sens;
-			sensitivity[1] = bindings->ControllerSensitivityY * 0.017453292f * sens;
+			angular_velocity->yaw = (moduleSettings.VarMouseSensitivityHorizontal->ValueInt / 100.0f * 360.0f) * 0.017453294f * sens;
+			angular_velocity->pitch = (moduleSettings.VarMouseSensitivityVertical->ValueInt / 100.0f * 360.0f) * 0.017453294f * sens;
+			return;
 		}
-		else
-		{
-			sensitivity[0] = (moduleSettings.VarMouseSensitivityHorizontal->ValueInt / 100.0f * 360.0f) * 0.017453294f * sens;
-			sensitivity[1] = (moduleSettings.VarMouseSensitivityVertical->ValueInt / 100.0f * 360.0f) * 0.017453294f * sens;
-		}
+
+		sens *= 0.015f;
+		angular_velocity->yaw = bindings->ControllerSensitivityX * 0.017453292f * sens;
+		angular_velocity->pitch = bindings->ControllerSensitivityY * 0.017453292f * sens;
 	}
 }
