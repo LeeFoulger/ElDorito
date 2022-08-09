@@ -13,12 +13,6 @@
 #include "dead_camera.hpp"
 #include "static_camera.hpp"
 
-//#include "director.hpp"
-//#include "game_director.hpp"
-//#include "observer_director.hpp"
-//#include "saved_film_director.hpp"
-//#include "editor_director.hpp"
-
 namespace blam
 {
 	enum e_director_mode : long
@@ -42,8 +36,7 @@ namespace blam
 		// c_following_camera, c_dead_camera, c_orbiting_camera
 		_director_perspective_1,
 
-		// c_scripted_camera
-		_director_perspective_2,
+		_director_perspective_scripted,
 
 		// c_null_camera, (c_authored_camera default)
 		_director_perspective_3,
@@ -64,30 +57,15 @@ namespace blam
 		virtual bool can_use_camera_mode(e_camera_mode);
 		//virtual void select_fallback_target(); // c_observer_director, c_saved_film_director
 
-		union
-		{
-			c_camera m_camera;
-			c_null_camera m_null;
-			c_following_camera m_following;
-			c_orbiting_camera m_orbiting;
-			c_flying_camera m_flying;
-			c_first_person_camera m_first_person;
-			c_dead_camera m_dead;
-			c_static_camera m_static;
-			c_scripted_camera m_scripted;
-			c_authored_camera m_authored;
-
-			char camera_data[0x4C];
-		};
+		char m_camera[0x4C];
 
 		s_observer_command m_observer_command;
 		real m_transition_time;
 		long m_user_index;
-		long m_player_index;
+		long m_output_user_index;
 		bool __unknown148;
-		e_camera_mode m_camera_mode;
-		long __unknown150;
-		char __data[12];
+
+		byte pad[3];
 
 		long get_perspective();
 		bool set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update);
@@ -99,26 +77,28 @@ namespace blam
 
 		inline c_camera* get_camera()
 		{
-			return &m_camera;
+			return (c_camera*)&m_camera;
 		}
 
 		inline bool in_free_camera_mode()
 		{
+			c_camera* camera = get_camera();
+
 			// check the camera has vtable
-			if (*reinterpret_cast<long*>(camera_data) == 0)
+			if (*reinterpret_cast<long*>(camera) == 0)
 				return false;
 
-			e_camera_mode camera_mode = m_camera.get_type();
+			e_camera_mode camera_mode = camera->get_type();
 			if (camera_mode == _camera_mode_flying || camera_mode == _camera_mode_scripted)
 				return true;
 
 			if (camera_mode == _camera_mode_authored)
-				return m_camera.get_target() == -1;
+				return camera->get_target() == -1;
 
 			return false;
 		}
 	};
-	static_assert(sizeof(c_director) == 0x160);
+	static_assert(sizeof(c_director) == 0x14C);
 
 	struct s_director_info
 	{
@@ -130,7 +110,9 @@ namespace blam
 
 	struct s_director_globals
 	{
-		c_director directors[4];
+		// c_static_array<unsigned char [352],4> directors;
+		unsigned char directors[4][0x160];
+
 		s_director_info infos[4];
 		real __unknown5B0;
 		real __unknown5B4;
@@ -143,4 +125,5 @@ namespace blam
 	extern c_director* director_get(long user_index);
 	extern s_director_info* director_get_info(long user_index);
 	extern long director_get_perspective(long user_index);
+	extern void director_set_mode(long user_index, e_director_mode director_mode);
 }

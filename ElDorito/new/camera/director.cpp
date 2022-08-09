@@ -1,6 +1,39 @@
 #include "director.hpp"
 
+#include "game_director.hpp"
+#include "saved_film_director.hpp"
+#include "observer_director.hpp"
+#include "debug_director.hpp"
+#include "editor_director.hpp"
+
 #include <ElDorito.hpp>
+
+namespace
+{
+	bool(__cdecl* game_in_progress)(void) = reinterpret_cast<decltype(game_in_progress)>(0x005314B0);
+	bool(__cdecl* game_is_ui_shell)(void) = reinterpret_cast<decltype(game_is_ui_shell)>(0x00531E90);
+
+	long(__cdecl* dead_or_alive_unit_from_user)(long) = reinterpret_cast<decltype(dead_or_alive_unit_from_user)>(0x005916F0);
+	void(__cdecl* first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
+	long(__cdecl* players_first_active_user)(void) = reinterpret_cast<decltype(players_first_active_user)>(0x00589A30);
+
+	using namespace blam;
+
+	void(__thiscall* following_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(following_camera_ctor)>(0x00728630);
+	void(__thiscall* orbiting_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(orbiting_camera_ctor)>(0x0072A5E0);
+	void(__thiscall* flying_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(flying_camera_ctor)>(0x0072ACA0);
+	void(__thiscall* first_person_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(first_person_camera_ctor)>(0x0065F410);
+	void(__thiscall* dead_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(dead_camera_ctor)>(0x00729E60);
+	void(__thiscall* static_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(static_camera_ctor)>(0x0072F170);
+	void(__thiscall* scripted_camera_ctor)(c_camera*) = reinterpret_cast<decltype(scripted_camera_ctor)>(0x0072BEB0);
+	void(__thiscall* authored_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(authored_camera_ctor)>(0x0072F2E0);
+	
+	void(__thiscall* game_director_ctor)(c_director*, long) = reinterpret_cast<decltype(game_director_ctor)>(0x007215C0);
+	void(__thiscall* saved_film_director_ctor)(c_director*, long) = reinterpret_cast<decltype(saved_film_director_ctor)>(0x007276C0);
+	void(__thiscall* observer_director_ctor)(c_director*, long) = reinterpret_cast<decltype(observer_director_ctor)>(0x00726430);
+	void(__thiscall* debug_director_ctor)(c_director*, long) = reinterpret_cast<decltype(debug_director_ctor)>(0x007260D0);
+	void(__thiscall* editor_director_ctor)(c_director*, long) = reinterpret_cast<decltype(editor_director_ctor)>(0x00727EA0);
+}
 
 namespace blam
 {
@@ -21,6 +54,74 @@ namespace blam
 		return k_director_mode_names[director_mode];
 	}
 
+	long c_director::get_perspective()
+	{
+
+		if (!game_in_progress())
+			return 3;
+		long director_perspective = get_camera()->get_perspective();
+		if (!director_perspective)
+			director_perspective = m_transition_time > 0.0;
+		if (game_is_ui_shell())
+			return 3;
+
+		return director_perspective;
+	}
+
+	bool c_director::set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update)
+	{
+		if (!can_use_camera_mode(camera_mode))
+			return false;
+
+		c_camera* camera = get_camera();
+		e_camera_mode current_camera_mode = camera->get_type();
+
+		bool result = camera_mode != current_camera_mode;
+		if (result || force_update)
+		{
+			switch (camera_mode)
+			{
+			case _camera_mode_following:
+				following_camera_ctor(camera, dead_or_alive_unit_from_user(m_user_index));
+				break;
+			case _camera_mode_orbiting:
+				orbiting_camera_ctor(camera, dead_or_alive_unit_from_user(m_user_index));
+				break;
+			case _camera_mode_flying:
+				flying_camera_ctor(camera, m_user_index);
+				break;
+			case _camera_mode_first_person:
+				first_person_camera_ctor(camera, dead_or_alive_unit_from_user(m_user_index));
+				break;
+			case _camera_mode_dead:
+				dead_camera_ctor(camera, m_user_index);
+				break;
+			case _camera_mode_static:
+				static_camera_ctor(camera, m_user_index);
+				break;
+			case _camera_mode_scripted:
+				scripted_camera_ctor(camera);
+				break;
+			case _camera_mode_authored:
+				authored_camera_ctor(camera, m_user_index);
+				break;
+			}
+			m_transition_time = transition_time;
+		}
+
+		long director_perspective = get_perspective();
+		s_director_globals* director_globals = director_globals_get();
+		if (director_globals->infos[m_user_index].director_perspective != director_perspective ||
+			director_globals->infos[m_user_index].camera_mode != camera_mode)
+		{
+			director_globals->infos[m_user_index].director_perspective = director_perspective;
+			director_globals->infos[m_user_index].camera_mode = camera_mode;
+			first_person_weapon_perspective_changed(m_user_index);
+		}
+
+		return result || force_update;
+	}
+
 	s_director_globals* director_globals_get()
 	{
 		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
@@ -36,7 +137,7 @@ namespace blam
 		if (!director_globals)
 			return nullptr;
 
-		return &director_globals->directors[user_index];
+		return (c_director*)&director_globals->directors[user_index];
 	}
 
 	s_director_info* director_get_info(long user_index)
@@ -57,83 +158,30 @@ namespace blam
 		return director->get_perspective();
 	}
 
-	long c_director::get_perspective()
+	void director_set_mode(long user_index, e_director_mode director_mode)
 	{
-		static bool(__cdecl * game_in_progress)() = reinterpret_cast<decltype(game_in_progress)>(0x005314B0);
-		static bool(__cdecl * game_is_ui_shell)() = reinterpret_cast<decltype(game_is_ui_shell)>(0x00531E90);
+		c_director* director = director_get(user_index);
 
-		if (!game_in_progress())
-			return 3;
-		long director_perspective = m_camera.get_perspective();
-		if (!director_perspective)
-			director_perspective = m_transition_time > 0.0;
-		if (game_is_ui_shell())
-			return 3;
-
-		return director_perspective;
-	}
-
-	bool c_director::set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update)
-	{
-		static void(__thiscall * following_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(following_camera_ctor)>(0x00728630);
-		static void(__thiscall * orbiting_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(orbiting_camera_ctor)>(0x0072A5E0);
-		static void(__thiscall * flying_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(flying_camera_ctor)>(0x0072ACA0);
-		static void(__thiscall * first_person_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(first_person_camera_ctor)>(0x0065F410);
-		static void(__thiscall * dead_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(dead_camera_ctor)>(0x00729E60);
-		static void(__thiscall * static_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(static_camera_ctor)>(0x0072F170);
-		static void(__thiscall * scripted_camera_ctor)(c_camera*) = reinterpret_cast<decltype(scripted_camera_ctor)>(0x0072BEB0);
-		static void(__thiscall * authored_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(authored_camera_ctor)>(0x0072F2E0);
-
-		static long(__cdecl * dead_or_alive_unit_from_user)(long) = reinterpret_cast<decltype(dead_or_alive_unit_from_user)>(0x005916F0);
-		static void(__cdecl * first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
-
-		if (!can_use_camera_mode(camera_mode))
-			return false;
-
-		e_camera_mode current_camera_mode = m_camera.get_type();
-		bool result = camera_mode != current_camera_mode;
-		if (result || force_update)
+		switch (director_mode)
 		{
-			switch (camera_mode)
-			{
-			case _camera_mode_following:
-				following_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_orbiting:
-				orbiting_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_flying:
-				flying_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_first_person:
-				first_person_camera_ctor(&m_camera, dead_or_alive_unit_from_user(m_user_index));
-				break;
-			case _camera_mode_dead:
-				dead_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_static:
-				static_camera_ctor(&m_camera, m_user_index);
-				break;
-			case _camera_mode_scripted:
-				scripted_camera_ctor(&m_camera);
-				break;
-			case _camera_mode_authored:
-				authored_camera_ctor(&m_camera, m_user_index);
-				break;
-			}
-			m_transition_time = transition_time;
+		case _director_mode_game:
+			game_director_ctor(director, user_index);
+			break;
+		case _director_mode_saved_film:
+			saved_film_director_ctor(director, user_index);
+			break;
+		case _director_mode_observer:
+			observer_director_ctor(director, user_index);
+			break;
+		case _director_mode_debug:
+			debug_director_ctor(director, user_index);
+			//flying_camera_ctor(director->get_camera(), user_index);
+			break;
+		case _director_mode_editor:
+			editor_director_ctor(director, user_index);
+			break;
 		}
 
-		long director_perspective = get_perspective();
-		s_director_globals* director_globals = director_globals_get();
-		if (director_globals->infos[m_user_index].director_perspective != director_perspective ||
-			director_globals->infos[m_user_index].camera_mode != camera_mode)
-		{
-			director_globals->infos[m_user_index].director_perspective = director_perspective;
-			director_globals->infos[m_user_index].camera_mode = camera_mode;
-			first_person_weapon_perspective_changed(m_user_index);
-		}
-
-		return result || force_update;
+		director_get_info(user_index)->director_mode = director_mode;
 	}
 }

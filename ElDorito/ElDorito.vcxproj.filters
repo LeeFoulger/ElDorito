@@ -1472,6 +1472,11 @@
     <ClInclude Include="new\camera\first_person_camera.hpp" />
     <ClInclude Include="new\camera\dead_camera.hpp" />
     <ClInclude Include="new\camera\static_camera.hpp" />
+    <ClInclude Include="new\camera\game_director.hpp" />
+    <ClInclude Include="new\camera\observer_director.hpp" />
+    <ClInclude Include="new\camera\editor_director.hpp" />
+    <ClInclude Include="new\camera\saved_film_director.hpp" />
+    <ClInclude Include="new\camera\debug_director.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
