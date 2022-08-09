@@ -75,9 +75,10 @@ namespace blam
 			return set_camera_mode_internal(camera_mode, transition_time, false);
 		}
 
-		inline c_camera* get_camera()
+		template<typename t_type = c_camera>
+		inline t_type* get_camera()
 		{
-			return (c_camera*)&m_camera;
+			return (t_type*)&m_camera;
 		}
 
 		inline bool in_free_camera_mode()

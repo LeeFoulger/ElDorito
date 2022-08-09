@@ -56,7 +56,6 @@ namespace blam
 
 	long c_director::get_perspective()
 	{
-
 		if (!game_in_progress())
 			return 3;
 		long director_perspective = get_camera()->get_perspective();
