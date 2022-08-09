@@ -311,10 +311,8 @@ namespace
 		// disable player movement while in flycam
 		player_control_globals->input_user_states[director->m_user_index].player_input_locked = (camera_mode == _camera_mode_flying);
 
-		// pan-cam
-		player_control_globals->machinima_camera_enabled = (camera_mode == _camera_mode_flying);
-		player_control_globals->machinima_camera_debug = (camera_mode == _camera_mode_flying);
-		//player_control_globals->machinima_camera_use_old_controls = (camera_mode == _camera_mode_flying);
+		// machinima camera
+		player_control_set_machinima_camera(camera_mode == _camera_mode_flying, camera_mode == _camera_mode_flying, false);
 
 		if (camera_mode != k_camera_mode_null)
 			director->set_camera_mode(camera_mode, 0.0f);

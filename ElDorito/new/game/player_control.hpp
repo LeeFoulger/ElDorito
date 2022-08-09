@@ -95,4 +95,8 @@ namespace blam
 	static_assert(sizeof(s_player_control_globals) == 0x8B0);
 
 	extern s_player_control_globals* player_control_globals_get();
+	extern inline bool player_control_get_machinima_camera_enabled();
+	extern inline bool player_control_get_machinima_camera_use_old_controls();
+	extern inline bool player_control_get_machinima_camera_debug();
+	extern inline void player_control_set_machinima_camera(bool enabled, bool debug, bool use_old_controls);
 }
