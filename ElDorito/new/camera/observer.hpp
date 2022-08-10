@@ -91,7 +91,9 @@ namespace blam
 	{
 		real __unknown0;
 		s_observer observers[4];
-		char __dataF24[4];
+		char __dataF24[2];
+		bool block_for_one_frame;
+		char __dataF27[1];
 	};
 	static_assert(sizeof(s_observer_globals) == 0xF28);
 
