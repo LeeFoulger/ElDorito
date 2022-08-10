@@ -78,6 +78,9 @@ namespace blam
 		template<typename t_type = c_camera>
 		inline t_type* get_camera()
 		{
+			if (!m_camera[0])
+				return nullptr;
+
 			return (t_type*)&m_camera;
 		}
 
