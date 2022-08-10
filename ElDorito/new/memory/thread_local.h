@@ -42,13 +42,6 @@ namespace blam
 	};
 	static_assert(sizeof(s_main_time_globals) == 0x40);
 
-	struct random_math_globals
-	{
-		dword __unknown0;
-		dword __unknown4;
-	};
-	static_assert(sizeof(random_math_globals) == 0x8);
-
 	struct players_globals
 	{
 		char __data[0x234];
@@ -243,11 +236,11 @@ namespace blam
 	};
 	static_assert(sizeof(s_game_allegiance_globals) == 0x184);
 
-	struct atmosphere_fog_globals
+	struct s_atmosphere_fog_globals
 	{
 		char __data[0x14];
 	};
-	static_assert(sizeof(atmosphere_fog_globals) == 0x14);
+	static_assert(sizeof(s_atmosphere_fog_globals) == 0x14);
 
 	struct s_scenario_soft_ceilings_globals
 	{
@@ -293,7 +286,7 @@ namespace blam
 	};
 	static_assert(sizeof(cinematic_light_globals) == 0xB2C8);
 
-	struct physics_constants
+	struct s_physics_constants
 	{
 		dword gravity;
 		dword water_density;
@@ -304,35 +297,31 @@ namespace blam
 		dword __unknown18;
 		dword __unknown1C;
 	};
-	static_assert(sizeof(physics_constants) == 0x20);
+	static_assert(sizeof(s_physics_constants) == 0x20);
 
-	struct recorded_animations
-	{
-		char __data[0xA4];
-	};
-	static_assert(sizeof(recorded_animations) == 0xA4);
+	//struct recorded_animation_datum : datum_header
 
-	struct game_save_globals
+	struct s_game_save_globals
 	{
 		char __data[0x18];
 	};
-	static_assert(sizeof(game_save_globals) == 0x18);
+	static_assert(sizeof(s_game_save_globals) == 0x18);
 
 	//struct s_rasterizer_screen_effect : datum_header
 
-	struct player_effects
+	struct s_player_effect_globals
 	{
 		char __data[0x3A0];
 	};
-	static_assert(sizeof(player_effects) == 0x3A0);
+	static_assert(sizeof(s_player_effect_globals) == 0x3A0);
 
-	struct scenario_interpolator_globals
+	struct s_scenario_interpolator_globals
 	{
 		char __data[0x204];
 	};
-	static_assert(sizeof(scenario_interpolator_globals) == 0x204);
+	static_assert(sizeof(s_scenario_interpolator_globals) == 0x204);
 
-	struct survival_mode_globals
+	struct s_survival_mode_globals
 	{
 		long lives;
 		short set;
@@ -352,34 +341,36 @@ namespace blam
 		char __unknown2C[4];
 		long scoreboard;
 		char __unknown34[464];
-	};
-	static_assert(sizeof(survival_mode_globals) == 0x204);
 
-	struct player_training_globals
+		char __data[0x5DC];
+	};
+	static_assert(sizeof(s_survival_mode_globals) == 0x7E0);
+
+	struct s_player_training_globals
 	{
 		char __data[0x8E8];
 	};
-	static_assert(sizeof(player_training_globals) == 0x8E8);
+	static_assert(sizeof(s_player_training_globals) == 0x8E8);
 
-	struct scenario_kill_trigger_volume_state
+	struct s_scenario_kill_trigger_volumes_state
 	{
 		char __data[0x84];
 	};
-	static_assert(sizeof(scenario_kill_trigger_volume_state) == 0x84);
+	static_assert(sizeof(s_scenario_kill_trigger_volumes_state) == 0x84);
 
-	struct deterministic_game_sound_globals
+	struct s_game_sound_deterministic_globals
 	{
 		char __data[0x1300];
 	};
-	static_assert(sizeof(deterministic_game_sound_globals) == 0x1300);
+	static_assert(sizeof(s_game_sound_deterministic_globals) == 0x1300);
 
 	//struct s_decal_system_datum : datum_header
 
-	struct decal_counts
+	struct s_decal_counts
 	{
 		char __data[0x20];
 	};
-	static_assert(sizeof(decal_counts) == 0x20);
+	static_assert(sizeof(s_decal_counts) == 0x20);
 
 	struct decal
 	{
@@ -387,17 +378,17 @@ namespace blam
 	};
 	static_assert(sizeof(decal) == 0x130);
 
-	struct decal_messaging_queue
+	struct s_decal_message_queue
 	{
 		char __data[0x824];
 	};
-	static_assert(sizeof(decal_messaging_queue) == 0x824);
+	static_assert(sizeof(s_decal_message_queue) == 0x824);
 
-	struct impact_globals
+	struct s_impact_globals
 	{
 		byte __unknown0[0x8C];
 	};
-	static_assert(sizeof(impact_globals) == 0x8C);
+	static_assert(sizeof(s_impact_globals) == 0x8C);
 
 	struct impacts
 	{
@@ -729,56 +720,46 @@ namespace blam
 	};
 	static_assert(sizeof(chud_persistent_global_data) == 0xFA40);
 
-	struct user_widget
-	{
-		char __data[0x18];
-	};
-	static_assert(sizeof(user_widget) == 0x18);
+	// struct chud_widget_datum : datum_header
 
-	struct first_person_orientations
+	struct s_first_person_orientations
 	{
 		char __data[0x12C00];
 	};
-	static_assert(sizeof(first_person_orientations) == 0x12C00);
+	static_assert(sizeof(s_first_person_orientations) == 0x12C00);
 
-	struct first_person_weapons
+	struct first_person_weapon
 	{
 		char __data[0x14000];
 	};
-	static_assert(sizeof(first_person_weapons) == 0x14000);
+	static_assert(sizeof(first_person_weapon) == 0x14000);
 
-	struct cortana_globals
+	struct s_cortana_globals
 	{
 		dword __unknown0;
 		dword __unknown4;
 		dword __unknown8;
 		dword __unknownC;
 	};
-	static_assert(sizeof(cortana_globals) == 0x10);
+	static_assert(sizeof(s_cortana_globals) == 0x10);
 
-	struct campaign_objectives
+	struct s_current_objective_state
 	{
 		char __data[0x14];
 	};
-	static_assert(sizeof(campaign_objectives) == 0x14);
+	static_assert(sizeof(s_current_objective_state) == 0x14);
 
-	struct object_globals
+	struct s_object_globals
 	{
 		char __data[0x6608];
 	};
-	static_assert(sizeof(object_globals) == 0x6608);
+	static_assert(sizeof(s_object_globals) == 0x6608);
 
 	struct objects_memory_pool
 	{
 		char __data[0x44];
 	};
 	static_assert(sizeof(objects_memory_pool) == 0x44);
-
-	struct object_name_list
-	{
-		char __data[0x2000];
-	};
-	static_assert(sizeof(object_name_list) == 0x2000);
 
 	struct object_messaging_queue
 	{
@@ -798,11 +779,17 @@ namespace blam
 	};
 	static_assert(sizeof(object_render_data) == 0x2000);
 
-	struct object_placement
+	struct s_damage_globals
+	{
+		char __data[0x810];
+	};
+	static_assert(sizeof(s_damage_globals) == 0x810);
+
+	struct s_object_placement_globals
 	{
 		char __data[0x320];
 	};
-	static_assert(sizeof(object_placement) == 0x320);
+	static_assert(sizeof(s_object_placement_globals) == 0x320);
 
 	struct device_groups
 	{
@@ -819,23 +806,23 @@ namespace blam
 	};
 	static_assert(sizeof(object_scripting) == 0x304);
 
-	struct object_broadphase
+	struct s_object_broadphase
 	{
 		char __data[0x32450];
 	};
-	static_assert(sizeof(object_broadphase) == 0x32450);
+	static_assert(sizeof(s_object_broadphase) == 0x32450);
 
-	struct object_early_movers
+	struct s_object_early_movers_globals
 	{
 		char __data[0x2688];
 	};
-	static_assert(sizeof(object_early_movers) == 0x2688);
+	static_assert(sizeof(s_object_early_movers_globals) == 0x2688);
 
-	struct object_schedule_globals
+	struct s_object_scehdule_globals
 	{
 		char __data[0x27C];
 	};
-	static_assert(sizeof(object_schedule_globals) == 0x27C);
+	static_assert(sizeof(s_object_scehdule_globals) == 0x27C);
 
 	struct object_activation_regions
 	{
@@ -849,17 +836,17 @@ namespace blam
 	};
 	static_assert(sizeof(lights) == 0xE4);
 
-	struct lights_globals
+	struct lights_game_globals_definition
 	{
 		char __data[0x40];
 	};
-	static_assert(sizeof(lights_globals) == 0x40);
+	static_assert(sizeof(lights_game_globals_definition) == 0x40);
 
-	struct nondeterministic_render_light_data
+	struct s_nondeterministic_light_data
 	{
 		char __data[0x2580];
 	};
-	static_assert(sizeof(nondeterministic_render_light_data) == 0x2580);
+	static_assert(sizeof(s_nondeterministic_light_data) == 0x2580);
 
 	struct widget
 	{
@@ -869,17 +856,13 @@ namespace blam
 	};
 	static_assert(sizeof(widget) == 0xC);
 
-	struct recycling_volumes
+	struct s_recycling_volumes
 	{
 		char __data[0x148];
 	};
-	static_assert(sizeof(recycling_volumes) == 0x148);
+	static_assert(sizeof(s_recycling_volumes) == 0x148);
 
-	struct recycling_group
-	{
-		char __data[0x14];
-	};
-	static_assert(sizeof(recycling_group) == 0x14);
+	//struct recycling_group_datum : datum_header
 
 	struct muffin
 	{

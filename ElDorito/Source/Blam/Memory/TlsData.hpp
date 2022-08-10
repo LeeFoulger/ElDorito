@@ -97,7 +97,13 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(game_looping_sound_datum) == 0x20);
 
-	struct s_rasterizer_screen_effect : DatumBase
+	struct recorded_animation_datum : DatumBase
+	{
+		char __data[0xA2];
+	};
+	static_assert(sizeof(recorded_animation_datum) == 0xA4);
+
+	struct screen_effect_datum : DatumBase
 	{
 		word field_2;
 		dword tag_index;
@@ -109,7 +115,7 @@ namespace Blam::Memory
 		real_vector3d field_2c;
 		dword field_38;
 	};
-	static_assert(sizeof(s_rasterizer_screen_effect) == 0x3C);
+	static_assert(sizeof(screen_effect_datum) == 0x3C);
 
 	struct s_decal_system_datum : DatumBase
 	{
@@ -164,69 +170,109 @@ namespace Blam::Memory
 	};
 	static_assert(sizeof(s_particle_system_datum) == 0x58);
 
+	struct chud_widget_datum : DatumBase
+	{
+		char __data[0x16];
+	};
+	static_assert(sizeof(chud_widget_datum) == 0x18);
+
+	struct cluster_partition
+	{
+		DataArrayBase* first_data;
+		DataArrayBase* data_reference;
+		void* cluster_first_data_references;
+	};
+
+	struct recycling_group_datum : DatumBase
+	{
+		char __data[0x12];
+	};
+	static_assert(sizeof(recycling_group_datum) == 0x14);
 
 	struct s_thread_local_storage
 	{
 		char* __unknown0;
 		char* __unknown4;
 
-		// name: "sim. gamestate entities"
+		//  name: "sim. gamestate entities"
+		// count: 2048
+		//  size: 0x10
 		DataArray<simulation_gamestate_entity_datum>* simulation_gamestate_entity_data;
 
 		// name: "gamestate timing samples", "global"
+		// size: 0x14
 		s_game_tick_time_samples* g_main_gamestate_timing_data;
 
 		// name: "render timing samples", "global"
+		// size: 0x14
 		s_game_tick_time_samples* g_main_render_timing_data;
 
 		// name: "main_timing", "globals"
+		// size: 0x40
 		s_main_time_globals* g_main_time_globals;
 
-		Blam::Preferences* preferences;
+		// size: 0x42000
+		Blam::Preferences* g_global_preferences;
 
 		char* __unknown1C;
-		char* __unknown20;
+
+		// from assert
+		long g_registered_thread_index;
+
 		char* __unknown24;
 		char* __unknown28;
 		char* __unknown2C;
 		char* __unknown30;
 
 		// name: "random math", "globals"
-		random_math_globals* random_math_globals;
+		// size: 0x4
+		dword* g_deterministic_random_seed_ptr;
 
 		char* filo_related;
 
 		// name: "game globals"
+		// size: 0x25208
 		game_globals_storage* game_globals;
 
 		// name: "players"
+		// count: 16
+		//  size: 0x2F08
 		DataArray<Blam::Players::PlayerDatum>* player_data;
 
 		// name: "players globals"
 		players_globals* players_globals;
 
 		// name: "game engine globals"
+		// size: 0x15858
 		game_engine_globals* game_engine_globals;
 
 		// name: "local game engine globals"
+		// size: 0xC4
 		local_game_engine_globals* local_game_engine_globals;
 
 		// name: "game time globals"
+		// size: 0x2C
 		game_time_globals_definition* game_time_globals;
 
 		// name: "breakable surface breakable_surface_globals"
+		// size: 0x3CE18
 		s_breakable_surface_globals* breakable_surface_globals;
 
 		//  name: "breakable surface set broken events"
+		// count: 64
+		//  size: 0x464
 		DataArray<breakable_surface_set_broken_event_datum>* g_breakable_surface_set_broken_event_data;
 
 		// name: "player mapping globals"
+		// size: 0xE8
 		s_player_mapping_globals* player_mapping_globals;
 
 		// name: "director globals"
+		// size: 0x5C0
 		s_director_globals* director_globals;
 
 		// name: "director scripting"
+		// size: 0x1
 		bool* director_camera_scripted;
 
 		DataArray<hs_thread_deterministic_data>* hs_thread_deterministic_data;
@@ -246,66 +292,91 @@ namespace Blam::Memory
 		char* __unknown9C;
 
 		//  name: "effect"
+		// count: 640
+		//  size: 0xA0
 		DataArray<effect_datum>* effect_data;
 
 		//  name: "effect event"
+		// count: 640
+		//  size: 0x14
 		DataArray<effect_event_datum>* event_data;
 
 		//  name: "effect location"
+		// count: 1152
+		//  size: 0x40
 		DataArray<effect_location_datum>* effect_location_data;
 
 		// name: "effect counts"
+		// size: 0x18
 		s_effect_counts* g_effect_counts;
 
 		//  name: "effect geometry sample"
+		// count: 128
+		//  size: 0x28
 		DataArray<effect_geometry_sample_datum>* effect_geometry_sample_data;
 
 		// name: "effect messaging queue"
+		// size: 0x17084
 		effect_messaging_queue* g_effect_message_queue;
 
 		// name: "effect lightprobes"
+		// size: 0xFE00
 		effect_lightprobes* effect_lightprobe_data;
 
 		// name: "havok gamestate"
+		// size: 0x8
 		s_havok_gamestate* g_havok_game_state;
 
 		// from assert
 		long havok_style_fpu_exceptions_count;
 
 		// name: "player control globals"
+		// size: 0x8B0
 		s_player_control_globals* player_control_globals;
 
 		// name: "player control globals deterministic"
+		// size: 0x80
 		s_player_control_globals_deterministic* player_control_globals_deterministic;
 
 		//  name: "object looping sounds"
+		// count: 1024
+		//  size: 0x20
 		DataArray<game_looping_sound_datum>* game_looping_sound_data;
 
 		// name: "game sound globals"
+		// size: 0x154
 		s_game_sound_globals* game_sound_globals;
 
 		// name: "game sound scripted impulses"
+		// size: 0x200
 		s_game_sound_impulse_datum* game_sound_scripted_impulses;
 
 		// name: "s_structure_seam_globals"
+		// size: 0x14614
 		s_structure_seam_globals* g_structure_seam_globals;
 
 		// name: "visibility active portals"
+		// size: 0x800
 		visibility_active_portals* visibility_active_portals;
 
 		// name: "campaign meta-game globals"
+		// size: 0x1A158
 		s_campaign_metagame_globals* g_campaign_metagame_globals;
 
 		// name: "observer gamestate globals"
+		// size: 0xC
 		s_observer_gamestate_globals* observer_gamestate_globals;
 
 		// name: "observer globals"
+		// size: 0xF28
 		s_observer_globals* g_observer_globals;
 
 		// name: "rumble"
+		// size: 0x22C
 		rumble_global_data* rumble_globals;
 
 		// name: "bink game state"
+		// size: 0x8
 		s_bink_shared_game_state* bink_game_state;
 
 		char* __unknownF4;
@@ -313,21 +384,28 @@ namespace Blam::Memory
 		struct s_font_cache_globals* g_font_cache_globals;
 
 		// name: "sound classes"
+		// size: 0x1144
 		sound_class_datum* sound_class_data;
 
 		// name: "game allegiance globals"
+		// size: 0x184
 		s_game_allegiance_globals* game_allegiance_globals;
 
-		atmosphere_fog_globals* atmosphere_fog_globals; // screen_effect?
+		// name: "atmosphere fog globals"
+		// size: 0x14
+		s_atmosphere_fog_globals* g_atmosphere_fog_globals;
 
 		// name: "soft surface globals"
+		// size: 0x10
 		s_scenario_soft_ceilings_globals* g_scenario_soft_ceilings_globals;
 
 		// name: "game sound player effects globals"
+		// size: 0x28
 		s_game_sound_player_effects_globals* g_game_sound_player_effects_globals;
 
-
 		//  name: "havok proxies"
+		// count: 16
+		//  size: 0x44
 		char* g_havok_proxy_data; // s_data_array
 
 		char* __unknown114;
@@ -462,29 +540,106 @@ namespace Blam::Memory
 		char* __unknown318;
 		char* __unknown31C;
 
+		// name: "cinematic new globals"
+		// size: 0x2808
 		cinematic_new_globals* cinematic_new_globals;
+
+		// name: "cinematic globals"
+		// size: 0x3C
 		cinematic_globals* cinematic_globals;
+
+		// name: "cinematic light globals"
+		// size: 0xB2C8
 		cinematic_light_globals* cinematic_light_globals;
-		physics_constants* physics_constants;
-		recorded_animations* recorded_animations;
-		game_save_globals* game_save_globals;
-		Blam::DataArray<s_rasterizer_screen_effect>* rasterizer_screen_effects;
-		player_effects* player_effects;
-		scenario_interpolator_globals* scenario_interpolator_globals;
-		survival_mode_globals* survival_mode_globals;
-		player_training_globals* player_training_globals;
-		scenario_kill_trigger_volume_state* scenario_kill_trigger_volume_state;
-		deterministic_game_sound_globals* deterministic_game_sound_globals;
+
+		// name: "physics constants"
+		// size: 0x20
+		s_physics_constants* g_physics_constants;
+
+		//  name: "recorded animations"
+		// count: 1
+		//  size: 0xA4
+		Blam::DataArray<recorded_animation_datum>* animation_threads;
+
+		// name: "game save globals"
+		// size: 0x18
+		s_game_save_globals* g_game_save_globals;
+
+		//  name: "screen_effect"
+		// count: 64
+		//  size: 0x3C
+		Blam::DataArray<screen_effect_datum>* screen_effect_data;
+
+		// name: "player effects"
+		// size: 0x3A0
+		s_player_effect_globals* player_effect_globals;
+
+		// name: "scenario interpolator globals"
+		// size: 0x204
+		s_scenario_interpolator_globals* scenario_interpolator_globals;
+
+		// name: "survival mode globals"
+		// size: 0x7E0
+		s_survival_mode_globals* g_survival_mode_globals;
+
+		// name: "player training globals", "globals"
+		// size: 0x8E8
+		s_player_training_globals* player_training_globals;
+
+		// name: "kill trigger volume state"
+		// size: 0x84
+		s_scenario_kill_trigger_volumes_state* g_scenario_kill_trigger_volumes_state;
+
+		// name: "deterministic game sound globals"
+		// size: 0x1300
+		s_game_sound_deterministic_globals* g_future_development_game_sound_deterministic_globals;
+
+		//  name: "decal_system"
+		// count: 856
+		//  size: 0x54
 		Blam::DataArray<s_decal_system_datum>* decal_system;
-		decal_counts* decal_counts;
-		decal* decal;
-		decal_messaging_queue* decal_messaging_queue;
-		impact_globals* impact_globals;
+
+		// name: "decal counts"
+		// size: 0x20
+		s_decal_counts* decal_counts;
+
+		//  name: "decal"
+		// count: 856
+		//  size: 0x130
+		decal* decal_data;
+
+		// name: "decal messaging queue"
+		// size: 0x824
+		s_decal_message_queue* g_decal_message_queue;
+
+		// name: "impact globals"
+		// size: 0x8C
+		s_impact_globals* g_impact_globals;
+
+		//  name: "impacts"
+		// count: 32
+		//  size: 0xB4
 		impacts* impacts;
+
+		//  name: "impact arrarys"
+		// count: 32
+		//  size: 0x88
 		impact_arrays* impact_arrays;
+
+		//  name: "object list header"
+		// count: 48
+		//  size: 0xC
 		object_list_header* object_list_header;
+
+		//  name: "list object"
+		// count: 128
+		//  size: 0xC
 		list_object* list_object;
+
+		// name: "scripted camera globals"
+		// size: 0xF0
 		scripted_camera_globals* scripted_camera_globals;
+
 		Blam::DataArrayBase* particles;
 		Blam::DataArray<s_particle_system_datum>* particle_system;
 		contrail_system* contrail_system;
@@ -528,51 +683,133 @@ namespace Blam::Memory
 		shield_render_cache_message* shield_render_cache_message;
 		chud_persistent_user_data* chud_persistent_user_data;
 		chud_persistent_global_data* chud_persistent_global_data;
-		user_widget* user_widget_0;
-		user_widget* user_widget_1;
-		user_widget* user_widget_2;
-		user_widget* user_widget_3;
-		first_person_orientations* first_person_orientations;
-		first_person_weapons* first_person_weapons;
-		cortana_globals* cortana_globals;
-		campaign_objectives* campaign_objectives;
-		DataArray<Blam::Objects::ObjectHeader>* object_header;
-		object_globals* object_globals;
+
+		// name: "chud widgets[0]"
+		// name: "chud widgets[1]"
+		// name: "chud widgets[2]"
+		// name: "chud widgets[3]"
+		Blam::DataArray<chud_widget_datum>* chud_widgets[4];
+
+		// name: "fp orientations"
+		// size: 0x12C00
+		s_first_person_orientations* first_person_orientations;
+
+		// name: "fp weapons"
+		// size: 0x14000
+		first_person_weapon* first_person_weapon;
+
+		// name: "chud", "cortana effect"
+		// size: 0x10
+		s_cortana_globals* g_cortana_globals;
+
+		// name: "campaign objectives"
+		// size: 0x14
+		s_current_objective_state* g_objectives;
+
+		//  name: "object"
+		// count: 2048
+		//  size: 0x18
+		DataArray<Blam::Objects::ObjectHeader>* object_header_data;
+
+		// name: "object globals"
+		// size: 0x6608
+		s_object_globals* object_globals;
+
+		// name: "objects"
+		// size: 0x180000
+		// s_memory_pool* object_memory_pool
 		objects_memory_pool* objects_memory_pool;
-		object_name_list* object_name_list;
-		object_messaging_queue* object_messaging_queue;
-		char* collideable_object;
-		damage_globals* damage_globals;
 
-		char* __unknown464;
+		// name: "object name list"
+		// size: 0x2000
+		long* g_object_name_list;
 
-		char* noncollideable_object;
+		// name: "object messaging queue"
+		// size: 0x4104
+		// s_object_render_thread_message (*g_object_message_queue)[2048];
+		object_messaging_queue* g_object_message_queue;
 
-		char* __unknown46C;
-		char* __unknown470;
+		// name: "collideable object"
+		// size: 0x14
+		cluster_partition collideable_object_cluster_partition;
 
+		// name: "noncollideable object"
+		// size: 0x14
+		cluster_partition noncollideable_object_cluster_partition;
+
+		// name: "OBJ: Render Data", "Render"
+		// size: 0x2000
 		object_render_data* object_render_data;
-		char* damage;
-		object_placement* object_placement;
-		device_groups* device_groups;
+
+		// name: "damage globals"
+		// size: 0x810
+		s_damage_globals* damage_globals;
+
+		// name: "object placement globals"
+		// size: 0x320
+		s_object_placement_globals* object_placement_globals;
+
+		//  name: "device groups"
+		// count: 1024
+		//  size: 0x10
+		device_groups* device_groups_data;
+
+		// name: "object scripting"
+		// size: 0x304
 		object_scripting* object_scripting;
-		object_broadphase* object_broadphase;
-		object_early_movers* object_early_movers;
-		object_schedule_globals* object_schedule_globals;
-		object_activation_regions* object_activation_regions;
+
+		// name: "object_broadphase", "global"
+		// size: 0x32450
+		s_object_broadphase* g_object_broadphase;
+
+		// name: "object early movers"
+		// size: 0x2688
+		s_object_early_movers_globals* g_object_early_movers_globals;
+
+		// name: "object schedule globals"
+		// size: 0x27C
+		s_object_scehdule_globals* g_object_scehdule_globals;
+
+		//  name: "object activation regions"
+		// count: 128
+		//  size: 0x28
+		object_activation_regions* g_object_activation_regions_data;
+
+		//  name: "lights"
+		// count: 400
+		//  size: 0xE4
 		lights* lights;
-		lights_globals* lights_globals;
-		char* light_data_reference;
-		char* light_cluster_reference;
-		char* light_first_data;
-		nondeterministic_render_light_data* nondeterministic_render_light_data;
-		widget* widget;
-		recycling_volumes* recycling_volumes;
-		recycling_group* recycling_group;
-		muffin* muffin;
-		leaf_system* leaf_system;
-		antenna* antenna;
-		cloth* cloth;
+
+		// name: "lights globals"
+		// size: 0x40
+		lights_game_globals_definition* lights_game_globals;
+
+		// name: "light"
+		// size: 0xC
+		cluster_partition light_cluster_partition;
+
+		// name: "nondet_light_data", "render lights"
+		// size: 0x2580
+		s_nondeterministic_light_data* g_nondeterministic_light_data;
+
+		widget* widget_data;
+
+		// name: "recycling_volumes"
+		// size: 0x148
+		s_recycling_volumes* recycling_volumes;
+
+		//  name: "recycling_group"
+		// count: 128
+		//  size: 0x14
+		DataArray<recycling_group_datum>* recycling_groups;
+
+		muffin* muffin_data;
+
+		leaf_system* leaf_system_data;
+
+		antenna* antenna_data;
+
+		cloth* cloth_data;
 
 		char* __unknown4CC;
 		char* __unknown4D0;
@@ -619,6 +856,9 @@ namespace Blam::Memory
 		squad_patrol* squad_patrol;
 		flocks* flocks;
 		formations* formations;
+
+		// name: "vision mode globals"
+		// size: 0xF0
 		vision_mode* vision_mode;
 
 		char* __unknown580;
