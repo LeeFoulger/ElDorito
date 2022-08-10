@@ -17,6 +17,7 @@
     <ClCompile Include="new\camera\observer.cpp" />
     <ClCompile Include="new\game\game_globals.cpp" />
     <ClCompile Include="new\game\player_control.cpp" />
+    <ClCompile Include="new\game\player_mapping.cpp" />
     <ClCompile Include="new\hs\hs.cpp" />
     <ClCompile Include="new\memory\data.cpp" />
     <ClCompile Include="new\tag_files\tag_definitions.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="new\game\game_globals.hpp" />
     <ClInclude Include="new\game\game_mode.hpp" />
     <ClInclude Include="new\game\player_control.hpp" />
+    <ClInclude Include="new\game\player_mapping.hpp" />
     <ClInclude Include="new\hs\hs.hpp" />
     <ClInclude Include="new\input\input.hpp" />
     <ClInclude Include="new\memory\data.hpp" />

@@ -627,6 +627,7 @@
     <ClCompile Include="new\camera\director.cpp" />
     <ClCompile Include="new\camera\observer.cpp" />
     <ClCompile Include="new\game\player_control.cpp" />
+    <ClCompile Include="new\game\player_mapping.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1478,6 +1479,7 @@
     <ClInclude Include="new\camera\editor_director.hpp" />
     <ClInclude Include="new\camera\saved_film_director.hpp" />
     <ClInclude Include="new\camera\debug_director.hpp" />
+    <ClInclude Include="new\game\player_mapping.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../game/game_globals.hpp"
 #include "../camera/observer.hpp"
 #include "../camera/camera.hpp"
 #include "../camera/director.hpp"
+#include "../game/game_globals.hpp"
 #include "../game/player_control.hpp"
+#include "../game/player_mapping.hpp"
 
 namespace blam
 {
@@ -120,38 +121,6 @@ namespace blam
 	static_assert(sizeof(s_breakable_surface_globals) == 0x3CE18);
 
 	//struct breakable_surface_set_broken_event_datum : datum_header
-
-	struct s_player_mapping_globals
-	{
-		word __unknown0;
-		word __unknown2;
-		dword __unknown4;
-		dword __unknown8;
-		dword __unknownC;
-		dword __unknown10;
-		dword __unknown14;
-		dword __unknown18;
-		dword __unknown1C;
-		dword __unknown20;
-		dword __unknown24;
-		dword __unknown28;
-		dword __unknown2C;
-		dword __unknown30;
-		byte __unknown34[64];
-		byte __unknown74[64];
-		word __unknownB4;
-		dword __unknownB8;
-		dword __unknownBC;
-		dword __unknownC0;
-		dword __unknownC4;
-		dword __unknownC8;
-		dword __unknownCC;
-		dword __unknownD0;
-		dword __unknownD4;
-		qword __unknownD8;
-		qword __unknownE0;
-	};
-	static_assert(sizeof(s_player_mapping_globals) == 0xE8);
 
 	//struct hs_thread_deterministic_data : datum_header
 
