@@ -4,7 +4,6 @@
 
 namespace blam
 {
-#pragma pack(push, 2)
 	struct c_observer_director : public c_director
 	{
 		virtual void select_fallback_target();
@@ -15,8 +14,7 @@ namespace blam
 		bool __unknown154;
 		bool __unknown155;
 
-		byte pad[0x8];
+		byte pad[0x2];
 	};
-	static_assert(sizeof(c_observer_director) == 0x15E);
-#pragma pack(pop)
+	static_assert(sizeof(c_observer_director) == 0x158);
 }
