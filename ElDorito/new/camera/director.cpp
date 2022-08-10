@@ -7,6 +7,7 @@
 #include "editor_director.hpp"
 
 #include <ElDorito.hpp>
+#include <Blam/Memory/TlsData.hpp>
 
 namespace
 {
@@ -52,6 +53,18 @@ namespace blam
 			return "<invalid 'director_mode'>";
 
 		return k_director_mode_names[director_mode];
+	}
+
+	inline s_director_globals* director_globals_get()
+	{
+		using namespace Blam::Memory;
+		s_thread_local_storage* tls = ElDorito::GetMainTls();
+
+		s_director_globals* director_globals = tls->director_globals;
+		if (!tls || !director_globals || !director_globals->directors[0][0])
+			return nullptr;
+
+		return director_globals;
 	}
 
 	long c_director::get_perspective()
@@ -121,31 +134,20 @@ namespace blam
 		return result || force_update;
 	}
 
-	s_director_globals* director_globals_get()
-	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
-			return nullptr;
-
-		return director_globals;
-	}
-
 	c_director* director_get(long user_index)
 	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals || !director_globals->directors[0][0])
+		if (!director_globals_get())
 			return nullptr;
 
-		return (c_director*)&director_globals->directors[user_index];
+		return (c_director*)&director_globals_get()->directors[user_index];
 	}
 
 	s_director_info* director_get_info(long user_index)
 	{
-		s_director_globals* director_globals = *(s_director_globals**)ElDorito::GetMainTls(0x60);
-		if (!director_globals)
+		if (!director_globals_get())
 			return nullptr;
 
-		return &director_globals->infos[user_index];
+		return &director_globals_get()->infos[user_index];
 	}
 
 	long director_get_perspective(long user_index)
@@ -174,7 +176,6 @@ namespace blam
 			break;
 		case _director_mode_debug:
 			debug_director_ctor(director, user_index);
-			//flying_camera_ctor(director->get_camera(), user_index);
 			break;
 		case _director_mode_editor:
 			editor_director_ctor(director, user_index);
@@ -182,5 +183,18 @@ namespace blam
 		}
 
 		director_get_info(user_index)->director_mode = director_mode;
+	}
+
+	bool director_get_camera_third_person(long user_index)
+	{
+		return director_get(user_index)->get_camera()->get_type() == _camera_mode_orbiting;
+	}
+
+	bool director_in_scripted_camera(void)
+	{
+		using namespace Blam::Memory;
+		s_thread_local_storage* tls = ElDorito::GetMainTls();
+
+		return tls->director_camera_scripted;
 	}
 }

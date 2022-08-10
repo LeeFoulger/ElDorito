@@ -86,18 +86,15 @@ namespace blam
 
 		inline bool in_free_camera_mode()
 		{
-			c_camera* camera = get_camera();
-
-			// check the camera has vtable
-			if (*reinterpret_cast<long*>(camera) == 0)
+			if (!m_camera[0])
 				return false;
 
-			e_camera_mode camera_mode = camera->get_type();
+			e_camera_mode camera_mode = get_camera()->get_type();
 			if (camera_mode == _camera_mode_flying || camera_mode == _camera_mode_scripted)
 				return true;
 
 			if (camera_mode == _camera_mode_authored)
-				return camera->get_target() == -1;
+				return get_camera()->get_target() == -1;
 
 			return false;
 		}
@@ -125,9 +122,10 @@ namespace blam
 	};
 	static_assert(sizeof(s_director_globals) == 0x5C0);
 
-	extern s_director_globals* director_globals_get();
 	extern c_director* director_get(long user_index);
 	extern s_director_info* director_get_info(long user_index);
 	extern long director_get_perspective(long user_index);
 	extern void director_set_mode(long user_index, e_director_mode director_mode);
+	extern bool director_get_camera_third_person(long);
+	extern bool director_in_scripted_camera(void);
 }
