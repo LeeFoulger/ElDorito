@@ -11,14 +11,17 @@
 
 namespace
 {
-	bool(__cdecl* game_in_progress)(void) = reinterpret_cast<decltype(game_in_progress)>(0x005314B0);
-	bool(__cdecl* game_is_ui_shell)(void) = reinterpret_cast<decltype(game_is_ui_shell)>(0x00531E90);
-
 	long(__cdecl* dead_or_alive_unit_from_user)(long) = reinterpret_cast<decltype(dead_or_alive_unit_from_user)>(0x005916F0);
 	void(__cdecl* first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
 	long(__cdecl* players_first_active_user)(void) = reinterpret_cast<decltype(players_first_active_user)>(0x00589A30);
 
 	using namespace blam;
+
+	void(__thiscall* game_director_ctor)(c_director*, long) = reinterpret_cast<decltype(game_director_ctor)>(0x007215C0);
+	void(__thiscall* saved_film_director_ctor)(c_director*, long) = reinterpret_cast<decltype(saved_film_director_ctor)>(0x007276C0);
+	void(__thiscall* observer_director_ctor)(c_director*, long) = reinterpret_cast<decltype(observer_director_ctor)>(0x00726430);
+	void(__thiscall* debug_director_ctor)(c_director*, long) = reinterpret_cast<decltype(debug_director_ctor)>(0x007260D0);
+	void(__thiscall* editor_director_ctor)(c_director*, long) = reinterpret_cast<decltype(editor_director_ctor)>(0x00727EA0);
 
 	void(__thiscall* following_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(following_camera_ctor)>(0x00728630);
 	void(__thiscall* orbiting_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(orbiting_camera_ctor)>(0x0072A5E0);
@@ -28,12 +31,6 @@ namespace
 	void(__thiscall* static_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(static_camera_ctor)>(0x0072F170);
 	void(__thiscall* scripted_camera_ctor)(c_camera*) = reinterpret_cast<decltype(scripted_camera_ctor)>(0x0072BEB0);
 	void(__thiscall* authored_camera_ctor)(c_camera*, long) = reinterpret_cast<decltype(authored_camera_ctor)>(0x0072F2E0);
-	
-	void(__thiscall* game_director_ctor)(c_director*, long) = reinterpret_cast<decltype(game_director_ctor)>(0x007215C0);
-	void(__thiscall* saved_film_director_ctor)(c_director*, long) = reinterpret_cast<decltype(saved_film_director_ctor)>(0x007276C0);
-	void(__thiscall* observer_director_ctor)(c_director*, long) = reinterpret_cast<decltype(observer_director_ctor)>(0x00726430);
-	void(__thiscall* debug_director_ctor)(c_director*, long) = reinterpret_cast<decltype(debug_director_ctor)>(0x007260D0);
-	void(__thiscall* editor_director_ctor)(c_director*, long) = reinterpret_cast<decltype(editor_director_ctor)>(0x00727EA0);
 }
 
 namespace blam
@@ -47,12 +44,27 @@ namespace blam
 		"unused",
 		"editor"
 	};
+
 	const char* director_mode_get_name(e_director_mode director_mode)
 	{
 		if (director_mode < _director_mode_game || director_mode >= k_number_of_director_modes)
 			return "<invalid 'director_mode'>";
 
 		return k_director_mode_names[director_mode];
+	}
+
+	e_director_mode director_mode_from_string(const char* str)
+	{
+		e_director_mode director_mode = e_director_mode(-1);
+		for (long i = _camera_mode_following; i < k_number_of_director_modes; i++)
+		{
+			if (strcmp(str, k_director_mode_names[i]) != 0)
+				continue;
+
+			director_mode = e_director_mode(i);
+		}
+
+		return director_mode;
 	}
 
 	inline s_director_globals* director_globals_get()

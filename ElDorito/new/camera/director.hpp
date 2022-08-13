@@ -28,6 +28,7 @@ namespace blam
 	};
 
 	extern const char* director_mode_get_name(e_director_mode director_mode);
+	extern e_director_mode director_mode_from_string(const char* str);
 
 	enum e_director_perspective : long
 	{
