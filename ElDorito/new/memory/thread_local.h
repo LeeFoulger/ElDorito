@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../camera/observer.hpp"
-#include "../camera/camera.hpp"
-#include "../camera/director.hpp"
-#include "../game/game_globals.hpp"
-#include "../game/player_control.hpp"
-#include "../game/player_mapping.hpp"
+#include "camera/observer.hpp"
+#include "camera/camera.hpp"
+#include "camera/director.hpp"
+#include "game/game_globals.hpp"
+#include "game/player_control.hpp"
+#include "game/player_mapping.hpp"
 
 namespace blam
 {

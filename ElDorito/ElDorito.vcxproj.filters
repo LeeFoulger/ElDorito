@@ -629,6 +629,7 @@
     <ClCompile Include="new\game\player_control.cpp" />
     <ClCompile Include="new\game\player_mapping.cpp" />
     <ClCompile Include="new\game\game_options.cpp" />
+    <ClCompile Include="new\game\game_engine_variant.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1483,6 +1484,30 @@
     <ClInclude Include="new\game\player_mapping.hpp" />
     <ClInclude Include="new\game\game_options.hpp" />
     <ClInclude Include="new\cseries\language.hpp" />
+    <ClInclude Include="new\game\game_engine_variant.hpp" />
+    <ClInclude Include="new\saved_games\saved_game_files.hpp" />
+    <ClInclude Include="new\game\game_engine_player_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_slayer.hpp" />
+    <ClInclude Include="new\game\game_engine_vip.hpp" />
+    <ClInclude Include="new\game\game_engine_vip_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_slayer_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_assault.hpp" />
+    <ClInclude Include="new\game\game_engine_assault_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_ctf.hpp" />
+    <ClInclude Include="new\game\game_engine_ctf_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_infection.hpp" />
+    <ClInclude Include="new\game\game_engine_infection_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_juggernaut.hpp" />
+    <ClInclude Include="new\game\game_engine_juggernaut_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_king.hpp" />
+    <ClInclude Include="new\game\game_engine_koth_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_oddball.hpp" />
+    <ClInclude Include="new\game\game_engine_oddball_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_sandbox.hpp" />
+    <ClInclude Include="new\game\game_engine_sandbox_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_territories.hpp" />
+    <ClInclude Include="new\game\game_engine_territories_traits.hpp" />
+    <ClInclude Include="new\game\game_engine_traits.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />

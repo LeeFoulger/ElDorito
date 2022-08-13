@@ -1,9 +1,10 @@
 #pragma once
-#include <cseries\cseries.hpp>
-#include <memory\resources.hpp>
-#include <tag_files\tag_groups.hpp>
 
-#include <Blam\Geometry\RenderGeometry.hpp>
+#include "cseries/cseries.hpp"
+#include "memory/resources.hpp"
+#include "tag_files/tag_groups.hpp"
+
+#include <Blam/Geometry/RenderGeometry.hpp>
 
 namespace blam
 {

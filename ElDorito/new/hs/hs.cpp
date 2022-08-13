@@ -1,7 +1,7 @@
+#include "hs.hpp"
+
 #include <fstream>
 #include <iostream>
-
-#include "hs.hpp"
 
 namespace blam
 {

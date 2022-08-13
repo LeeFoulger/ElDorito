@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cseries\cseries.hpp>
-#include <cseries\integer_math.hpp>
+#include "cseries/cseries.hpp"
+#include "cseries/integer_math.hpp"
 
 namespace blam
 {

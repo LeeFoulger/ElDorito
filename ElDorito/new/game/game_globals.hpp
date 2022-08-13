@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cseries\cseries.hpp"
+#include "cseries/cseries.hpp"
 #include "game_options.hpp"
 
 namespace blam

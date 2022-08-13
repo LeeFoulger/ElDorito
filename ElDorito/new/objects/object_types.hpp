@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cseries\cseries.hpp>
-#include <memory\data.hpp>
-#include <tag_files\tag_definitions.hpp>
+#include "cseries/cseries.hpp"
+#include "memory/data.hpp"
+#include "tag_files/tag_definitions.hpp"
 
 #include "object_data.hpp"
 
@@ -69,7 +69,7 @@ namespace blam
 		short placement_tag_block_offset;
 		short palette_tag_block_offset;
 		short placement_tag_block_size;
-		long_flags placement_flags;
+		dword_flags placement_flags;
 		long unknown14;
 		void *mover_definition_data;
 		void(__cdecl *initialize)(object_type_definition *type, long);

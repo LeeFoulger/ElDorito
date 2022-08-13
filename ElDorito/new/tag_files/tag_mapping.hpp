@@ -1,6 +1,7 @@
 #pragma once
-#include <cseries\cseries.hpp>
-#include <tag_files\tag_groups.hpp>
+
+#include "cseries/cseries.hpp"
+#include "tag_groups.hpp"
 
 namespace blam
 {

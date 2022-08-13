@@ -1,8 +1,9 @@
 #pragma once
-#include <cseries\cseries.hpp>
-#include <tag_files\tag_groups.hpp>
-#include <tag_files\tag_mapping.hpp>
-#include <shaders\render_method.hpp>
+
+#include "cseries/cseries.hpp"
+#include "tag_files/tag_groups.hpp"
+#include "tag_files/tag_mapping.hpp"
+#include "shaders/render_method.hpp"
 
 namespace blam
 {

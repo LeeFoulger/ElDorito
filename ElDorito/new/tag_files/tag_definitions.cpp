@@ -1,4 +1,4 @@
-#include "tag_files\tag_definitions.hpp"
+#include "tag_definitions.hpp"
 
 namespace blam
 {

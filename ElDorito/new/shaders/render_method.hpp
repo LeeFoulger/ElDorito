@@ -1,6 +1,7 @@
 #pragma once
-#include <tag_files\tag_groups.hpp>
-#include <tag_files\tag_mapping.hpp>
+
+#include "tag_files/tag_groups.hpp"
+#include "tag_files/tag_mapping.hpp"
 
 namespace blam
 {

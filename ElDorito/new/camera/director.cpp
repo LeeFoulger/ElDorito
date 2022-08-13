@@ -1,6 +1,6 @@
 #include "director.hpp"
 
-#include "../game/game_options.hpp"
+#include "game/game_options.hpp"
 
 #include "game_director.hpp"
 #include "saved_film_director.hpp"
