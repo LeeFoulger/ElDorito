@@ -493,10 +493,10 @@ namespace blam
 	struct hue_saturation_control
 	{
 		dword graphics_override;
-		dword saturation;
-		dword color;
-		dword __unknownC;
-		dword __unknown10;
+		real saturation;
+		real color;
+		real __unknownC;
+		real __unknown10;
 	};
 	static_assert(sizeof(hue_saturation_control) == 0x14);
 
@@ -545,8 +545,8 @@ namespace blam
 
 	struct render_texture_globals
 	{
-		char camera_enable;
-		char camera_dynamic_lights_enable;
+		bool camera_enable;
+		bool camera_dynamic_lights_enable;
 		short __unknown2;
 		long camera_render_mode;
 		long __unknown8;
@@ -557,15 +557,11 @@ namespace blam
 		long camera_object_handle;
 		long camera_marker_name;
 		long __unknown24;
-		long camera_position_world_x;
-		long camera_position_world_y;
-		long camera_position_world_z;
-		long camera_target_object_x;
-		long camera_target_object_y;
-		long camera_target_object_z;
+		real_point3d camera_position_world;
+		real_point3d camera_target_object;
 		char __unknown40[28];
 		float camera_fov;
-		long aspect_ratio;
+		float aspect_ratio;
 		long camera_resolution_width;
 		long camera_resolution_height;
 	};

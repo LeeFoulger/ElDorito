@@ -90,7 +90,8 @@ namespace blam
 		bool machinima_camera_enabled;
 		bool machinima_camera_use_old_controls;
 		bool machinima_camera_debug;
-		char __data8AB[5];
+		bool __unknown8AB;
+		char __data8AC[4];
 	};
 	static_assert(sizeof(s_player_control_globals) == 0x8B0);
 

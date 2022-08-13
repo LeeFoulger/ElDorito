@@ -722,7 +722,7 @@ namespace Blam::Memory
 
 		// name: "object name list"
 		// size: 0x2000
-		long* g_object_name_list;
+		long(*g_object_name_list)[2048];
 
 		// name: "object messaging queue"
 		// size: 0x4104
@@ -863,4 +863,5 @@ namespace Blam::Memory
 
 		char* __unknown580;
 	};
+	static_assert(sizeof(s_thread_local_storage) == 0x584);
 }
