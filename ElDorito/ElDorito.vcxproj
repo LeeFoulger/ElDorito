@@ -16,6 +16,7 @@
     <ClCompile Include="new\camera\director.cpp" />
     <ClCompile Include="new\camera\observer.cpp" />
     <ClCompile Include="new\game\game_globals.cpp" />
+    <ClCompile Include="new\game\game_options.cpp" />
     <ClCompile Include="new\game\player_control.cpp" />
     <ClCompile Include="new\game\player_mapping.cpp" />
     <ClCompile Include="new\hs\hs.cpp" />
@@ -206,10 +207,12 @@
     <ClInclude Include="new\camera\static_camera.hpp" />
     <ClInclude Include="new\cseries\cseries.hpp" />
     <ClInclude Include="new\cseries\integer_math.hpp" />
+    <ClInclude Include="new\cseries\language.hpp" />
     <ClInclude Include="new\cseries\real_math.hpp" />
     <ClInclude Include="new\effects\particles.hpp" />
     <ClInclude Include="new\game\game_globals.hpp" />
     <ClInclude Include="new\game\game_mode.hpp" />
+    <ClInclude Include="new\game\game_options.hpp" />
     <ClInclude Include="new\game\player_control.hpp" />
     <ClInclude Include="new\game\player_mapping.hpp" />
     <ClInclude Include="new\hs\hs.hpp" />

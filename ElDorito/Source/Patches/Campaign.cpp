@@ -7,12 +7,12 @@
 #include "../Blam/BlamPlayers.hpp"
 #include "../Blam/Memory/DatumHandle.hpp"
 
-#include <game\game_globals.hpp>
+#include <game\game_options.hpp>
 
 namespace
 {
 	int g_insertion_point = 0;
-	int __cdecl game_insertion_point_get();
+	int __cdecl game_insertion_point_get_hook();
 
 	void __fastcall campaign_scoring_sub_6E59A0(char *scoreboard, void *, Blam::DatumHandle handle, int a3, short a4, int a5, char a6);
 }
@@ -22,7 +22,7 @@ namespace Patches::Campaign
 	void ApplyAll() 
 	{
 		Hook(0x2E59A0, campaign_scoring_sub_6E59A0).Apply();
-		Hook(0x131840, game_insertion_point_get).Apply();
+		Hook(0x131840, game_insertion_point_get_hook).Apply();
 	}
 
 	void SetInsertionPoint(int insertion_point)
@@ -33,11 +33,9 @@ namespace Patches::Campaign
 
 namespace
 {
-	int __cdecl game_insertion_point_get()
+	int __cdecl game_insertion_point_get_hook()
 	{
-		auto *game_globals = blam::game_globals_get();
-
-		if (game_globals->current_game_mode == blam::game_mode::campaign)
+		if (blam::game_is_campaign())
 			return g_insertion_point;
 
 		return 0;

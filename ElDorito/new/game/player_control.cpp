@@ -3,12 +3,6 @@
 #include <ElDorito.hpp>
 #include <Blam/Memory/TlsData.hpp>
 
-namespace
-{
-    bool(__cdecl* game_in_progress)(void) = reinterpret_cast<decltype(game_in_progress)>(0x005314B0);
-    bool(__cdecl* game_is_ui_shell)(void) = reinterpret_cast<decltype(game_is_ui_shell)>(0x00531E90);
-}
-
 namespace blam
 {
     inline s_player_control_globals* player_control_globals_get()

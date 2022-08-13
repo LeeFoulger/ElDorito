@@ -2,13 +2,15 @@
 
 namespace blam
 {
-	enum class game_mode : long
+	enum e_game_mode : long
 	{
-		none,
-		campaign,
-		multiplayer,
-		mainmenu,
-		shared
+		_game_mode_none = 0,
+		_game_mode_campaign,
+		_game_mode_multiplayer,
+		_game_mode_mainmenu,
+		_game_mode_shared,
+
+		k_game_mode_count
 	};
-	static_assert(sizeof(game_mode) == 0x4);
+	static_assert(sizeof(e_game_mode) == 0x4);
 }
