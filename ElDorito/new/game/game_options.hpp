@@ -45,9 +45,16 @@ namespace blam
 	static_assert(sizeof(e_campaign_difficulty_level) == sizeof(short));
 
 	// TODO: find a home
+	struct s_campaign_armaments_player
+	{
+		bool valid;
+		byte __data[29];
+	};
+
+	// TODO: find a home
 	struct s_hub_progression
 	{
-		byte armaments[0x78];
+		s_campaign_armaments_player hub_armaments[4];
 		long hub_return_to_insertion_point;
 		bool hub_progression_valid;
 		byte : 8;
@@ -136,7 +143,7 @@ namespace blam
 		bool survival_enabled;
 		byte : 8; // halo3_tag_test: campaign_allow_persistent_storage
 		byte : 8; // halo3_tag_test: campaign_customization_enabled
-		byte campaign_armaments[0x78];
+		s_campaign_armaments_player campaign_armaments[4];
 		byte : 8;
 		byte : 8;
 		byte campaign_game_progression[0x80];
