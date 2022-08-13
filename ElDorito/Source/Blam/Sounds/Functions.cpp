@@ -44,10 +44,10 @@ namespace Blam::Sounds
 
 	int16_t sound_get_pitch_range_by_pitch(Sound* sound, float pitchModifier, int16_t fallbackIndex)
 	{
-		bool hasFlag14 = (sound->Flags) & 0x4000 == 0;
+		bool hasFlag14 = ((sound->Flags) & 0x4000) == 0;
 		auto pitchRangeCount = sound->PitchRanges.Count;
 		auto curPitchRangeIndex = -1;
-		auto failure = -1;
+		short failure = -1;
 
 
 		if (!hasFlag14)
@@ -56,7 +56,7 @@ namespace Blam::Sounds
 
 			if (pitchRangeCount > 0)
 			{
-				auto curPitchRange = sound->PitchRanges[0];
+				auto& curPitchRange = sound->PitchRanges[0];
 				while (curPitchRange.Name != 1236) // "lfe"
 				{
 					curPitchRangeIndex++;
@@ -73,7 +73,7 @@ namespace Blam::Sounds
 			//Will return if the fallback Index satisfies the right conditions
 			if (fallbackIndex != -1 && fallbackIndex < pitchRangeCount)
 			{
-				auto curPitchRange = sound->PitchRanges[fallbackIndex];
+				auto& curPitchRange = sound->PitchRanges[fallbackIndex];
 				if ((curPitchRangeIndex == fallbackIndex || pitchModifier >= curPitchRange.MaxGainPitch.Lower && pitchModifier <= curPitchRange.MaxGainPitch.Upper) && curPitchRange.Unknown7>0)
 				{
 					return fallbackIndex;
@@ -87,10 +87,10 @@ namespace Blam::Sounds
 			if (pitchRangeCount < 0)
 				return failure;
 
-			auto curIndex = 0;
-			auto curPitchRange = sound->PitchRanges[curIndex];
+			short curIndex = 0;
+			auto& curPitchRange = sound->PitchRanges[curIndex];
 			auto bendsMax = curPitchRange.Bend.Upper;
-			auto bendsMin = 0;
+			float bendsMin = 0;
 
 			while (curPitchRangeIndex == curIndex || curPitchRange.PermutationCount <= 0)
 			{
@@ -122,9 +122,7 @@ namespace Blam::Sounds
 			return curIndex;
 		}
 
-
-
-
+		//return failure;
 	};
 
 	Sound::PitchRange* sound_get_pitch_range(Sound* sound, int32_t pitchRangeIndex)
@@ -201,7 +199,7 @@ namespace Blam::Sounds
 		auto pitchRange = sound_get_pitch_range(sound, pitchRangeIndex);
 		auto permutation = sound_get_permutation(pitchRange, permutationIndex);
 
-		float permutationPitchModifierMin = sound_compute_pitch_modifier_min(sound, pitchRange, permutation->SampleSize);
+		float permutationPitchModifierMin = (float)sound_compute_pitch_modifier_min(sound, pitchRange, permutation->SampleSize);
 		float naturalPitchModifier = exp(parameter - pitchRange->NaturalPitch / 1200.0f * 0.69314718f);
 
 		return naturalPitchModifier * permutationPitchModifierMin;
