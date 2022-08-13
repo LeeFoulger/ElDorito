@@ -25,10 +25,12 @@ namespace blam
 		dword __unkown24B58;
 		byte current_game_progress[0x80];
 		bool game_in_progress;
-		byte __data24BDD[0x7];
-		bool finished;
+		bool game_lost;
+		byte __data24BDE[2];
+		dword __unknown24BE0; // game_lost timer?
+		bool game_finished;
 		byte __data24BE5[3];
-		dword end_match_wait_time;
+		dword end_match_wait_time; // game_finished timer?
 		dword active_current_primary_skulls;
 		dword active_current_secondary_skulls;
 		byte __data24BF4[4];
