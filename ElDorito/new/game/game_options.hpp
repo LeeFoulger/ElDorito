@@ -172,9 +172,9 @@ namespace blam
 		s_campaign_armaments_player campaign_armaments[4];
 		byte : 8;
 		byte : 8;
-		byte campaign_game_progression[0x80];
-		dword active_primary_skulls;
-		dword active_secondary_skulls;
+		byte initial_game_progression[0x80];
+		dword initial_primary_skulls;
+		dword initial_secondary_skulls;
 		s_hub_progression hub_progression;
 		bool matchmade_game;
 		byte __align2C9[7];
