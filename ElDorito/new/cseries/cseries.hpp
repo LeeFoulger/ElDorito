@@ -89,4 +89,50 @@ namespace blam
 		t_type m_storage[k_count];
 	};
 
+	template<typename t_type, typename t_storage_type, size_t k_count>
+	struct c_flags
+	{
+	public:
+		inline t_storage_type get_raw_bits()
+		{
+			return m_storage;
+		}
+
+		inline void set_raw_bits(t_storage_type raw_bits)
+		{
+			m_storage = raw_bits;
+		}
+
+		inline void set(t_type bit, bool enable)
+		{
+			if (bit < k_count)
+			{
+				if (enable)
+					m_storage |= (1 << bit);
+				else
+					m_storage &= ~(1 << bit);
+			}
+		}
+
+		inline bool operator==(t_type value)
+		{
+			return !!(m_storage & (1 << value));
+		}
+
+		template <class T>
+		inline void operator= (T value)
+		{
+			m_storage = static_cast<t_storage_type>(value);
+		}
+
+		template <class T>
+		inline operator T () const
+		{
+			return static_cast<T>(m_storage);
+		}
+
+	protected:
+		t_storage_type m_storage;
+	};
+
 }
