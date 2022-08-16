@@ -77,10 +77,10 @@ namespace blam
 	typedef float real;
 	static_assert(sizeof(real) == 0x4);
 
-	template<size_t k_bit_count>
-	struct c_static_flags
+	template<typename t_type, size_t k_bit_count>
+	struct c_big_flags
 	{
-		dword m_storage[(k_bit_count / 8) / sizeof(dword)];
+		t_type m_storage[(k_bit_count / 8) / sizeof(t_type)];
 	};
 
 	template<typename t_type, size_t k_count>
