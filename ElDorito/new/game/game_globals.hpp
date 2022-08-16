@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cseries/cseries.hpp"
+#include "memory/data.hpp"
 #include "game_options.hpp"
 
 namespace blam
@@ -8,7 +9,7 @@ namespace blam
 	// TODO: find a home
 	struct s_game_cluster_bit_vectors
 	{
-		c_static_array<c_static_flags<256>, 16> value;
+		c_static_array<c_static_flags<256>, 16> flags;
 	};
 	static_assert(sizeof(s_game_cluster_bit_vectors) == 0x200);
 
@@ -25,14 +26,14 @@ namespace blam
 
 		game_options options;
 
-		dword __unkown24B58;
-		byte current_game_progress[0x80];
+		dword __unknown24B58;
+		byte active_game_progress[0x80];
 
 		bool game_in_progress;
 
 		bool game_lost;
-		byte : 8;
-		byte : 8;
+		bool game_revert;
+		bool __unknown24BDF;
 		dword game_lost_wait_time;
 
 		bool game_finished;
@@ -50,7 +51,22 @@ namespace blam
 		s_game_cluster_bit_vectors cluster_pvs_local;
 		s_game_cluster_bit_vectors cluster_activation;
 
-		byte __data251F8[0x10];
+		// game_pvs_enable_scripted_camera_pvs
+		// game_pvs_clear_scripted_camera_pvs
+		bool scripted_camera_pvs;
+		byte : 8;
+
+		// game_pvs_scripted_clear
+		// game_pvs_scripted_set_object
+		// game_pvs_scripted_set_camera_point
+		word scripted;
+
+		// game_pvs_scripted_set_object
+		// game_pvs_scripted_set_camera_point
+		// scenario_group, scenario_block, scenario_cutscene_camera_point_block, camera_point_index
+		datum_index scripted_object_index; // scenario_group.scenario_block.cutscene_camera_points[camera_point_index]
+
+		byte __data25200[8];
 	};
 	static_assert(sizeof(game_globals_storage) == 0x25208);
 	
