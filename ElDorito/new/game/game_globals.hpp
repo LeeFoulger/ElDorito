@@ -8,7 +8,7 @@ namespace blam
 	// TODO: find a home
 	struct s_game_cluster_bit_vectors
 	{
-		dword __unknown[16][8];
+		c_static_array<c_static_flags<256>, 16> value;
 	};
 	static_assert(sizeof(s_game_cluster_bit_vectors) == 0x200);
 
@@ -27,6 +27,7 @@ namespace blam
 
 		dword __unkown24B58;
 		byte current_game_progress[0x80];
+
 		bool game_in_progress;
 
 		bool game_lost;

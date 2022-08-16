@@ -76,4 +76,17 @@ namespace blam
 	// 32-bit floating-point number ranging from 1.175494351e-38F to 3.402823466e+38F
 	typedef float real;
 	static_assert(sizeof(real) == 0x4);
+
+	template<size_t k_bit_count>
+	struct c_static_flags
+	{
+		dword m_storage[(k_bit_count / 8) / sizeof(dword)];
+	};
+
+	template<typename t_type, size_t k_count>
+	struct c_static_array
+	{
+		t_type m_storage[k_count];
+	};
+
 }
