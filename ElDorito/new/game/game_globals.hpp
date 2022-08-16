@@ -18,25 +18,37 @@ namespace blam
 		bool map_active;
 		byte : 8;
 		byte : 8;
+
 		dword active_structure_bsp_mask;
 		dword active_designer_zone_mask;
 		dword active_cinematic_zone_mask;
+
 		game_options options;
+
 		dword __unkown24B58;
 		byte current_game_progress[0x80];
 		bool game_in_progress;
+
 		bool game_lost;
-		byte __data24BDE[2];
-		dword __unknown24BE0; // game_lost timer?
+		byte : 8;
+		byte : 8;
+		dword game_lost_wait_time;
+
 		bool game_finished;
-		byte __data24BE5[3];
-		dword end_match_wait_time; // game_finished timer?
-		dword active_current_primary_skulls;
-		dword active_current_secondary_skulls;
+		byte : 8;
+		byte : 8;
+		byte : 8;
+		dword game_finished_wait_time;
+
+		dword active_primary_skulls;
+		dword active_secondary_skulls;
+
 		byte __data24BF4[4];
+
 		s_game_cluster_bit_vectors cluster_pvs;
 		s_game_cluster_bit_vectors cluster_pvs_local;
 		s_game_cluster_bit_vectors cluster_activation;
+
 		byte __data251F8[0x10];
 	};
 	static_assert(sizeof(game_globals_storage) == 0x25208);
