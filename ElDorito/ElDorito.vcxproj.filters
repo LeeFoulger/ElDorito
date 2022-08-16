@@ -630,6 +630,7 @@
     <ClCompile Include="new\game\player_mapping.cpp" />
     <ClCompile Include="new\game\game_options.cpp" />
     <ClCompile Include="new\game\game_engine_variant.cpp" />
+    <ClCompile Include="new\main\main_game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1508,6 +1509,7 @@
     <ClInclude Include="new\game\game_engine_territories.hpp" />
     <ClInclude Include="new\game\game_engine_territories_traits.hpp" />
     <ClInclude Include="new\game\game_engine_traits.hpp" />
+    <ClInclude Include="new\main\main_game.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
