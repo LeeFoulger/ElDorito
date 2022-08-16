@@ -135,4 +135,27 @@ namespace blam
 		t_storage_type m_storage;
 	};
 
+	template<typename t_type, typename t_storage_type, size_t k_count>
+	struct c_enum
+	{
+	public:
+		inline bool operator==(t_type value)
+		{
+			return m_storage == static_cast<t_storage_type>(value);
+		}
+
+		inline void operator= (t_type value)
+		{
+			m_storage = static_cast<t_storage_type>(value);
+		}
+
+		template <class T>
+		inline operator T () const
+		{
+			return static_cast<T>(m_storage);
+		}
+
+	protected:
+		t_storage_type m_storage;
+	};
 }
