@@ -86,5 +86,5 @@ namespace blam
 			game_globals->scripted = 0;
 	}
 
-	// game_update_pvs
+	// void game_update_pvs()
 }

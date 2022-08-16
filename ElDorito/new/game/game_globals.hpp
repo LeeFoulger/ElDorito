@@ -74,4 +74,11 @@ namespace blam
 	extern s_game_cluster_bit_vectors* game_get_cluster_pvs();
 	extern s_game_cluster_bit_vectors* game_get_cluster_pvs_local();
 	extern s_game_cluster_bit_vectors* game_get_cluster_activation();
+	//extern bool game_test_cluster_activation(s_cluster_reference* cluster_reference);
+	extern void game_pvs_enable_scripted_camera_pvs();
+	extern void game_pvs_clear_scripted_camera_pvs();
+	extern void game_pvs_scripted_set_object(datum_index object_index);
+	//extern void game_pvs_scripted_set_camera_point(short camera_point_index);
+	extern void game_pvs_scripted_clear();
+	//extern void game_update_pvs();
 }
