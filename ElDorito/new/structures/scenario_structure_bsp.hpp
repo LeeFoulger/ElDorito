@@ -302,4 +302,21 @@ namespace blam
 		int index_count;
 	};
 	static_assert(sizeof(global_collision_bsp_instance_unknown2) == 0x8);
+
+	// #TODO: find an actual home
+	struct s_cluster_reference
+	{
+		unsigned char bsp_index;
+		unsigned char cluster_index;
+	};
+	static_assert(sizeof(s_cluster_reference) == 0x2);
+
+	// #TODO: find an actual home
+	struct s_location
+	{
+		s_cluster_reference cluster_reference;
+		unsigned short __unknown2;
+	};
+	static_assert(sizeof(s_location) == 0x4);
+
 }

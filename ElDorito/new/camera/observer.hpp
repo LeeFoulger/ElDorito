@@ -2,23 +2,10 @@
 
 #include "cseries/cseries.hpp"
 #include "memory/data.hpp"
+#include "structures/scenario_structure_bsp.hpp"
 
 namespace blam
 {
-	struct s_cluster_reference
-	{
-		unsigned char bsp_index;
-		unsigned char cluster_index;
-	};
-	static_assert(sizeof(s_cluster_reference) == 0x2);
-
-	struct s_location
-	{
-		s_cluster_reference cluster_reference;
-		unsigned short __unknown2;
-	};
-	static_assert(sizeof(s_location) == 0x4);
-
 	struct s_observer_command
 	{
 		dword_flags flags;
