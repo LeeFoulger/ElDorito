@@ -48,10 +48,43 @@ namespace blam
 	}
 
 	// bool game_test_cluster_activation(s_cluster_reference* cluster_reference)
-	// void game_pvs_enable_scripted_camera_pvs()
-	// void game_pvs_clear_scripted_camera_pvs()
-	// void game_pvs_scripted_set_object(long)
-	// void game_pvs_scripted_set_camera_point(short)
-	// void game_pvs_scripted_clear()
+	
+	void game_pvs_enable_scripted_camera_pvs()
+	{
+		game_globals_storage* game_globals = game_globals_get();
+		if (game_globals)
+			game_globals->scripted_camera_pvs = true;
+	}
+
+	void game_pvs_clear_scripted_camera_pvs()
+	{
+		game_globals_storage* game_globals = game_globals_get();
+		if (game_globals)
+			game_globals->scripted_camera_pvs = false;
+	}
+
+	void game_pvs_scripted_set_object(datum_index object_index)
+	{
+		game_globals_storage* game_globals = game_globals_get();
+		if (!game_globals)
+			return;
+
+		if (object_index != -1)
+		{
+			game_globals->scripted = 1;
+			game_globals->scripted_object_index = object_index;
+		}
+		game_globals->scripted = 0;
+	}
+
+	// void game_pvs_scripted_set_camera_point(short camera_point_index)
+	
+	void game_pvs_scripted_clear()
+	{
+		game_globals_storage* game_globals = game_globals_get();
+		if (game_globals)
+			game_globals->scripted = 0;
+	}
+
 	// game_update_pvs
 }

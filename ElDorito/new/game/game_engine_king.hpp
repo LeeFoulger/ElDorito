@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cseries/cseries.hpp"
 #include "game_engine_variant.hpp"
 #include "game_engine_koth_traits.hpp"
 
