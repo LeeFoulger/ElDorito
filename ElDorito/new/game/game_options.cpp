@@ -276,7 +276,7 @@ namespace blam
 			if (enable)
 				game_globals->active_primary_skulls |= (1 << primary_skull);
 			else
-				game_globals->active_primary_skulls &= !(1 << primary_skull);
+				game_globals->active_primary_skulls &= ~(1 << primary_skull);
 		}
 	}
 
@@ -288,7 +288,7 @@ namespace blam
 			if (enable)
 				game_globals->active_secondary_skulls |= (1 << secondary_skull);
 			else
-				game_globals->active_secondary_skulls &= !(1 << secondary_skull);
+				game_globals->active_secondary_skulls &= ~(1 << secondary_skull);
 		}
 	}
 
