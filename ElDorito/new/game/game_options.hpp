@@ -219,6 +219,8 @@ namespace blam
 	//extern void game_create_unlock_resources(e_game_create_mode, long&);
 	//extern void game_start(enum e_game_create_mode);
 	extern bool game_options_valid();
+	extern bool game_options_verify(game_options const* options, char* error_string, long error_string_length);
+	extern void assert_game_options_verify(game_options const* options);
 	extern game_options* game_options_get();
 	extern void game_options_print_game_id();
 	//extern void game_options_setup_for_saved_film(e_game_playback_type playback_type);
