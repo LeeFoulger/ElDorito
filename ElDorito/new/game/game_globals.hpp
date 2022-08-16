@@ -70,8 +70,8 @@ namespace blam
 	};
 	static_assert(sizeof(game_globals_storage) == 0x25208);
 	
-	extern game_globals_storage* game_globals_get(void);
-	extern s_game_cluster_bit_vectors* game_get_cluster_pvs(void);
-	extern s_game_cluster_bit_vectors* game_get_cluster_pvs_local(void);
-	extern s_game_cluster_bit_vectors* game_get_cluster_activation(void);
+	extern game_globals_storage* game_globals_get();
+	extern s_game_cluster_bit_vectors* game_get_cluster_pvs();
+	extern s_game_cluster_bit_vectors* game_get_cluster_pvs_local();
+	extern s_game_cluster_bit_vectors* game_get_cluster_activation();
 }
