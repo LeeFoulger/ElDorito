@@ -2,8 +2,7 @@
 
 namespace blam
 {
-
-	enum e_juggernaut_initial_juggernaut_settings : char
+	enum e_juggernaut_initial_juggernaut_settings
 	{
 		_juggernaut_initial_juggernaut_settings_random = 0,
 		_juggernaut_initial_juggernaut_settings_first_kill,
@@ -13,7 +12,7 @@ namespace blam
 		k_juggernaut_initial_juggernaut_settings_default = _juggernaut_initial_juggernaut_settings_random
 	};
 
-	enum e_juggernaut_next_juggernaut_settings : char
+	enum e_juggernaut_next_juggernaut_settings
 	{
 		_juggernaut_next_juggernaut_settings_on_killing_juggernaut = 0,
 		_juggernaut_next_juggernaut_settings_on_killed_by_juggernaut,
@@ -24,16 +23,16 @@ namespace blam
 		k_juggernaut_next_juggernaut_settings_default = _juggernaut_next_juggernaut_settings_on_killing_juggernaut
 	};
 
-	enum e_juggernaut_variant_flags : byte_flags
+	enum e_juggernaut_variant_flags
 	{
-		_juggernaut_variant_flags_allied_against_juggernaut = 1 << 0,
-		_juggernaut_variant_flags_respawn_on_lone_juggernaut = 1 << 1,
-		_juggernaut_variant_flags_destination_zones_enabled = 1 << 2,
+		_juggernaut_variant_flags_allied_against_juggernaut = 0,
+		_juggernaut_variant_flags_respawn_on_lone_juggernaut,
+		_juggernaut_variant_flags_destination_zones_enabled,
 
 		k_juggernaut_variant_flags
 	};
 
-	enum e_juggernaut_zone_movement_settings : char
+	enum e_juggernaut_zone_movement_settings
 	{
 		_juggernaut_zone_movement_settings_off = 0,
 		_juggernaut_zone_movement_settings_10_seconds,
@@ -51,7 +50,7 @@ namespace blam
 		k_juggernaut_zone_movement_settings_default = _juggernaut_zone_movement_settings_off
 	};
 
-	enum e_juggernaut_zone_order_settings : char
+	enum e_juggernaut_zone_order_settings
 	{
 		_juggernaut_zone_order_settings_random = 0,
 		_juggernaut_zone_order_settings_sequence,

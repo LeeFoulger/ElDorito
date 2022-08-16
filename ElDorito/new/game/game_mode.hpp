@@ -2,7 +2,7 @@
 
 namespace blam
 {
-	enum e_game_mode : long
+	enum e_game_mode
 	{
 		_game_mode_none = 0,
 		_game_mode_campaign,
@@ -12,5 +12,4 @@ namespace blam
 
 		k_game_mode_count
 	};
-	static_assert(sizeof(e_game_mode) == 0x4);
 }

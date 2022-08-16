@@ -2,14 +2,14 @@
 
 namespace blam
 {
-	enum e_ctf_variant_flags : byte_flags
+	enum e_ctf_variant_flags
 	{
-		_ctf_variant_flags_flag_at_home_to_score_flag = 1 << 0,
+		_ctf_variant_flags_flag_at_home_to_score_flag = 0,
 
 		k_ctf_variant_flags
 	};
 
-	enum e_ctf_home_flag_waypoint_settings : char
+	enum e_ctf_home_flag_waypoint_settings
 	{
 		_ctf_home_flag_waypoint_settings_never = 0,
 		_ctf_home_flag_waypoint_settings_when_not_carried_by_enemy,
@@ -20,7 +20,7 @@ namespace blam
 		k_ctf_home_flag_waypoint_settings_default = _ctf_home_flag_waypoint_settings_when_not_carried_by_enemy
 	};
 
-	enum e_ctf_game_type_settings : char
+	enum e_ctf_game_type_settings
 	{
 		_ctf_game_type_settings_multi_flag = 0,
 		_ctf_game_type_settings_single_flag,
@@ -30,7 +30,7 @@ namespace blam
 		k_ctf_game_type_settings_default = _ctf_game_type_settings_multi_flag
 	};
 
-	enum e_ctf_respawn_settings : char
+	enum e_ctf_respawn_settings
 	{
 		_ctf_respawn_settings_normal = 0,
 		_ctf_respawn_settings_on_friendly_capture,
@@ -41,7 +41,7 @@ namespace blam
 		k_ctf_respawn_settings_default = _ctf_respawn_settings_normal
 	};
 
-	enum e_ctf_touch_return_settings : short
+	enum e_ctf_touch_return_settings
 	{
 		_ctf_touch_return_settings_off = -1,
 		_ctf_touch_return_settings_instant = 0,
@@ -57,7 +57,7 @@ namespace blam
 		k_ctf_touch_return_settings_default = _ctf_touch_return_settings_5_seconds
 	};
 
-	enum e_ctf_sudden_death_time : short
+	enum e_ctf_sudden_death_time
 	{
 		_ctf_sudden_death_time_infinite = -1,
 		_ctf_sudden_death_time_off = 0,

@@ -2,14 +2,14 @@
 
 namespace blam
 {
-	enum e_infection_variant_flags : byte_flags
+	enum e_infection_variant_flags
 	{
-		_infection_variant_flags_respawn_on_haven_move = 1 << 0,
+		_infection_variant_flags_respawn_on_haven_move = 0,
 
 		k_infection_variant_flags
 	};
 
-	enum e_infection_safe_havens_settings : char
+	enum e_infection_safe_havens_settings
 	{
 		_infection_safe_havens_off = 0,
 		_infection_safe_havens_sequential,
@@ -19,7 +19,7 @@ namespace blam
 		k_infection_safe_havens_settings_default = _infection_safe_havens_off
 	};
 
-	enum e_infection_next_zombie_settings : char
+	enum e_infection_next_zombie_settings
 	{
 		_infection_next_zombie_winner = 0,
 		_infection_next_zombie_chump,
@@ -30,7 +30,7 @@ namespace blam
 		k_infection_next_zombie_settings_default = _infection_next_zombie_winner
 	};
 
-	enum e_infection_initial_zombie_count_settings : char
+	enum e_infection_initial_zombie_count_settings
 	{
 		_infection_initial_zombie_count_25_percent = 0,
 		_infection_initial_zombie_count_50_percent,

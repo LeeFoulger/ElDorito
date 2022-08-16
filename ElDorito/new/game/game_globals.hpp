@@ -42,8 +42,8 @@ namespace blam
 		byte : 8;
 		dword game_finished_wait_time;
 
-		dword active_primary_skulls;
-		dword active_secondary_skulls;
+		c_flags<e_campaign_skulls_primary, dword, k_campaign_skull_primary_count> active_primary_skulls;
+		c_flags<e_campaign_skulls_secondary, dword, k_campaign_skull_secondary_count> active_secondary_skulls;
 
 		byte __data24BF4[4];
 

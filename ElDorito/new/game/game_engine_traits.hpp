@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cseries/cseries.hpp"
 #include "game_engine_player_traits.hpp"
 
 namespace blam
@@ -11,92 +12,146 @@ namespace blam
 		k_base_variant_flags
 	};
 
-	enum e_game_engine_miscellaneous_option_flags : byte_flags
+	enum e_game_engine_miscellaneous_option_flags
 	{
-		_game_engine_miscellaneous_option_teams_enabled = 1 << 0,
-		_game_engine_miscellaneous_option_round_reset_players = 1 << 1,
-		_game_engine_miscellaneous_option_round_reset_map = 1 << 2,
+		_game_engine_miscellaneous_option_teams_enabled = 0,
+		_game_engine_miscellaneous_option_round_reset_players,
+		_game_engine_miscellaneous_option_round_reset_map,
 
 		k_game_engine_miscellaneous_option_flags
 	};
 
-	enum e_game_engine_respawn_options_flags : byte_flags
+	enum e_game_engine_respawn_options_flags
 	{
-		_game_engine_respawn_options_inherit_respawn_time = 1 << 0,
-		_game_engine_respawn_options_respawn_with_teammate = 1 << 1,
-		_game_engine_respawn_options_respawn_at_location = 1 << 2,
-		_game_engine_respawn_options_respawn_on_kills = 1 << 3,
+		_game_engine_respawn_options_inherit_respawn_time = 0,
+		_game_engine_respawn_options_respawn_with_teammate,
+		_game_engine_respawn_options_respawn_at_location,
+		_game_engine_respawn_options_respawn_on_kills,
 
 		k_game_engine_respawn_options_flags
 	};
 
-	enum e_game_engine_social_options_flags : word_flags
+	enum e_game_engine_social_options_flags
 	{
-		_game_engine_social_options_observers_enabled = 1 << 0,
-		_game_engine_social_options_team_changing_enabled = 1 << 1,
-		_game_engine_social_options_team_changing_balancing_only = 1 << 2,
-		_game_engine_social_options_friendly_fire_enabled = 1 << 3,
-		_game_engine_social_options_betrayal_booting_enabled = 1 << 4,
-		_game_engine_social_options_enemy_voice_enabled = 1 << 5,
-		_game_engine_social_options_open_channel_voice_enabled = 1 << 6,
-		_game_engine_social_options_dead_player_voice_enabled = 1 << 7,
+		_game_engine_social_options_observers_enabled = 0,
+		_game_engine_social_options_team_changing_enabled,
+		_game_engine_social_options_team_changing_balancing_only,
+		_game_engine_social_options_friendly_fire_enabled,
+		_game_engine_social_options_betrayal_booting_enabled,
+		_game_engine_social_options_enemy_voice_enabled,
+		_game_engine_social_options_open_channel_voice_enabled,
+		_game_engine_social_options_dead_player_voice_enabled,
 
 		k_game_engine_social_options_flags
 	};
 
-	enum e_game_engine_map_override_options_flags : dword_flags
+	enum e_game_engine_map_override_options_flags
 	{
-		_game_engine_map_override_options_grenades_on_map = 1 << 0,
-		_game_engine_map_override_options_indestructible_vehicles = 1 << 1,
+		_game_engine_map_override_options_grenades_on_map = 0,
+		_game_engine_map_override_options_indestructible_vehicles,
 
 		k_game_engine_map_override_options_flags
 	};
 
 	struct c_game_engine_miscellaneous_options
 	{
-		e_game_engine_miscellaneous_option_flags m_flags;
-		byte m_round_time_limit;                           // minutes
+		c_flags<e_game_engine_miscellaneous_option_flags, byte_flags, k_game_engine_miscellaneous_option_flags> m_flags;
+
+		// default: 8
+		// maximum: 60
+		byte m_round_time_limit; // minutes
+
+		// default: 1
+		// maximum: 15
 		byte m_number_of_rounds;
+
+		// default: 2
+		// maximum: 15
 		byte m_early_victory_win_count;
 	};
 	static_assert(sizeof(c_game_engine_miscellaneous_options) == 0x4);
 
 	struct c_game_engine_respawn_options
 	{
-		e_game_engine_respawn_options_flags m_flags;
+		c_flags<e_game_engine_respawn_options_flags, byte_flags, k_game_engine_respawn_options_flags> m_flags;
+
+		// default: 0
+		// maximum: 50
 		byte m_lives_per_round;
+
+		// default: 0
+		// maximum: 100
 		byte m_team_lives_per_round;
-		byte m_respawn_time;                          // seconds
-		byte m_suicide_penalty;                       // seconds
-		byte m_betrayal_penalty;                      // seconds
-		byte m_unknown_penalty;                       // seconds
+
+		// default: 5
+		// maximum: 240
+		byte m_respawn_time; // seconds
+
+		// default: 10
+		// maximum: 240
+		byte m_suicide_penalty; // seconds
+
+		// default: 5
+		// maximum: 240
+		byte m_betrayal_penalty; // seconds
+
+		// halo online specific
+		// default: 5
+		// maximum: 240
+		byte m_unknown_penalty; // seconds
+
+		// default: 0
+		// maximum: 15
 		byte m_respawn_growth;
+
+		// default: 5
+		// maximum: 60
 		byte m_respawn_player_traits_duration;
-		byte pad[3];                                  // woman bound for glory, why you leaving me again?
+
+		// woman bound for glory, why you leaving me again?
+		byte pad[3];
+
 		c_player_traits m_respawn_player_traits;
 	};
 	static_assert(sizeof(c_game_engine_respawn_options) == 0x28);
 
 	struct c_game_engine_social_options
 	{
-		e_game_engine_social_options_flags m_flags;
+		c_flags<e_game_engine_social_options_flags, word_flags, k_game_engine_social_options_flags> m_flags;
+
+		// default: 0
+		// maximum: 2
 		word m_team_changing;
 	};
 	static_assert(sizeof(c_game_engine_social_options) == 0x4);
 
 	struct c_game_engine_map_override_options
 	{
-		e_game_engine_map_override_options_flags m_flags;
+		c_flags<e_game_engine_map_override_options_flags, dword_flags, k_game_engine_map_override_options_flags> m_flags;
+
 		c_player_traits m_player_traits;
+
 		word m_weapon_set;
 		word m_vehicle_set;
+
 		c_player_traits m_red_powerup_traits;
 		c_player_traits m_blue_powerup_traits;
 		c_player_traits m_yellow_powerup_traits;
-		byte m_red_powerup_traits_duration;                // seconds
-		byte m_blue_powerup_traits_duration;               // seconds
-		byte m_yellow_powerup_traits_duration;             // seconds
-		byte pad;                                          // gonna pack her bags and leave this house of pain
+
+		// default: 5
+		// maximum: 120
+		byte m_red_powerup_traits_duration; // seconds
+
+		// default: 30
+		// maximum: 120
+		byte m_blue_powerup_traits_duration; // seconds
+
+		// default: 30
+		// maximum: 120
+		byte m_yellow_powerup_traits_duration; // seconds
+
+		// gonna pack her bags and leave this house of pain
+		byte pad[1];
 	};
 	static_assert(sizeof(c_game_engine_map_override_options) == 0x7C);
 }

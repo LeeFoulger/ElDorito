@@ -253,8 +253,8 @@ namespace blam
 	bool game_skull_is_active_primary(e_campaign_skulls_primary primary_skull)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals && (primary_skull >= _campaign_skull_iron && primary_skull < k_campaign_skull_primary_count))
-			return !!(game_globals->active_primary_skulls & (1 << primary_skull));
+		if (game_globals)
+			return game_globals->active_primary_skulls == primary_skull;
 
 		return false;
 	}
@@ -262,8 +262,8 @@ namespace blam
 	bool game_skull_is_active_secondary(e_campaign_skulls_secondary secondary_skull)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals && (secondary_skull >= _campaign_skull_assassin && secondary_skull < k_campaign_skull_secondary_count))
-			return !!(game_globals->active_secondary_skulls & (1 << secondary_skull));
+		if (game_globals)
+			return game_globals->active_secondary_skulls == secondary_skull;
 
 		return false;
 	}
@@ -271,25 +271,15 @@ namespace blam
 	void game_skull_enable_primary(e_campaign_skulls_primary primary_skull, bool enable)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals && (primary_skull >= _campaign_skull_iron && primary_skull < k_campaign_skull_primary_count))
-		{
-			if (enable)
-				game_globals->active_primary_skulls |= (1 << primary_skull);
-			else
-				game_globals->active_primary_skulls &= ~(1 << primary_skull);
-		}
+		if (game_globals)
+			game_globals->active_primary_skulls.set(primary_skull, enable);
 	}
 
 	void game_skull_enable_secondary(e_campaign_skulls_secondary secondary_skull, bool enable)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals && (secondary_skull >= _campaign_skull_assassin && secondary_skull < k_campaign_skull_secondary_count))
-		{
-			if (enable)
-				game_globals->active_secondary_skulls |= (1 << secondary_skull);
-			else
-				game_globals->active_secondary_skulls &= ~(1 << secondary_skull);
-		}
+		if (game_globals)
+			game_globals->active_secondary_skulls.set(secondary_skull, enable);
 	}
 
 	bool game_coop_allow_respawn()

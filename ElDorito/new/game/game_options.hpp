@@ -18,7 +18,7 @@
 namespace blam
 {
 	// TODO: find a home
-	enum e_game_simulation_type : char
+	enum e_game_simulation_type
 	{
 		_game_simulation_none = 0,
 		_game_simulation_local,
@@ -29,10 +29,9 @@ namespace blam
 
 		k_game_simulation_count
 	};
-	static_assert(sizeof(e_game_simulation_type) == sizeof(char));
 
 	// TODO: find a home
-	enum e_game_playback_type : short
+	enum e_game_playback_type
 	{
 		_game_playback_none = 0,
 		_game_playback_local,
@@ -41,10 +40,9 @@ namespace blam
 
 		k_game_playback_count
 	};
-	static_assert(sizeof(e_game_playback_type) == sizeof(short));
 
 	// TODO: find a home
-	enum e_campaign_difficulty_level : short
+	enum e_campaign_difficulty_level
 	{
 		_campaign_difficulty_level_easy = 0,
 		_campaign_difficulty_level_normal,
@@ -53,7 +51,6 @@ namespace blam
 
 		k_campaign_difficulty_levels_count
 	};
-	static_assert(sizeof(e_campaign_difficulty_level) == sizeof(short));
 
 	// TODO: find a home
 	struct s_campaign_armaments_player
@@ -65,7 +62,7 @@ namespace blam
 	// TODO: find a home
 	enum e_campaign_skulls_primary
 	{
-		_campaign_skull_iron,
+		_campaign_skull_iron = 0,
 		_campaign_skull_black_eye,
 		_campaign_skull_tough_luck,
 		_campaign_skull_catch,
@@ -81,7 +78,7 @@ namespace blam
 	// TODO: find a home
 	enum e_campaign_skulls_secondary
 	{
-		_campaign_skull_assassin,
+		_campaign_skull_assassin = 0,
 		_campaign_skull_blind,
 		_campaign_skull_superman,
 		_campaign_skull_birthday_party,
@@ -126,7 +123,7 @@ namespace blam
 	// TODO: find a home
 	struct c_game_variant
 	{
-		e_game_engine_variant m_game_engine_index;
+		c_enum<e_game_engine_variant, long, k_game_engine_variant_count> m_game_engine_index;
 
 		union
 		{
@@ -169,13 +166,13 @@ namespace blam
 
 	struct game_options
 	{
-		e_game_mode game_mode;
-		e_game_simulation_type game_simulation;
+		c_enum<e_game_mode, long, k_game_mode_count> game_mode;
+		c_enum<e_game_simulation_type, char, k_game_mode_count> game_simulation;
 		byte game_network_type;
 		short game_tick_rate;
 		qword game_instance;
 		dword random_seed;
-		e_language language;
+		c_enum<e_language, long, k_language_count> language;
 		long determinism_version;
 		long campaign_id;
 		long map_id;
@@ -187,12 +184,12 @@ namespace blam
 		bool dump_random_seeds;
 		bool playtest_mode;
 		byte : 8;
-		e_game_playback_type game_playback;
+		c_enum<e_game_playback_type, short, k_game_playback_count> game_playback;
 		bool record_saved_film;
 		byte : 8;
 		long playback_start_ticks;
 		long playback_length_in_ticks;
-		e_campaign_difficulty_level campaign_difficulty;
+		c_enum<e_campaign_difficulty_level, short, k_campaign_difficulty_levels_count> campaign_difficulty;
 		short campaign_insertion_index;
 		short campaign_metagame_scoring;
 		bool campaign_metagame_enabled;
@@ -203,8 +200,8 @@ namespace blam
 		byte : 8;
 		byte : 8;
 		byte initial_game_progression[0x80];
-		dword initial_primary_skulls;
-		dword initial_secondary_skulls;
+		c_flags<e_campaign_skulls_primary, dword, k_campaign_skull_primary_count> initial_primary_skulls;
+		c_flags<e_campaign_skulls_secondary, dword, k_campaign_skull_secondary_count> initial_secondary_skulls;
 		s_hub_progression hub_progression;
 		bool matchmade_game;
 		byte __align2C9[7];

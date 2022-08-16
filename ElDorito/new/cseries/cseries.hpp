@@ -93,11 +93,6 @@ namespace blam
 	struct c_flags
 	{
 	public:
-		inline t_storage_type get_raw_bits()
-		{
-			return m_storage;
-		}
-
 		inline void set_raw_bits(t_storage_type raw_bits)
 		{
 			m_storage = raw_bits;

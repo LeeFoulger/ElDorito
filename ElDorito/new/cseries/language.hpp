@@ -2,7 +2,7 @@
 
 namespace blam
 {
-	enum e_language : long
+	enum e_language
 	{
 		_language_invalid = -1,
 
@@ -22,5 +22,4 @@ namespace blam
 		k_language_count,
 		k_language_default = _language_english
 	};
-	static_assert(sizeof(e_language) == sizeof(long));
 }

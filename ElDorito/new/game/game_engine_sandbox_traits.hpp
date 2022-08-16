@@ -2,14 +2,14 @@
 
 namespace blam
 {
-	enum e_sandbox_variant_flags : byte_flags
+	enum e_sandbox_variant_flags
 	{
-		_sandbox_variant_flags_open_channel_voice = 1 << 0,
+		_sandbox_variant_flags_open_channel_voice = 0,
 
 		k_sandbox_variant_flags
 	};
 
-	enum e_sandbox_editing_mode : char
+	enum e_sandbox_editing_mode
 	{
 		_sandbox_flags_all_players = 0,
 		_sandbox_flags_only_leader,
@@ -18,7 +18,7 @@ namespace blam
 		k_sandbox_editing_mode_default = _sandbox_flags_all_players
 	};
 
-	enum e_sandbox_respawn_time : short
+	enum e_sandbox_respawn_time
 	{
 		_sandbox_respawn_time_instant = 0,
 		_sandbox_respawn_time_3_seconds = 3,

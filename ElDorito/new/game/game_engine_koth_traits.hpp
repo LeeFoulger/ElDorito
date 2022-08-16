@@ -12,14 +12,14 @@ namespace blam
 		k_king_team_scoring_settings
 	};
 
-	enum e_king_variant_flags : dword_flags
+	enum e_king_variant_flags
 	{
-		_king_variant_flags_opaque_hill = 1 << 0,
+		_king_variant_flags_opaque_hill = 0,
 
 		k_king_variant_flags
 	};
 
-	enum e_king_moving_hill_settings : char
+	enum e_king_moving_hill_settings
 	{
 		_king_moving_hill_settings_off = 0,
 		_king_moving_hill_settings_10_seconds,
@@ -35,7 +35,7 @@ namespace blam
 		k_king_moving_hill_settings_default = _king_moving_hill_settings_30_seconds
 	};
 
-	enum e_king_moving_hill_order_settings : char
+	enum e_king_moving_hill_order_settings
 	{
 		_king_moving_hill_order_settings_random = 0,
 		_king_moving_hill_order_settings_sequence,

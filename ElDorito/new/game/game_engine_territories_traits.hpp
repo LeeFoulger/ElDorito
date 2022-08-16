@@ -2,15 +2,15 @@
 
 namespace blam
 {
-	enum e_territories_variant_flags : word_flags
+	enum e_territories_variant_flags
 	{
-		_territories_variant_flags_one_sided = 1 << 0,
-		_territories_variant_flags_lock_after_first_capture = 1 << 1,
+		_territories_variant_flags_one_sided = 0,
+		_territories_variant_flags_lock_after_first_capture,
 
 		k_territories_variant_flags
 	};
 
-	enum e_territories_respawn_on_capture_settings : short
+	enum e_territories_respawn_on_capture_settings
 	{
 		_territories_respawn_on_capture_settings_disabled,
 		_territories_respawn_on_capture_settings_friendly,
@@ -21,7 +21,7 @@ namespace blam
 		k_territories_respawn_on_capture_settings_default = _territories_respawn_on_capture_settings_disabled
 	};
 
-	enum e_territories_capture_time_settings : short
+	enum e_territories_capture_time_settings
 	{
 		_territories_capture_time_settings_instant = 0,
 		_territories_capture_time_settings_5_seconds = 5,
@@ -37,7 +37,7 @@ namespace blam
 		k_territories_capture_time_settings_default = _territories_capture_time_settings_30_seconds
 	};
 
-	enum e_territories_sudden_death_settings : short
+	enum e_territories_sudden_death_settings
 	{
 		_territories_sudden_death_settings_indefinite = -1,
 		_territories_sudden_death_settings_off = 0,
