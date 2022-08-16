@@ -21,6 +21,7 @@
     <ClCompile Include="new\game\player_control.cpp" />
     <ClCompile Include="new\game\player_mapping.cpp" />
     <ClCompile Include="new\hs\hs.cpp" />
+    <ClCompile Include="new\main\game_launch.cpp" />
     <ClCompile Include="new\main\main_game.cpp" />
     <ClCompile Include="new\memory\data.cpp" />
     <ClCompile Include="new\tag_files\tag_definitions.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="new\game\player_mapping.hpp" />
     <ClInclude Include="new\hs\hs.hpp" />
     <ClInclude Include="new\input\input.hpp" />
+    <ClInclude Include="new\main\game_launch.hpp" />
     <ClInclude Include="new\main\main_game.hpp" />
     <ClInclude Include="new\memory\data.hpp" />
     <ClInclude Include="new\memory\resources.hpp" />
