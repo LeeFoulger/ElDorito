@@ -63,6 +63,36 @@ namespace blam
 	};
 
 	// TODO: find a home
+	enum e_campaign_skulls_primary
+	{
+		_campaign_skull_iron,
+		_campaign_skull_black_eye,
+		_campaign_skull_tough_luck,
+		_campaign_skull_catch,
+		_campaign_skull_fog,
+		_campaign_skull_famine,
+		_campaign_skull_thunderstorm,
+		_campaign_skull_tilt,
+		_campaign_skull_mythic,
+
+		k_campaign_skull_primary_count
+	};
+
+	// TODO: find a home
+	enum e_campaign_skulls_secondary
+	{
+		_campaign_skull_assassin,
+		_campaign_skull_blind,
+		_campaign_skull_superman,
+		_campaign_skull_birthday_party,
+		_campaign_skull_daddy,
+		_campaign_skull_third_person,
+		_campaign_skull_directors_cut,
+
+		k_campaign_skull_secondary_count
+	};
+
+	// TODO: find a home
 	struct s_hub_progression
 	{
 		s_campaign_armaments_player hub_armaments[4];
@@ -144,7 +174,7 @@ namespace blam
 		byte game_network_type;
 		short game_tick_rate;
 		qword game_instance;
-		long random_seed;
+		dword random_seed;
 		e_language language;
 		long determinism_version;
 		long campaign_id;
@@ -224,12 +254,12 @@ namespace blam
 	extern bool game_is_predicted();
 	extern bool game_is_distributed();
 	extern long game_tick_rate_get();
-	extern bool game_skull_is_active_primary(long primary_skull);
-	extern bool game_skull_is_active_secondary(long secondary_skull);
-	extern void game_skull_enable_primary(long primary_skull, bool enable);
-	extern void game_skull_enable_secondary(long secondary_skull, bool enable);
-	//extern bool game_coop_allow_respawn();
-	//extern bool game_survival_allow_respawn(long)
+	extern bool game_skull_is_active_primary(e_campaign_skulls_primary primary_skull);
+	extern bool game_skull_is_active_secondary(e_campaign_skulls_secondary secondary_skull);
+	extern void game_skull_enable_primary(e_campaign_skulls_primary primary_skull, bool enable);
+	extern void game_skull_enable_secondary(e_campaign_skulls_secondary secondary_skull, bool enable);
+	extern bool game_coop_allow_respawn();
+	//extern bool game_survival_allow_respawn(long);
 	extern e_language game_get_master_language();
 	//extern bool game_is_language_neutral();
 	//extern void game_won();

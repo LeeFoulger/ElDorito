@@ -250,28 +250,28 @@ namespace blam
 		return game_options_get()->game_tick_rate;
 	}
 
-	bool game_skull_is_active_primary(long primary_skull)
+	bool game_skull_is_active_primary(e_campaign_skulls_primary primary_skull)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals)
-			return (game_globals->active_primary_skulls & (1 << primary_skull)) == 1;
+		if (game_globals && (primary_skull >= _campaign_skull_iron && primary_skull < k_campaign_skull_primary_count))
+			return !!(game_globals->active_primary_skulls & (1 << primary_skull));
 
 		return false;
 	}
 
-	bool game_skull_is_active_secondary(long secondary_skull)
+	bool game_skull_is_active_secondary(e_campaign_skulls_secondary secondary_skull)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (game_globals)
-			return (game_globals->active_secondary_skulls & (1 << secondary_skull)) == 1;
+		if (game_globals && (secondary_skull >= _campaign_skull_assassin && secondary_skull < k_campaign_skull_secondary_count))
+			return !!(game_globals->active_secondary_skulls & (1 << secondary_skull));
 
 		return false;
 	}
 	
-	void game_skull_enable_primary(long primary_skull, bool enable)
+	void game_skull_enable_primary(e_campaign_skulls_primary primary_skull, bool enable)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (!game_globals)
+		if (game_globals && (primary_skull >= _campaign_skull_iron && primary_skull < k_campaign_skull_primary_count))
 		{
 			if (enable)
 				game_globals->active_primary_skulls |= (1 << primary_skull);
@@ -280,10 +280,10 @@ namespace blam
 		}
 	}
 
-	void game_skull_enable_secondary(long secondary_skull, bool enable)
+	void game_skull_enable_secondary(e_campaign_skulls_secondary secondary_skull, bool enable)
 	{
 		game_globals_storage* game_globals = game_globals_get();
-		if (!game_globals)
+		if (game_globals && (secondary_skull >= _campaign_skull_assassin && secondary_skull < k_campaign_skull_secondary_count))
 		{
 			if (enable)
 				game_globals->active_secondary_skulls |= (1 << secondary_skull);
@@ -292,7 +292,13 @@ namespace blam
 		}
 	}
 
-	// bool game_coop_allow_respawn()
+	bool game_coop_allow_respawn()
+	{
+		game_globals_storage* game_globals = game_globals_get();
+
+		return game_globals && game_globals->options.game_mode == _game_mode_campaign && !game_skull_is_active_primary(_campaign_skull_iron);
+	}
+
 	// bool game_survival_allow_respawn(long)
 
 	e_language game_get_master_language()
