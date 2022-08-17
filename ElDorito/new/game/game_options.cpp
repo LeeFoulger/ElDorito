@@ -352,5 +352,12 @@ namespace blam
 		return game_globals->game_finished && !game_globals->game_finished_wait_time;
 	}
 
+	void game_options_setup_default_players(long player_count, game_options* options)
+	{
+		void(__cdecl * game_options_setup_default_players_ptr)(long player_count, game_options*) = reinterpret_cast<decltype(game_options_setup_default_players_ptr)>(0x00532440);
+
+		return game_options_setup_default_players_ptr(player_count, options);
+	}
+
 	// bool game_is_finished_waiting_for_level_advance()
 }

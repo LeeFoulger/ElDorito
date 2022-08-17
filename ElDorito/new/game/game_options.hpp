@@ -271,4 +271,5 @@ namespace blam
 	extern bool game_is_finished();
 	extern bool game_is_finished_immediate();
 	//extern bool game_is_finished_waiting_for_level_advance();
+	extern void game_options_setup_default_players(long player_count, game_options* options);
 }
