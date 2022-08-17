@@ -139,6 +139,11 @@ namespace blam
 			return m_storage == static_cast<t_storage_type>(value);
 		}
 
+		inline bool operator!=(t_type value)
+		{
+			return m_storage != static_cast<t_storage_type>(value);
+		}
+
 		inline void operator= (t_type value)
 		{
 			m_storage = static_cast<t_storage_type>(value);
@@ -148,6 +153,11 @@ namespace blam
 		inline operator T () const
 		{
 			return static_cast<T>(m_storage);
+		}
+
+		t_type get()
+		{
+			return static_cast<t_type>(m_storage);
 		}
 
 	protected:
