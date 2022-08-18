@@ -33,10 +33,7 @@ namespace blam
 	enum e_director_perspective : long
 	{
 		_director_perspective_first_person = 0,
-
-		// c_following_camera, c_dead_camera, c_orbiting_camera
-		_director_perspective_1,
-
+		_director_perspective_third_person,
 		_director_perspective_scripted,
 
 		// c_null_camera, (c_authored_camera default)
@@ -68,7 +65,7 @@ namespace blam
 
 		byte pad[3];
 
-		long get_perspective();
+		e_director_perspective get_perspective();
 		bool set_camera_mode_internal(e_camera_mode camera_mode, real transition_time, bool force_update);
 
 		inline bool set_camera_mode(e_camera_mode camera_mode, real transition_time)
@@ -105,7 +102,7 @@ namespace blam
 	struct s_director_info
 	{
 		e_director_mode director_mode;
-		long director_perspective; // e_director_perspective
+		e_director_perspective director_perspective;
 		e_camera_mode camera_mode;
 	};
 	static_assert(sizeof(s_director_info) == 0xC);
@@ -125,9 +122,12 @@ namespace blam
 
 	extern c_director* director_get(long user_index);
 	extern s_director_info* director_get_info(long user_index);
-	extern long director_get_perspective(long user_index);
+	extern e_director_perspective director_get_perspective(long user_index);
+	extern void director_set_perspective(long user_index, e_director_perspective director_perspective);
 	extern void director_set_mode(long user_index, e_director_mode director_mode);
-	extern bool director_get_camera_third_person(long);
+	extern bool director_get_camera_third_person(long user_index);
 	extern bool director_in_scripted_camera();
-	extern void debug_director_toggle(long);
+	extern void director_toggle(long user_index, e_director_mode director_mode);
+	extern void director_toggle_perspective(long user_index, e_director_perspective director_perspective);
+	extern void director_toggle_camera(long user_index, e_camera_mode camera_mode);
 }

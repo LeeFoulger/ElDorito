@@ -81,15 +81,15 @@ namespace blam
 		return director_globals;
 	}
 
-	long c_director::get_perspective()
+	e_director_perspective c_director::get_perspective()
 	{
 		if (!game_in_progress())
-			return 3;
-		long director_perspective = get_camera()->get_perspective();
+			return _director_perspective_3;
+		e_director_perspective director_perspective = (e_director_perspective)get_camera()->get_perspective();
 		if (!director_perspective)
-			director_perspective = m_transition_time > 0.0;
+			director_perspective = e_director_perspective(m_transition_time > 0.0);
 		if (game_is_ui_shell())
-			return 3;
+			return _director_perspective_3;
 
 		return director_perspective;
 	}
@@ -135,7 +135,7 @@ namespace blam
 			m_transition_time = transition_time;
 		}
 
-		long director_perspective = get_perspective();
+		e_director_perspective director_perspective = get_perspective();
 		s_director_globals* director_globals = director_globals_get();
 		if (director_globals->infos[m_user_index].director_perspective != director_perspective ||
 			director_globals->infos[m_user_index].camera_mode != camera_mode)
@@ -164,13 +164,23 @@ namespace blam
 		return &director_globals_get()->infos[user_index];
 	}
 
-	long director_get_perspective(long user_index)
+	e_director_perspective director_get_perspective(long user_index)
 	{
 		c_director* director = director_get(user_index);
 		if (!director)
-			return 0;
+			return _director_perspective_3;
 
 		return director->get_perspective();
+	}
+
+	void director_set_perspective(long user_index, e_director_perspective director_perspective)
+	{
+		s_director_globals* director_globals = director_globals_get();
+		if (director_globals->infos[user_index].director_perspective != director_perspective)
+		{
+			director_globals->infos[user_index].director_perspective = director_perspective;
+			first_person_weapon_perspective_changed(user_index);
+		}
 	}
 
 	void director_set_mode(long user_index, e_director_mode director_mode)
@@ -212,19 +222,33 @@ namespace blam
 		return tls->director_camera_scripted;
 	}
 
-	void debug_director_toggle(long user_index)
+	void director_toggle(long user_index, e_director_mode director_mode)
 	{
-		static s_director_info previous_info = {};
+		static e_director_mode previous_mode = {};
 
-		if (director_get_info(user_index)->director_mode != _director_mode_debug)
-		{
-			previous_info = *director_get_info(user_index);
-			director_set_mode(user_index, _director_mode_debug);
-		}
-		else
-		{
-			director_set_mode(user_index, previous_info.director_mode);
-			director_get(user_index)->set_camera_mode(previous_info.camera_mode, 0.0f);
-		}
+		if (director_get_info(user_index)->director_mode == director_mode)
+			director_mode = previous_mode;
+
+		director_set_mode(user_index, director_mode);
+	}
+
+	void director_toggle_perspective(long user_index, e_director_perspective director_perspective)
+	{
+		static e_director_perspective previous_mode = {};
+
+		if (director_get_info(user_index)->director_perspective == director_perspective)
+			director_perspective = previous_mode;
+
+		director_set_perspective(user_index, director_perspective);
+	}
+
+	void director_toggle_camera(long user_index, e_camera_mode camera_mode)
+	{
+		static e_camera_mode previous_mode = {};
+
+		if (director_get_info(user_index)->camera_mode == camera_mode)
+			camera_mode = previous_mode;
+
+		director_get(user_index)->set_camera_mode(camera_mode, 0.0f);
 	}
 }
