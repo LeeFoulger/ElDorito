@@ -632,6 +632,7 @@
     <ClCompile Include="new\game\game_engine_variant.cpp" />
     <ClCompile Include="new\main\main_game.cpp" />
     <ClCompile Include="new\main\main_game_launch.cpp" />
+    <ClCompile Include="new\cseries\cseries_string.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1512,6 +1513,7 @@
     <ClInclude Include="new\game\game_engine_traits.hpp" />
     <ClInclude Include="new\main\main_game.hpp" />
     <ClInclude Include="new\main\main_game_launch.hpp" />
+    <ClInclude Include="new\cseries\cseries_string.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />

@@ -15,6 +15,7 @@
     <ClCompile Include="new\camera\camera.cpp" />
     <ClCompile Include="new\camera\director.cpp" />
     <ClCompile Include="new\camera\observer.cpp" />
+    <ClCompile Include="new\cseries\cseries_string.cpp" />
     <ClCompile Include="new\game\game_engine_variant.cpp" />
     <ClCompile Include="new\game\game_globals.cpp" />
     <ClCompile Include="new\game\game_options.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="new\camera\saved_film_director.hpp" />
     <ClInclude Include="new\camera\static_camera.hpp" />
     <ClInclude Include="new\cseries\cseries.hpp" />
+    <ClInclude Include="new\cseries\cseries_string.hpp" />
     <ClInclude Include="new\cseries\integer_math.hpp" />
     <ClInclude Include="new\cseries\language.hpp" />
     <ClInclude Include="new\cseries\real_math.hpp" />
