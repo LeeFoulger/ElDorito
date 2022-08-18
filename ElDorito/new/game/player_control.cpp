@@ -55,4 +55,17 @@ namespace blam
         player_control_globals->machinima_camera_debug = debug;
         player_control_globals->machinima_camera_use_old_controls = use_old_controls;
     }
+
+    void player_control_toggle_machinima_camera()
+    {
+        static bool enable = false;
+        static bool debug = false;
+        static bool use_old_controls = false;
+
+        player_control_set_machinima_camera(enable, debug, use_old_controls);
+
+        enable = !enable;
+        debug = !debug;
+        use_old_controls = !use_old_controls;
+    }
 }

@@ -100,4 +100,5 @@ namespace blam
 	extern inline bool player_control_get_machinima_camera_use_old_controls();
 	extern inline bool player_control_get_machinima_camera_debug();
 	extern inline void player_control_set_machinima_camera(bool enabled, bool debug, bool use_old_controls);
+	extern inline void player_control_toggle_machinima_camera();
 }
