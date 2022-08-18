@@ -158,11 +158,11 @@ namespace blam
 	static_assert(sizeof(s_game_machine_options) == 0x128);
 
 	// TODO: find a home
-	struct s_game_player_options
+	struct game_player_options
 	{
 		byte __data[0x1640];
 	};
-	static_assert(sizeof(s_game_player_options) == 0x1640);
+	static_assert(sizeof(game_player_options) == 0x1640);
 
 	struct game_options
 	{
@@ -209,7 +209,7 @@ namespace blam
 		c_game_variant game_variant;
 		c_map_variant map_variant;
 		s_game_machine_options machine_options;
-		s_game_player_options players[16];
+		c_static_array<game_player_options, 16> players;
 	};
 	static_assert(sizeof(game_options) == 0x24B48);
 
