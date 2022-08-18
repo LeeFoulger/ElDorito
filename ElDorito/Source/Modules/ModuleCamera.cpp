@@ -419,36 +419,26 @@ namespace Modules
 		float lookDelta = 0.01f;	// not used yet
 
 		// current values
-		float hLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.yaw;
-		float vLookAngle = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles.pitch;
-		float xPos = observer->positions_focus_position.x;
-		float yPos = observer->positions_focus_position.y;
-		float zPos = observer->positions_focus_position.z;
-		float xShift = observer->positions_focus_offset.i;
-		float yShift = observer->positions_focus_offset.j;
-		float zShift = observer->positions_focus_offset.k;
-		float hShift = observer->positions_look_shift.x;
-		float vShift = observer->positions_look_shift.y;
-		float depth = observer->positions_focus_distance;
+		real_euler_angles2d desired_angles = player_control_globals->controls[director->m_user_index].state.internal_state.desired_angles;
+		real_point3d positions_focus_position = observer->positions_focus_position;
+		real_vector3d positions_focus_offset = observer->positions_focus_offset;
+		real_point2d positions_look_shift = observer->positions_look_shift;
+		real positions_focus_distance = observer->positions_focus_distance;
 		float fov = observer->horizontal_field_of_view;
-		float iForward = observer->positions_forward.i;
-		float jForward = observer->positions_forward.j;
-		float kForward = observer->positions_forward.k;
-		float iUp = observer->positions_up.i;
-		float jUp = observer->positions_up.j;
-		float kUp = observer->positions_up.k;
-		float iRight = cos(hLookAngle + 3.14159265359f / 2);
-		float jRight = sin(hLookAngle + 3.14159265359f / 2);
+		real_vector3d positions_forward = observer->positions_forward;
+		real_vector3d positions_up = observer->positions_up;
+		float iRight = cos(desired_angles.yaw + Blam::Math::PI / 2);
+		float jRight = sin(desired_angles.yaw + Blam::Math::PI / 2);
 
 		struct ControllerAxes { int16_t LeftX, LeftY, RightX, RightY; };
 		auto& controllerAxes = *(ControllerAxes*)(0x0244D1F0 + 0x2F4);
 		bool controllerEnabled = Pointer::Base(0x204DE98).Read<bool>();
 
 		if (GetActionState(Blam::Input::eGameActionUiLeftBumper)->Ticks > 0)
-			zPos -= moveDelta;
+			positions_focus_position.z -= moveDelta;
 
 		if (GetActionState(Blam::Input::eGameActionUiRightBumper)->Ticks > 0)
-			zPos += moveDelta;
+			positions_focus_position.z += moveDelta;
 
 		if (GetActionState(Blam::Input::eGameActionMoveForward)->Ticks > 0 || GetActionState(Blam::Input::eGameActionMoveBack)->Ticks > 0 || (controllerEnabled && controllerAxes.LeftY != 0))
 		{
@@ -458,9 +448,9 @@ namespace Modules
 			else if (GetActionState(Blam::Input::eGameActionMoveBack)->Ticks > 0)
 				mod = -1;
 
-			xPos += iForward * (moveDelta * mod);
-			yPos += jForward * (moveDelta * mod);
-			zPos += kForward * (moveDelta * mod);
+			positions_focus_position.x += positions_forward.i * (moveDelta * mod);
+			positions_focus_position.y += positions_forward.j * (moveDelta * mod);
+			positions_focus_position.z += positions_forward.k * (moveDelta * mod);
 		}
 
 		if (GetActionState(Blam::Input::eGameActionMoveLeft)->Ticks > 0 || GetActionState(Blam::Input::eGameActionMoveRight)->Ticks > 0 || (controllerEnabled && controllerAxes.LeftX != 0))
@@ -471,8 +461,8 @@ namespace Modules
 			else if (GetActionState(Blam::Input::eGameActionMoveLeft)->Ticks > 0)
 				mod = -1;
 
-			xPos -= iRight * (moveDelta * mod);
-			yPos -= jRight * (moveDelta * mod);
+			positions_focus_position.x -= iRight * (moveDelta * mod);
+			positions_focus_position.y -= jRight * (moveDelta * mod);
 		}
 
 		if (GetAsyncKeyState('Z') & 0x8000)
@@ -485,15 +475,15 @@ namespace Modules
 		}
 
 		// update position
-		observer->positions_focus_position = { xPos, yPos, zPos };
+		observer->positions_focus_position = positions_focus_position;
 
 		// update look angles
-		observer->positions_forward.i = cos(hLookAngle) * cos(vLookAngle);
-		observer->positions_forward.j = sin(hLookAngle) * cos(vLookAngle);
-		observer->positions_forward.k = sin(vLookAngle);
-		observer->positions_up.i = -cos(hLookAngle) * sin(vLookAngle);
-		observer->positions_up.j = -sin(hLookAngle) * sin(vLookAngle);
-		observer->positions_up.k = cos(vLookAngle);
+		observer->positions_forward.i = cos(desired_angles.yaw) * cos(desired_angles.pitch);
+		observer->positions_forward.j = sin(desired_angles.yaw) * cos(desired_angles.pitch);
+		observer->positions_forward.k = sin(desired_angles.pitch);
+		observer->positions_up.i = -cos(desired_angles.yaw) * sin(desired_angles.pitch);
+		observer->positions_up.j = -sin(desired_angles.yaw) * sin(desired_angles.pitch);
+		observer->positions_up.k = cos(desired_angles.pitch);
 
 		observer->horizontal_field_of_view = fov;
 	}
