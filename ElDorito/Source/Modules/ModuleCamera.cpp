@@ -312,7 +312,8 @@ namespace
 		player_control_globals->input_user_states[director->m_user_index].player_input_locked = (camera_mode == _camera_mode_flying);
 
 		// machinima camera
-		player_control_set_machinima_camera(camera_mode == _camera_mode_flying, camera_mode == _camera_mode_flying, false);
+		player_control_toggle_machinima_camera_enabled();
+		player_control_toggle_machinima_camera_debug();
 
 		if (camera_mode != k_camera_mode_null)
 			director->set_camera_mode(camera_mode, 0.0f);

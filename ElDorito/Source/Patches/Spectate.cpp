@@ -18,7 +18,7 @@
 
 namespace
 {
-	void __fastcall game_director_update_hook(blam::c_director* director, void* unused, int a2);
+	void __fastcall game_director_update_hook(blam::c_game_director* director, void* unused, int a2);
 	void __cdecl input_abstraction_get_player_look_angular_velocity_hook(long controller_index, blam::real_euler_angles2d* angular_velocity);
 
 	struct
@@ -121,9 +121,9 @@ namespace
 			&& !(Pointer(player)(0x4).Read<uint32_t>() & 8u);
 	}
 
-	void __fastcall game_director_update_hook(blam::c_director* director, void* unused, int a2)
+	void __fastcall game_director_update_hook(blam::c_game_director* director, void* unused, int a2)
 	{
-		static void(__thiscall* game_director_update)(blam::c_director*, long) = reinterpret_cast<decltype(game_director_update)>(0x007219A0);
+		static void(__thiscall* game_director_update)(blam::c_game_director*, long) = reinterpret_cast<decltype(game_director_update)>(0x007219A0);
 		
 		if (IsSpectating(director->m_user_index))
 		{

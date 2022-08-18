@@ -10,7 +10,7 @@ namespace
 {
 	float GetScriptedCameraFovHook();
 	void DeadCameraFovHook();
-	void __fastcall c_following_camera__update_hook(void *ptr, void *unused, int localPlayerIndex, int a4, uint8_t *state);
+	void __fastcall following_camera_update_hook(blam::c_following_camera* following_camera, void* unused, int localPlayerIndex, int a4, blam::s_observer_command* command);
 
 	long director_get_perspective_hook(long user_index);
 	bool director_in_unit_perspective_hook(long user_index);
@@ -24,7 +24,7 @@ namespace Patches::Camera
 	{
 		Hook(0x32E18C, GetScriptedCameraFovHook, HookFlags::IsCall).Apply();
 		Hook(0x2122C5, DeadCameraFovHook).Apply();
-		Pointer(0x016724DC).Write(uint32_t(&c_following_camera__update_hook));
+		Pointer(0x016724DC).Write(uint32_t(&following_camera_update_hook));
 
 		Hook(0x001C211F, director_get_perspective_hook, HookFlags::IsCall).Apply();
 		Hook(0x00645340, director_get_perspective_hook, HookFlags::IsCall).Apply();
@@ -104,40 +104,32 @@ namespace
 		}
 	}
 
-	void __fastcall c_following_camera__update_hook(void *thisptr, void *unused, int localPlayerIndex, int a4, uint8_t *state)
+	void __fastcall following_camera_update_hook(blam::c_following_camera *following_camera, void *unused, int localPlayerIndex, int a4, blam::s_observer_command* command)
 	{
-		struct s_camera_definition
-		{
-			Blam::Math::RealVector3D Position;
-			Blam::Math::RealVector3D PositionShift;
-			float LookShift[2];
-			float Depth;
-			float FieldOfView;
-			Blam::Math::RealVector3D Forward;
-			Blam::Math::RealVector3D Up;
-			// ...
-		};
-
-		const auto c_following_camera__update = (void(__thiscall *)(void *ptr, int localPlayerIndex, int a4, uint8_t *state))(0x00729730);
+		const auto c_following_camera__update = (void(__thiscall *)(blam::c_following_camera*, int, int a4, blam::s_observer_command*))(0x00729730);
 		const auto &moduleCamera = Modules::ModuleCamera::Instance();
 
-		c_following_camera__update(thisptr, localPlayerIndex, a4, state);
-
-		auto &definition = *(s_camera_definition*)(state + 0x4);
+		c_following_camera__update(following_camera, localPlayerIndex, a4, command);
 
 		// scale fov by prefered fov
-		definition.FieldOfView = definition.FieldOfView / moduleCamera.VarCameraFov->DefaultValueFloat * moduleCamera.VarCameraFov->ValueFloat;
+		command->field_of_view = command->field_of_view / moduleCamera.VarCameraFov->DefaultValueFloat * moduleCamera.VarCameraFov->ValueFloat;
 
 		// scale position shift and depth with target object scale
-		auto targetObjectIndex = *(uint32_t*)((uint8_t*)thisptr + 0x4);
-		if (targetObjectIndex == -1)
+		auto object_index = following_camera->m_object_index;
+		if (object_index == -1)
 			return;
-		auto targetObject = Blam::Objects::Get(targetObjectIndex);
+
+		auto targetObject = Blam::Objects::Get(object_index);
 		if (!targetObject)
 			return;	
+
 		auto s = (float)std::pow(targetObject->Scale, 0.5);
-		definition.Depth *= s;
-		definition.PositionShift *= s;
+		command->focus_distance *= s;
+
+		// TODO: add operator* from `RealVector3D` to `real_vector3d`
+		command->focus_offset.i *= s;
+		command->focus_offset.j *= s;
+		command->focus_offset.k *= s;
 	}
 
 	long director_get_perspective_hook(long user_index)
