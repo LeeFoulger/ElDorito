@@ -18,11 +18,6 @@ namespace blam
 
     inline bool player_control_get_machinima_camera_enabled()
     {
-        // unsure `game_options_get` is needed here
-        //if (game_in_progress() && !game_is_ui_shell())
-        //    game_options_get();
-        //return player_control_globals->machinima_camera_enabled;
-
         if (game_in_progress() && !game_is_ui_shell())
             return player_control_globals_get()->machinima_camera_enabled;
 
@@ -56,16 +51,39 @@ namespace blam
         player_control_globals->machinima_camera_use_old_controls = use_old_controls;
     }
 
-    void player_control_toggle_machinima_camera()
+    inline void player_control_toggle_machinima_camera_enabled()
     {
-        static bool enable = false;
-        static bool debug = false;
-        static bool use_old_controls = false;
+        s_player_control_globals* player_control_globals = player_control_globals_get();
+        if (!player_control_globals)
+            return;
 
-        player_control_set_machinima_camera(enable, debug, use_old_controls);
+        player_control_globals->machinima_camera_enabled = !player_control_globals->machinima_camera_enabled;
+    }
 
-        enable = !enable;
-        debug = !debug;
-        use_old_controls = !use_old_controls;
+    inline void player_control_toggle_machinima_camera_use_old_controls()
+    {
+        s_player_control_globals* player_control_globals = player_control_globals_get();
+        if (!player_control_globals)
+            return;
+
+        player_control_globals->machinima_camera_use_old_controls = !player_control_globals->machinima_camera_use_old_controls;
+    }
+
+    inline void player_control_toggle_machinima_camera_debug()
+    {
+        s_player_control_globals* player_control_globals = player_control_globals_get();
+        if (!player_control_globals)
+            return;
+
+        player_control_globals->machinima_camera_debug = !player_control_globals->machinima_camera_debug;
+    }
+
+    void player_control_toggle_player_input(long user_index)
+    {
+        s_player_control_globals* player_control_globals = player_control_globals_get();
+        if (!player_control_globals)
+            return;
+
+        player_control_globals->input_user_states[user_index].player_input_locked = !player_control_globals->input_user_states[user_index].player_input_locked;
     }
 }
