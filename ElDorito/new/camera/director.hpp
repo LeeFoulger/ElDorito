@@ -128,5 +128,6 @@ namespace blam
 	extern long director_get_perspective(long user_index);
 	extern void director_set_mode(long user_index, e_director_mode director_mode);
 	extern bool director_get_camera_third_person(long);
-	extern bool director_in_scripted_camera(void);
+	extern bool director_in_scripted_camera();
+	extern void debug_director_toggle(long);
 }

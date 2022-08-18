@@ -204,11 +204,27 @@ namespace blam
 		return director_get(user_index)->get_camera()->get_type() == _camera_mode_orbiting;
 	}
 
-	bool director_in_scripted_camera(void)
+	bool director_in_scripted_camera()
 	{
 		using namespace Blam::Memory;
 		s_thread_local_storage* tls = ElDorito::GetMainTls();
 
 		return tls->director_camera_scripted;
+	}
+
+	void debug_director_toggle(long user_index)
+	{
+		static s_director_info previous_info = {};
+
+		if (director_get_info(user_index)->director_mode != _director_mode_debug)
+		{
+			previous_info = *director_get_info(user_index);
+			director_set_mode(user_index, _director_mode_debug);
+		}
+		else
+		{
+			director_set_mode(user_index, previous_info.director_mode);
+			director_get(user_index)->set_camera_mode(previous_info.camera_mode, 0.0f);
+		}
 	}
 }
