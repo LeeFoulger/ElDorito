@@ -78,7 +78,7 @@ namespace blam
         player_control_globals->machinima_camera_debug = !player_control_globals->machinima_camera_debug;
     }
 
-    void player_control_toggle_player_input(long user_index)
+    inline void player_control_toggle_player_input(long user_index)
     {
         s_player_control_globals* player_control_globals = player_control_globals_get();
         if (!player_control_globals)
