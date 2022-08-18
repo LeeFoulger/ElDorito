@@ -200,8 +200,8 @@ namespace blam
 		byte : 8;
 		byte : 8;
 		byte initial_game_progression[0x80];
-		c_flags<e_campaign_skulls_primary, dword, k_campaign_skull_primary_count> initial_primary_skulls;
-		c_flags<e_campaign_skulls_secondary, dword, k_campaign_skull_secondary_count> initial_secondary_skulls;
+		c_flags<e_campaign_skulls_primary, long, k_campaign_skull_primary_count> initial_skulls_primary;
+		c_flags<e_campaign_skulls_secondary, long, k_campaign_skull_secondary_count> initial_skulls_secondary;
 		s_hub_progression hub_progression;
 		bool matchmade_game;
 		byte __align2C9[7];
