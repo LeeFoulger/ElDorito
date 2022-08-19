@@ -2,6 +2,7 @@
 
 #include "cseries/cseries.hpp"
 #include "memory/data.hpp"
+#include "game_progression.hpp"
 #include "game_options.hpp"
 
 namespace blam
@@ -26,14 +27,15 @@ namespace blam
 
 		game_options options;
 
-		dword __unknown24B58;
-		byte active_game_progress[0x80];
+		// ODST
+		dword active_game_progression_level; // string id
+		s_campaign_game_progression active_game_progression;
 
 		bool game_in_progress;
 
 		bool game_lost;
 		bool game_revert;
-		bool __unknown24BDF;
+		bool prepare_for_game_progression; // false if `active_game_progression_level` is `_invalid_string_id`
 		dword game_lost_wait_time;
 
 		bool game_finished;

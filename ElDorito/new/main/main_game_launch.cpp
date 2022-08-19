@@ -145,11 +145,11 @@ namespace blam
 
     void main_game_launch_set_active_skulls_primary(long primary_skull)
     {
-        g_launch_globals.options.initial_skulls_primary = primary_skull;
+        g_launch_globals.options.skulls_primary = primary_skull;
     }
 
     void main_game_launch_set_active_skulls_secondary(long secondary_skull)
     {
-        g_launch_globals.options.initial_skulls_secondary = secondary_skull;
+        g_launch_globals.options.skulls_secondary = secondary_skull;
     }
 }

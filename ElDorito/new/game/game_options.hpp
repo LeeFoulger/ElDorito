@@ -3,6 +3,7 @@
 #include "cseries/cseries.hpp"
 #include "cseries/language.hpp"
 #include "game_mode.hpp"
+#include "game_progression.hpp"
 #include "game_engine_variant.hpp"
 #include "game_engine_ctf.hpp"
 #include "game_engine_slayer.hpp"
@@ -53,13 +54,6 @@ namespace blam
 	};
 
 	// TODO: find a home
-	struct s_campaign_armaments_player
-	{
-		bool valid;
-		byte __data[29];
-	};
-
-	// TODO: find a home
 	enum e_campaign_skulls_primary
 	{
 		_campaign_skull_iron = 0,
@@ -88,18 +82,6 @@ namespace blam
 
 		k_campaign_skull_secondary_count
 	};
-
-	// TODO: find a home
-	struct s_hub_progression
-	{
-		s_campaign_armaments_player hub_armaments[4];
-		long hub_return_to_insertion_point;
-		bool hub_progression_valid;
-		byte : 8;
-		byte : 8;
-		byte : 8;
-	};
-	static_assert(sizeof(s_hub_progression) == 0x80);
 
 	// TODO: find a home
 	struct s_game_matchmaking_options
@@ -199,9 +181,9 @@ namespace blam
 		s_campaign_armaments_player campaign_armaments[4];
 		byte : 8;
 		byte : 8;
-		byte initial_game_progression[0x80];
-		c_flags<e_campaign_skulls_primary, long, k_campaign_skull_primary_count> initial_skulls_primary;
-		c_flags<e_campaign_skulls_secondary, long, k_campaign_skull_secondary_count> initial_skulls_secondary;
+		s_campaign_game_progression campaign_game_progression;
+		c_flags<e_campaign_skulls_primary, long, k_campaign_skull_primary_count> skulls_primary;
+		c_flags<e_campaign_skulls_secondary, long, k_campaign_skull_secondary_count> skulls_secondary;
 		s_hub_progression hub_progression;
 		bool matchmade_game;
 		byte __align2C9[7];

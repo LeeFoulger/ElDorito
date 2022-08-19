@@ -241,6 +241,7 @@
     <ClInclude Include="new\game\game_globals.hpp" />
     <ClInclude Include="new\game\game_mode.hpp" />
     <ClInclude Include="new\game\game_options.hpp" />
+    <ClInclude Include="new\game\game_progression.hpp" />
     <ClInclude Include="new\game\player_control.hpp" />
     <ClInclude Include="new\game\player_mapping.hpp" />
     <ClInclude Include="new\hs\hs.hpp" />

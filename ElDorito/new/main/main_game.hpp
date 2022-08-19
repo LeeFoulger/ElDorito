@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cseries/cseries.hpp"
+#include "game/game_progression.hpp"
 #include "game/game_options.hpp"
 
 namespace blam
@@ -29,8 +30,9 @@ namespace blam
 		byte : 8;
 		byte : 8;
 
-		dword __unknown110;
-		dword __unknown114;
+		// game_progression_levels_block: "type" and block index
+		c_enum<e_game_progression_level, long, k_game_progression_level_count> gp_level_advance_type;
+		long gp_level_block_index;
 
 		bool change_in_progress;
 		bool game_load_pending;
