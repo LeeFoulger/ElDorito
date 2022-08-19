@@ -30,7 +30,7 @@ namespace blam
 		byte : 8;
 		byte : 8;
 
-		// game_progression_levels_block: "type" and block index
+		// ODST, game_progression_levels_block: "type" and block index
 		c_enum<e_game_progression_level, long, k_game_progression_level_count> gp_level_advance_type;
 		long gp_level_block_index;
 

@@ -14,12 +14,33 @@ namespace blam
 		k_game_progression_level_count
 	};
 
-	struct s_campaign_armaments_player
+	struct s_persistent_campaign_player_weapon
+	{
+		short damage_reporting_type;
+		short rounds_loaded_maximum;
+		short runtime_rounds_inventory_maximum;
+		short loaded_ammo_amount;
+	};
+	static_assert(sizeof(s_persistent_campaign_player_weapon) == 0x8);
+
+	struct s_persistent_campaign_player
 	{
 		bool valid;
-		byte __data[0x1D];
+		byte : 8;
+
+		s_persistent_campaign_player_weapon primary_weapon;
+		s_persistent_campaign_player_weapon backpack_weapon;
+		s_persistent_campaign_player_weapon secondary_weapon;
+
+		char __unknown1A[4];
 	};
-	static_assert(sizeof(s_campaign_armaments_player) == 0x1E);
+	static_assert(sizeof(s_persistent_campaign_player) == 0x1E);
+
+	struct s_campaign_armaments
+	{
+		s_persistent_campaign_player players[4];
+	};
+	static_assert(sizeof(s_campaign_armaments) == 0x78);
 
 	struct s_campaign_game_progression
 	{
@@ -29,7 +50,7 @@ namespace blam
 
 	struct s_hub_progression
 	{
-		s_campaign_armaments_player hub_armaments[4];
+		s_campaign_armaments hub_armaments;
 		long hub_return_to_insertion_point;
 		bool hub_progression_valid;
 		byte : 8;

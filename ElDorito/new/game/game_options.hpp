@@ -178,7 +178,7 @@ namespace blam
 		bool survival_enabled;
 		byte : 8; // halo3_tag_test: campaign_allow_persistent_storage
 		byte : 8; // halo3_tag_test: campaign_customization_enabled
-		s_campaign_armaments_player campaign_armaments[4];
+		s_campaign_armaments campaign_armaments;
 		byte : 8;
 		byte : 8;
 		s_campaign_game_progression campaign_game_progression;
