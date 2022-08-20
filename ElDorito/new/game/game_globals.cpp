@@ -110,8 +110,8 @@ namespace blam
 			{
 				// seconds_to_wait:
 				// - halo 3: 5.0f
-				// - halo reach: 5.0f
-				// - halo online: 5.0f
+				// - halo reach: 6.0f
+				// - halo online: 6.0f
 				real seconds_to_wait = 5.0f;
 
 				game_globals->game_lost = true;
