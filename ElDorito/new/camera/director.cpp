@@ -14,7 +14,7 @@
 namespace
 {
 	long(__cdecl* dead_or_alive_unit_from_user)(long) = reinterpret_cast<decltype(dead_or_alive_unit_from_user)>(0x005916F0);
-	void(__cdecl* first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0xA9C550);
+	void(__cdecl* first_person_weapon_perspective_changed)(long) = reinterpret_cast<decltype(first_person_weapon_perspective_changed)>(0x00A9C550);
 	long(__cdecl* players_first_active_user)(void) = reinterpret_cast<decltype(players_first_active_user)>(0x00589A30);
 
 	using namespace blam;
