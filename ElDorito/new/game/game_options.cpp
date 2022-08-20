@@ -312,45 +312,6 @@ namespace blam
 	}
 
 	// bool game_is_language_neutral()
-	// void game_won()
-	// bool game_is_won()
-	// void game_lost(bool)
-	
-	bool game_is_lost()
-	{
-		game_globals_storage* game_globals = game_globals_get();
-		assert(game_globals && game_globals->map_active);
-
-		return game_globals->game_lost;
-	}
-
-	// custom like `game_is_finished_immediate`
-	bool game_is_lost_immediate()
-	{
-		game_globals_storage* game_globals = game_globals_get();
-		assert(game_globals && game_globals->map_active);
-
-		return game_globals->game_lost && !game_globals->game_lost_wait_time;
-	}
-	
-	// void game_finish()
-	// void game_finish_immediate()
-
-	bool game_is_finished()
-	{
-		game_globals_storage* game_globals = game_globals_get();
-		assert(game_globals && game_globals->map_active);
-
-		return game_globals->game_finished;
-	}
-
-	bool game_is_finished_immediate()
-	{
-		game_globals_storage* game_globals = game_globals_get();
-		assert(game_globals && game_globals->map_active);
-
-		return game_globals->game_finished && !game_globals->game_finished_wait_time;
-	}
 
 	void game_options_setup_default_players(long player_count, game_options* options)
 	{

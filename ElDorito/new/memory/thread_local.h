@@ -6,41 +6,12 @@
 #include "game/game_globals.hpp"
 #include "game/player_control.hpp"
 #include "game/player_mapping.hpp"
+#include "game/game_time.hpp"
+#include "main/main_time.hpp"
 
 namespace blam
 {
 	//struct simulation_gamestate_entity_datum : datum_header
-
-	struct s_game_tick_time_samples
-	{
-		long flags;
-		float float4;
-		float float8;
-		float floatC;
-		dword __unknown10;
-	};
-	static_assert(sizeof(s_game_tick_time_samples) == 0x14);
-
-	struct s_main_time_globals
-	{
-		dword __unknown0;
-		dword __unknown4;
-		dword __unknown8;
-		dword __unknownC;
-		dword __unknown10;
-		dword __unknown14;
-		dword __unknown18;
-		dword __unknown1C;
-		dword __unknown20;
-		dword __unknown24;
-		dword __unknown28;
-		dword __unknown2C;
-		dword __unknown30;
-		dword __unknown34;
-		dword __unknown38;
-		dword __unknown3C;
-	};
-	static_assert(sizeof(s_main_time_globals) == 0x40);
 
 	struct players_globals
 	{
@@ -87,25 +58,6 @@ namespace blam
 		char __data[0xC4];
 	};
 	static_assert(sizeof(local_game_engine_globals) == 0xC4);
-
-	struct game_time_globals_definition
-	{
-		bool initialized;
-		byte : 8;
-		word flags;
-		word ticks_per_second;
-		word : 16;
-		float seconds_per_tick;
-		dword elapsed_ticks;
-		dword gamespeed;
-		dword __unknown14;
-		dword __unknown18;
-		dword __unknown1C;
-		dword __unknown20;
-		dword __unknown24;
-		dword __unknown28;
-	};
-	static_assert(sizeof(game_time_globals_definition) == 0x2C);
 
 	struct s_breakable_surface_globals
 	{

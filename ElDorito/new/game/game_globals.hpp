@@ -36,13 +36,13 @@ namespace blam
 		bool game_lost;
 		bool game_revert;
 		bool prepare_for_game_progression; // false if `active_game_progression_level` is `_invalid_string_id`
-		dword game_lost_wait_time;
+		long game_lost_wait_time;
 
 		bool game_finished;
 		byte : 8;
 		byte : 8;
 		byte : 8;
-		dword game_finished_wait_time;
+		long game_finished_wait_time;
 
 		c_flags<e_campaign_skulls_primary, dword, k_campaign_skull_primary_count> active_primary_skulls;
 		c_flags<e_campaign_skulls_secondary, dword, k_campaign_skull_secondary_count> active_secondary_skulls;
@@ -83,4 +83,13 @@ namespace blam
 	//extern void game_pvs_scripted_set_camera_point(short camera_point_index);
 	extern void game_pvs_scripted_clear();
 	//extern void game_update_pvs();
+	//extern void game_won();
+	//extern bool game_is_won();
+	extern void game_lost(bool game_revert);
+	extern bool game_is_lost();
+	extern bool game_is_lost_immediate();
+	extern void game_finish();
+	extern void game_finish_immediate();
+	extern bool game_is_finished();
+	extern bool game_is_finished_immediate();
 }

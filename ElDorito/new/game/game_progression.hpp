@@ -19,7 +19,7 @@ namespace blam
 		short damage_reporting_type;
 		short rounds_loaded_maximum;
 		short runtime_rounds_inventory_maximum;
-		short loaded_ammo_amount;
+		short rounds_loaded_amount;
 	};
 	static_assert(sizeof(s_persistent_campaign_player_weapon) == 0x8);
 

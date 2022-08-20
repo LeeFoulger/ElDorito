@@ -243,15 +243,5 @@ namespace blam
 	//extern bool game_survival_allow_respawn(long);
 	extern e_language game_get_master_language();
 	//extern bool game_is_language_neutral();
-	//extern void game_won();
-	//extern bool game_is_won();
-	//extern void game_lost(bool);
-	extern bool game_is_lost();
-	extern bool game_is_lost_immediate();
-	//extern void game_finish();
-	//extern void game_finish_immediate();
-	extern bool game_is_finished();
-	extern bool game_is_finished_immediate();
-	//extern bool game_is_finished_waiting_for_level_advance();
 	extern void game_options_setup_default_players(long player_count, game_options* options);
 }
