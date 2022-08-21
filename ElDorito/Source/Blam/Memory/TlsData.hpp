@@ -11,14 +11,6 @@ namespace Blam::Memory
 {
 	using namespace blam;
 
-	struct s_thread_local_storage;
-	//s_thread_local_storage* get_thread_local()
-	//{
-	//	// TODO: Replace all instances of GetMainTls with get_thread_local 
-	//	// once all the needed structs for s_thread_local_storage are written out.
-	//	return ElDorito::GetMainTls().Read<s_thread_local_storage*>();
-	//}
-
 	struct simulation_gamestate_entity_datum : DatumBase
 	{
 		word __unknown2;
@@ -864,4 +856,6 @@ namespace Blam::Memory
 		char* __unknown580;
 	};
 	static_assert(sizeof(s_thread_local_storage) == 0x584);
+
+	s_thread_local_storage* GetTls();
 }

@@ -63,6 +63,7 @@
     <ClCompile Include="Source\Blam\Math\Rectangle2D.cpp" />
     <ClCompile Include="Source\Blam\Memory\Align.cpp" />
     <ClCompile Include="Source\Blam\Memory\DatumHandle.cpp" />
+    <ClCompile Include="Source\Blam\Memory\TlsData.cpp" />
     <ClCompile Include="Source\Blam\Sounds\Functions.cpp" />
     <ClCompile Include="Source\Blam\Sounds\SoundCache.cpp" />
     <ClCompile Include="Source\Blam\Tags\Camera\AreaScreenEffect.cpp" />

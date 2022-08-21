@@ -634,6 +634,7 @@
     <ClCompile Include="new\main\main_game_launch.cpp" />
     <ClCompile Include="new\cseries\cseries_string.cpp" />
     <ClCompile Include="new\game\game_time.cpp" />
+    <ClCompile Include="Source\Blam\Memory\TlsData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">

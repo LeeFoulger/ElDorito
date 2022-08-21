@@ -72,7 +72,7 @@ namespace blam
 	inline s_director_globals* director_globals_get()
 	{
 		using namespace Blam::Memory;
-		s_thread_local_storage* tls = ElDorito::GetMainTls();
+		s_thread_local_storage* tls = GetTls();
 
 		s_director_globals* director_globals = tls->director_globals;
 		if (!tls || !director_globals || !director_globals->directors[0][0])
@@ -217,7 +217,7 @@ namespace blam
 	bool director_in_scripted_camera()
 	{
 		using namespace Blam::Memory;
-		s_thread_local_storage* tls = ElDorito::GetMainTls();
+		s_thread_local_storage* tls = GetTls();
 
 		return tls->director_camera_scripted;
 	}

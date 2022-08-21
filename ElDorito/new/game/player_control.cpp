@@ -9,7 +9,7 @@ namespace blam
     {
         using namespace Blam::Memory;
 
-        s_thread_local_storage* tls = ElDorito::GetMainTls();
+        s_thread_local_storage* tls = GetTls();
         if (!tls || !tls->player_control_globals)
             return nullptr;
 
