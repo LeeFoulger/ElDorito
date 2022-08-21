@@ -43,7 +43,7 @@ namespace
 	bool LoadMapHook(void *data);
 	void LoadLevelHook(uint8_t* data, char n2, int n3, int n4);
 	void GameStartHook();
-	void __fastcall EdgeDropHook(void* thisptr, void* unused, int a2, int a3, int a4, float* a5);
+	void __fastcall character_physics_mode_ground_datum_update_internal_hook(void* thisptr, void* unused, int physics_output, int physics_input, bool a4, float* in_vector);
 	void __cdecl BipedFeetZoneOffsetHook(uint32_t bipedObjectIndex, Blam::Math::RealVector3D *position, float *height, float *radius);
 	char GetBinkVideoPathHook(int p_VideoID, char *p_DestBuf);
 	void DirtyDiskErrorHook();
@@ -157,7 +157,7 @@ namespace Patches::Core
 		Patch(0x7FC42E, { 0xC3 }).Apply();
 		Patch::NopFill(Pointer::Base(0x106057), 5);*/
 
-		Hook(0x324701, EdgeDropHook, HookFlags::IsCall).Apply();
+		Hook(0x324701, character_physics_mode_ground_datum_update_internal_hook, HookFlags::IsCall).Apply();
 		// Fixes an issue where biped feet are just below the zone bottom causing 
 		// it not to register flag caps, teleporter usage etc..
 		Hook(0x7A111B, BipedFeetZoneOffsetHook, HookFlags::IsCall).Apply();
@@ -433,14 +433,16 @@ namespace
 		return ((double)gameResolution[0] / (double)gameResolution[1]);
 	}
 
-	void __fastcall EdgeDropHook(void* thisptr, void* unused, int a2, int a3, int a4, float* a5)
+	// void __cdecl c_character_physics_mode_ground_datum::update_internal(s_character_physics_update_output_datum*, s_character_physics_update_input_datum const*, bool, real_vector3d const*)
+	void __fastcall character_physics_mode_ground_datum_update_internal_hook(void* thisptr, void* unused, int physics_output, int physics_input, bool a4, float* in_vector)
 	{
 		static auto& modulePlayer = Modules::ModulePlayer::Instance();
 
-		Pointer(a3)(0xAC).WriteFast<float>(0.5f);
+		// physics_input->scale_ground_adhesion_velocity
+		Pointer(physics_input)(0xAC).WriteFast<float>(0.5f);
 
-		static auto sub_724BB0 = (void(__thiscall*)(void* thisptr, int a2, int a3, int a4, float* a5))(0x724BB0);
-		sub_724BB0(thisptr, a2, a3, a4, a5);
+		static auto character_physics_mode_ground_datum_update_internal = (void(__thiscall*)(void*, int a2, int a3, bool a4, float* a5))(0x724BB0);
+		character_physics_mode_ground_datum_update_internal(thisptr, physics_output, physics_input, a4, in_vector);
 	}
 
 	void __cdecl BipedFeetZoneOffsetHook(uint32_t bipedObjectIndex, Blam::Math::RealVector3D *position, float *height, float *radius)
