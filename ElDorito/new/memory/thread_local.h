@@ -8,6 +8,7 @@
 #include "game/player_mapping.hpp"
 #include "game/game_time.hpp"
 #include "main/main_time.hpp"
+#include "physics/physics_constants.hpp"
 
 namespace blam
 {
@@ -237,19 +238,6 @@ namespace blam
 		char __data[0xB2C8];
 	};
 	static_assert(sizeof(cinematic_light_globals) == 0xB2C8);
-
-	struct s_physics_constants
-	{
-		dword gravity;
-		dword water_density;
-		dword air_density;
-		dword __unknownC;
-		dword __unknown10;
-		float float14;
-		dword __unknown18;
-		dword __unknown1C;
-	};
-	static_assert(sizeof(s_physics_constants) == 0x20);
 
 	//struct recorded_animation_datum : datum_header
 

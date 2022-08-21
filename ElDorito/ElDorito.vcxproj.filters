@@ -635,6 +635,7 @@
     <ClCompile Include="new\cseries\cseries_string.cpp" />
     <ClCompile Include="new\game\game_time.cpp" />
     <ClCompile Include="Source\Blam\Memory\TlsData.cpp" />
+    <ClCompile Include="new\physics\physics_constants.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\ChatCommands\ChatCommand.hpp">
@@ -1519,6 +1520,7 @@
     <ClInclude Include="new\game\game_progression.hpp" />
     <ClInclude Include="new\game\game_time.hpp" />
     <ClInclude Include="new\main\main_time.hpp" />
+    <ClInclude Include="new\physics\physics_constants.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />

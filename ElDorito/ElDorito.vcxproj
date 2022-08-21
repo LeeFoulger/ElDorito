@@ -26,6 +26,7 @@
     <ClCompile Include="new\main\main_game_launch.cpp" />
     <ClCompile Include="new\main\main_game.cpp" />
     <ClCompile Include="new\memory\data.cpp" />
+    <ClCompile Include="new\physics\physics_constants.cpp" />
     <ClCompile Include="new\tag_files\tag_definitions.cpp" />
     <ClCompile Include="new\tag_files\tag_groups.cpp" />
     <ClCompile Include="Source\Blam\BitStream.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="new\memory\thread_local.h" />
     <ClInclude Include="new\objects\object_data.hpp" />
     <ClInclude Include="new\objects\object_types.hpp" />
+    <ClInclude Include="new\physics\physics_constants.hpp" />
     <ClInclude Include="new\players\player_data.hpp" />
     <ClInclude Include="new\saved_games\saved_game_files.hpp" />
     <ClInclude Include="new\shaders\render_method.hpp" />
