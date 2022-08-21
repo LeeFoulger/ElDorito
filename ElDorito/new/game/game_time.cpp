@@ -25,7 +25,7 @@ namespace blam
 
 	long __cdecl game_seconds_to_ticks_round(real seconds)
 	{
-		real tick_rate = game_time_globals_get()->ticks_per_second * seconds;
+		real tick_rate = game_time_globals_get()->tick_rate * seconds;
 		if (tick_rate < 0.0)
 			return static_cast<long>((-1.0 * 0.5) + tick_rate);
 		else
@@ -114,9 +114,9 @@ namespace blam
 		reinterpret_cast<decltype(game_time_set)*>(0x00564FE0)(time);
 	}
 
-	void __cdecl game_time_set_paused(bool and, e_game_time_pause_reason reason)
+	void __cdecl game_time_set_paused(bool enable, e_game_time_pause_reason reason)
 	{
-		reinterpret_cast<decltype(game_time_set_paused)*>(0x00565000)(and, reason);
+		reinterpret_cast<decltype(game_time_set_paused)*>(0x00565000)(enable, reason);
 	}
 
 	void __cdecl game_time_set_rate_scale(real rate_scale0, real rate_scale1, real rate_scale2)
