@@ -45,7 +45,7 @@ namespace
 	void GameStartHook();
 	void __fastcall character_physics_mode_ground_datum_update_internal_hook(void* thisptr, void* unused, int physics_output, int physics_input, bool a4, float* in_vector);
 	void __cdecl BipedFeetZoneOffsetHook(uint32_t bipedObjectIndex, Blam::Math::RealVector3D *position, float *height, float *radius);
-	char GetBinkVideoPathHook(int p_VideoID, char *p_DestBuf);
+	bool __cdecl attract_mode_get_built_in_movie_path_hook(long movie, char* out_fullpath);
 	void DirtyDiskErrorHook();
 	int __cdecl GetScreenshotFolderHook(wchar_t *path);
 	void __cdecl HsPrintHook(const char *message);
@@ -162,7 +162,7 @@ namespace Patches::Core
 		// it not to register flag caps, teleporter usage etc..
 		Hook(0x7A111B, BipedFeetZoneOffsetHook, HookFlags::IsCall).Apply();
 
-		Hook(0x10590B, GetBinkVideoPathHook, HookFlags::IsCall).Apply();
+		Hook(0x10590B, attract_mode_get_built_in_movie_path_hook, HookFlags::IsCall).Apply();
 
 		Hook(0x20F4AD, GetScreenshotFolderHook, HookFlags::IsCall).Apply();
 		Hook(0x20F44B, GetScreenshotFolderHook, HookFlags::IsCall).Apply();
@@ -454,15 +454,13 @@ namespace
 			*position += bipedObject->Up * 0.05f; // offset feet
 	}
 
-	const auto GetBinkVideoPath = reinterpret_cast<char(*)(int, char*)>(0xA99120);
-
-	char GetBinkVideoPathHook(int p_VideoID, char *p_DestBuf)
+	bool __cdecl attract_mode_get_built_in_movie_path_hook(long movie, char* out_fullpath)
 	{
 		if (Modules::ModuleGame::Instance().VarSkipIntroVideos->ValueInt == 1)
 			// Tell the game that there is no video with that ID
 			return 0;
 
-		return GetBinkVideoPath(p_VideoID, p_DestBuf);
+		return reinterpret_cast<decltype(attract_mode_get_built_in_movie_path_hook)*>(0xA99120)(movie, out_fullpath);
 	}
 
 	void DirtyDiskErrorHookImpl()
@@ -474,6 +472,7 @@ namespace
 
 	__declspec(naked) void DirtyDiskErrorHook()
 	{
+		// "There once was a man from Bungie...... Nothing rhymes with Bungie.This is the worst possible way we can emulate a stupid !@#$%^& OS exception. And it's not our fault. And that makes it suck even more.I are sad."
 		// "There once was a man from Bungie...... Nothing rhymes with Bungie.but he got a dirty disc error for the Alpha or Profile Build and exploded.  The End."
 		__asm
 		{
